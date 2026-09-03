@@ -43,10 +43,77 @@
     external: '<path d="M14 5h5v5M19 5l-8 8"></path><path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"></path>'
   };
 
-  document.querySelectorAll('[data-icon]').forEach(function (element) {
-    const path = iconPaths[element.dataset.icon];
-    if (path) element.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24">' + path + '</svg>';
-  });
+  function injectIcons() {
+    document.querySelectorAll('[data-icon]').forEach(function (element) {
+      const path = iconPaths[element.dataset.icon];
+      if (path) element.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24">' + path + '</svg>';
+    });
+  }
+
+  function detectRole() {
+    const roleParam = new URLSearchParams(window.location.search).get('role');
+    if (['admin', 'guru', 'santri', 'wali_santri'].includes(roleParam)) return roleParam;
+    const currentPath = window.location.pathname.replace(/\\/g, '/');
+    if (currentPath.includes('/guru/')) return 'guru';
+    if (currentPath.includes('/santri/')) return 'santri';
+    if (currentPath.includes('/wali/')) return 'wali_santri';
+    return 'admin';
+  }
+
+  const currentRole = detectRole();
+  const dashboardByRole = {
+    admin: 'admin/dashboard.html',
+    guru: 'guru/dashboard.html',
+    santri: 'santri/dashboard.html',
+    wali_santri: 'wali/dashboard.html'
+  };
+  const navigation = {
+    admin: [
+      { label: 'Overview', items: [{ label: 'Beranda', href: 'admin/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=admin', icon: 'calendar' }] },
+      { label: 'Akademik', items: [{ label: 'Akun pengguna', href: 'admin/akun.html', icon: 'users' }, { label: 'Kelas', href: 'admin/kelas.html', icon: 'book' }, { label: 'Mapel', href: 'admin/mapel.html', icon: 'book' }, { label: 'Penugasan guru', href: 'admin/penugasan-guru.html', icon: 'clipboard' }, { label: 'Relasi wali santri', href: 'admin/wali-santri.html', icon: 'users' }, { label: 'Tugas & submission', href: 'admin/dashboard.html#tugas', icon: 'clipboard', count: '24' }, { label: 'Nilai & kehadiran', href: 'admin/dashboard.html#nilai', icon: 'chart' }, { label: 'Rapor', href: 'admin/rapor.html', icon: 'file' }] },
+      { label: 'Pembayaran SPP', items: [{ label: 'Dashboard pembayaran', href: 'admin/pembayaran/dashboard.html', icon: 'wallet', count: '86', group: 'admin/pembayaran/' }, { label: 'Tarif SPP', href: 'admin/pembayaran/tarif-spp.html', icon: 'settings', group: 'admin/pembayaran/' }, { label: 'Tagihan', href: 'admin/pembayaran/tagihan.html', icon: 'file', group: 'admin/pembayaran/' }, { label: 'Transaksi', href: 'admin/pembayaran/transaksi.html', icon: 'chart', group: 'admin/pembayaran/' }, { label: 'Pengaturan pembayaran', href: 'admin/pembayaran/pengaturan.html', icon: 'settings', group: 'admin/pembayaran/' }] },
+      { label: 'Layanan pesantren', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html', icon: 'megaphone' }, { label: 'Pengaturan', href: 'admin/pengaturan.html', icon: 'settings' }, { label: 'Log aktivitas', href: 'admin/log-aktivitas.html', icon: 'shield' }] }
+    ],
+    guru: [
+      { label: 'Workspace', items: [{ label: 'Dashboard', href: 'guru/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=guru', icon: 'calendar' }] },
+      { label: 'Kegiatan mengajar', items: [{ label: 'Input nilai', href: 'guru/nilai.html', icon: 'chart' }, { label: 'Kehadiran', href: 'guru/kehadiran.html', icon: 'users' }, { label: 'Tugas & submission', href: 'guru/tugas/index.html', icon: 'clipboard', count: '12', group: 'guru/tugas/' }, { label: 'Rapor', href: 'guru/rapor.html', icon: 'file' }] },
+      { label: 'Akun', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html?role=guru', icon: 'megaphone' }, { label: 'Keluar', href: 'login.html', icon: 'log-out' }] }
+    ],
+    santri: [
+      { label: 'Workspace', items: [{ label: 'Dashboard', href: 'santri/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=santri', icon: 'calendar' }] },
+      { label: 'Belajar', items: [{ label: 'Tugas saya', href: 'santri/tugas/index.html', icon: 'clipboard', count: '4', group: 'santri/tugas/' }, { label: 'Nilai', href: 'santri/nilai.html', icon: 'chart' }, { label: 'Kehadiran', href: 'santri/kehadiran.html', icon: 'users' }, { label: 'Rapor', href: 'santri/rapor.html', icon: 'file' }] },
+      { label: 'Keuangan', items: [{ label: 'Pembayaran SPP', href: 'santri/pembayaran/tagihan.html', icon: 'wallet', group: 'santri/pembayaran/' }, { label: 'Riwayat pembayaran', href: 'santri/pembayaran/riwayat.html', icon: 'clock', group: 'santri/pembayaran/' }] },
+      { label: 'Akun', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html?role=santri', icon: 'megaphone' }, { label: 'Keluar', href: 'login.html', icon: 'log-out' }] }
+    ],
+    wali_santri: [
+      { label: 'Workspace', items: [{ label: 'Dashboard', href: 'wali/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=wali_santri', icon: 'calendar' }] },
+      { label: 'Pantau anak', items: [{ label: 'Nilai anak', href: 'wali/nilai.html', icon: 'chart' }, { label: 'Kehadiran anak', href: 'wali/kehadiran.html', icon: 'users' }, { label: 'Rapor anak', href: 'wali/rapor.html', icon: 'file' }] },
+      { label: 'Keuangan', items: [{ label: 'Pembayaran SPP', href: 'wali/pembayaran/tagihan.html', icon: 'wallet', group: 'wali/pembayaran/' }, { label: 'Riwayat pembayaran', href: 'wali/pembayaran/riwayat.html', icon: 'clock', group: 'wali/pembayaran/' }] },
+      { label: 'Akun', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html?role=wali_santri', icon: 'megaphone' }, { label: 'Keluar', href: 'login.html', icon: 'log-out' }] }
+    ]
+  };
+
+  function renderNavigation() {
+    const sidebarNav = document.querySelector('.sidebar nav');
+    if (!sidebarNav) return;
+    const currentPath = window.location.pathname.replace(/\\/g, '/');
+    const roleNavigation = navigation[currentRole];
+    sidebarNav.innerHTML = roleNavigation.map(function (section, sectionIndex) {
+      const sectionId = 'nav-' + currentRole + '-' + sectionIndex;
+      const items = section.items.map(function (item) {
+        const targetPath = new URL(item.href, document.baseURI).pathname.replace(/\\/g, '/');
+        const isActive = targetPath === currentPath || (item.group && currentPath.includes('/' + item.group));
+        return '<li><a class="nav-link' + (isActive ? ' active' : '') + '" href="' + item.href + '"' + (isActive ? ' aria-current="page"' : '') + '><span class="nav-icon" data-icon="' + item.icon + '"></span>' + item.label + (item.count ? '<span class="nav-count">' + item.count + '</span>' : '') + '</a></li>';
+      }).join('');
+      return '<section class="nav-section" aria-labelledby="' + sectionId + '"><h2 class="nav-label" id="' + sectionId + '">' + section.label + '</h2><ul class="nav-list">' + items + '</ul></section>';
+    }).join('');
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.setAttribute('aria-label', 'Navigasi ' + (currentRole === 'wali_santri' ? 'wali santri' : currentRole));
+  }
+
+  renderNavigation();
+  injectIcons();
+  if (currentRole !== 'admin') document.querySelectorAll('[data-admin-only]').forEach(function (element) { element.remove(); });
 
   const routeMap = {
     'index.html': 'admin/dashboard.html',
@@ -90,6 +157,14 @@
   document.querySelectorAll('a[href]').forEach(function (link) {
     const href = link.getAttribute('href');
     if (!href || href.charAt(0) === '#' || /^(https?:|mailto:|javascript:|data:)/.test(href)) return;
+    if (href === 'index.html') {
+      link.setAttribute('href', dashboardByRole[currentRole]);
+      return;
+    }
+    if (href === 'calendar.html') {
+      link.setAttribute('href', 'calendar.html?role=' + currentRole);
+      return;
+    }
     const parts = href.split('#');
     const destination = routeMap[parts[0]];
     if (destination) link.setAttribute('href', destination + (parts[1] ? '#' + parts[1] : ''));

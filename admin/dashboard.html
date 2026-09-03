@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <base href="../">
+  <meta name="description" content="Dashboard ELMS Pesantren untuk mengelola aktivitas akademik, tugas, kehadiran, rapor, dan pembayaran SPP.">
+  <title>Beranda | ELMS Pesantren</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <svg class="sr-only" aria-hidden="true" focusable="false">
+    <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="3" y="14" width="7" height="7" rx="1.5"></rect><rect x="14" y="14" width="7" height="7" rx="1.5"></rect></symbol>
+    <symbol id="icon-users" viewBox="0 0 24 24"><path d="M16 20v-1.5a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4V20"></path><circle cx="9.5" cy="7.5" r="3.5"></circle><path d="M17 11a3.5 3.5 0 1 0-1.2-6.8M21 20v-1.5a4 4 0 0 0-2.8-3.8"></path></symbol>
+    <symbol id="icon-book" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path><path d="M8 6h8M8 10h6"></path></symbol>
+    <symbol id="icon-clipboard" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"></rect><path d="M9 4.5V3h6v1.5M8 9h8M8 13h6M8 17h4"></path></symbol>
+    <symbol id="icon-chart" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></symbol>
+    <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="17" rx="2"></rect><path d="M16 2.5v4M8 2.5v4M3 9h18M8 13h.01M12 13h.01M16 13h.01M8 17h.01M12 17h.01"></path></symbol>
+    <symbol id="icon-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path><path d="M14 2v6h6M8 13h8M8 17h6"></path></symbol>
+    <symbol id="icon-wallet" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H19a2 2 0 0 1 2 2v14H6a3 3 0 0 1-3-3V7a.5.5 0 0 1 .5-.5Z"></path><path d="M3 8h16M16 14h.01"></path></symbol>
+    <symbol id="icon-megaphone" viewBox="0 0 24 24"><path d="m3 11 14-5v12L3 14v-3Z"></path><path d="M17 10h2a2 2 0 0 1 0 4h-2M6 15l1.5 5H11l-1.3-4.1"></path></symbol>
+    <symbol id="icon-settings" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"></path><path d="m19.4 15 .1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-3.4 1.4v.3a2 2 0 1 1-4 0v-.2A2 2 0 0 0 5.8 18l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A2 2 0 0 0 1.6 12a2 2 0 1 1 0-4h.2A2 2 0 0 0 3 4.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A2 2 0 0 0 9.2.5V.3a2 2 0 1 1 4 0v.2a2 2 0 0 0 3.4 1.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A2 2 0 0 0 20.8 8h.2a2 2 0 1 1 0 4h-.2a2 2 0 0 0-1.4 3Z" transform="translate(.8 1.7) scale(.93)"></path></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></symbol>
+    <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"></path></symbol>
+    <symbol id="icon-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></symbol>
+    <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"></path></symbol>
+    <symbol id="icon-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"></path></symbol>
+    <symbol id="icon-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"></path></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"></path></symbol>
+    <symbol id="icon-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"></circle><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle></symbol>
+    <symbol id="icon-sparkle" viewBox="0 0 24 24"><path d="m12 3 1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3ZM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"></path></symbol>
+    <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 3 20 6v5c0 5.2-3.4 8.7-8 10-4.6-1.3-8-4.8-8-10V6l8-3Z"></path><path d="m8.5 12 2.2 2.2 4.8-5"></path></symbol>
+    <symbol id="icon-log-out" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-5"></path></symbol>
+    <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"></circle><path d="M5 21a7 7 0 0 1 14 0"></path></symbol>
+    <symbol id="icon-check" viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"></path></symbol>
+    <symbol id="icon-mosque" viewBox="0 0 24 24"><path d="M3 21h18M5 21v-8h14v8M4 13h16M7 13V9l5-4 5 4v4M12 5V2M9 21v-5h6v5"></path><path d="M12 2a1.5 1.5 0 0 1 1.5 1.5H10.5A1.5 1.5 0 0 1 12 2Z"></path></symbol>
+  </svg>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Navigasi utama">
+      <a class="brand" href="#beranda" aria-label="ELMS Pesantren, kembali ke beranda">
+        <span class="brand-mark"><svg aria-hidden="true"><use href="#icon-mosque"></use></svg></span>
+        <span>
+          <strong class="brand-name">ELMS Pesantren</strong>
+          <span class="brand-subtitle">Ruang belajar terpadu</span>
+        </span>
+      </a>
+
+      <nav>
+        <section class="nav-section" aria-labelledby="nav-overview">
+          <h2 class="nav-label" id="nav-overview">Overview</h2>
+          <ul class="nav-list">
+            <li><a class="nav-link active" href="#beranda"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-grid"></use></svg></span>Beranda</a></li>
+            <li><a class="nav-link" href="calendar.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span>Kalender akademik</a></li>
+          </ul>
+        </section>
+
+        <section class="nav-section" aria-labelledby="nav-akademik">
+          <h2 class="nav-label" id="nav-akademik">Akademik</h2>
+          <ul class="nav-list">
+            <li><a class="nav-link" href="admin-akun.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>Akun pengguna</a></li>
+            <li><a class="nav-link" href="admin-kelas.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-book"></use></svg></span>Kelas &amp; mapel</a></li>
+            <li><a class="nav-link" href="#tugas"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-clipboard"></use></svg></span>Tugas &amp; submission<span class="nav-count">24</span></a></li>
+            <li><a class="nav-link" href="#nilai"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-chart"></use></svg></span>Nilai &amp; kehadiran</a></li>
+            <li><a class="nav-link" href="admin-mapel.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-book"></use></svg></span>Mapel</a></li>
+            <li><a class="nav-link" href="admin-penugasan-guru.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>Penugasan guru</a></li>
+            <li><a class="nav-link" href="admin-wali-santri.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>Relasi wali santri</a></li>
+            <li><a class="nav-link" href="admin-rapor.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-file"></use></svg></span>Rapor</a></li>
+          </ul>
+        </section>
+
+        <section class="nav-section" aria-labelledby="nav-layanan">
+          <h2 class="nav-label" id="nav-layanan">Layanan pesantren</h2>
+          <ul class="nav-list">
+            <li><a class="nav-link" href="admin-pembayaran.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-wallet"></use></svg></span>Pembayaran SPP<span class="nav-count">86</span></a></li>
+            <li><a class="nav-link" href="admin-tarif-spp.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-settings"></use></svg></span>Tarif SPP</a></li>
+            <li><a class="nav-link" href="admin-tagihan.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-file"></use></svg></span>Tagihan</a></li>
+            <li><a class="nav-link" href="admin-transaksi.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-chart"></use></svg></span>Transaksi</a></li>
+            <li><a class="nav-link" href="admin-pengaturan-pembayaran.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-settings"></use></svg></span>Pengaturan pembayaran</a></li>
+            <li><a class="nav-link" href="admin-pengumuman.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-megaphone"></use></svg></span>Pengumuman</a></li>
+            <li><a class="nav-link" href="admin-pengaturan.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-settings"></use></svg></span>Pengaturan</a></li>
+            <li><a class="nav-link" href="admin-log-aktivitas.html"><span class="nav-icon"><svg aria-hidden="true"><use href="#icon-shield"></use></svg></span>Log aktivitas</a></li>
+          </ul>
+        </section>
+      </nav>
+
+      <div class="sidebar-foot">
+        <label class="year-caption" for="yearSelect">Tahun ajaran aktif</label>
+        <select class="year-select" id="yearSelect" aria-label="Pilih tahun ajaran">
+          <option>2026 / 2027</option>
+          <option>2025 / 2026</option>
+        </select>
+        <div class="sidebar-meta"><span class="live-dot" aria-hidden="true"></span><span>Semester Ganjil &middot; Sistem aktif</span></div>
+      </div>
+    </aside>
+
+    <main class="main-shell" id="beranda">
+      <header class="topbar">
+        <div class="topbar-start">
+          <button class="menu-button" id="menuButton" type="button" aria-label="Buka menu navigasi" aria-expanded="false" aria-controls="sidebar"><svg aria-hidden="true"><use href="#icon-menu"></use></svg></button>
+          <div class="breadcrumb" aria-label="Breadcrumb"><span>Workspace</span><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg><strong>Beranda</strong></div>
+        </div>
+        <div class="topbar-end">
+          <button class="search-button" id="searchButton" type="button" aria-label="Cari"><svg aria-hidden="true"><use href="#icon-search"></use></svg><span>Cari apa saja</span><kbd class="search-key">/</kbd></button>
+          <button class="icon-button" id="notificationButton" type="button" aria-label="Buka notifikasi" aria-expanded="false" aria-controls="notificationPopover"><svg aria-hidden="true"><use href="#icon-bell"></use></svg><span class="notification-dot" aria-hidden="true"></span></button>
+          <button class="profile-button" id="profileButton" type="button" aria-label="Buka menu profil" aria-expanded="false" aria-controls="profilePopover"><span class="avatar">AF</span><span class="profile-copy"><span class="profile-name">Ahmad Fauzi</span><span class="profile-role">Administrator</span></span><svg class="profile-chevron" aria-hidden="true"><use href="#icon-chevron-down"></use></svg></button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="page-heading" aria-labelledby="pageTitle">
+          <div>
+            <span class="page-kicker">Ringkasan pesantren</span>
+            <h1 class="page-title" id="pageTitle">Selamat datang, Ustadz Ahmad.</h1>
+            <p class="page-description">Pantau aktivitas akademik dan operasional pesantren dalam satu ruang yang tertata.</p>
+          </div>
+          <div class="heading-actions">
+            <button class="button button-secondary" type="button" data-toast="Kalender akademik siap dibuka."><svg aria-hidden="true"><use href="#icon-calendar"></use></svg>Kalender</button>
+            <button class="button button-primary" type="button" data-toast="Form pengumuman baru siap digunakan."><svg aria-hidden="true"><use href="#icon-plus"></use></svg>Pengumuman baru</button>
+          </div>
+        </section>
+
+        <section class="welcome-card" aria-labelledby="welcomeTitle">
+          <div class="welcome-copy">
+            <span class="welcome-label"><svg aria-hidden="true"><use href="#icon-sparkle"></use></svg>Ruang kerja administrator</span>
+            <h2 class="welcome-title" id="welcomeTitle">Menata ilmu, menjaga amanah, menguatkan langkah.</h2>
+            <p class="welcome-text">Hari ini ada 24 tugas aktif dan 86 tagihan SPP yang perlu dipantau. Terima kasih telah menjaga ritme belajar santri.</p>
+            <div class="welcome-actions">
+              <button class="button button-primary" type="button" data-toast="Menu tugas dibuka pada prototype.">Kelola tugas <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+              <button class="button button-secondary" type="button" data-toast="Ringkasan rapor siap dibuka.">Lihat rapor</button>
+            </div>
+          </div>
+          <div class="welcome-art" aria-hidden="true">
+            <svg viewBox="0 0 230 195" fill="none">
+              <circle cx="117" cy="89" r="69" stroke="#bdd58e" stroke-opacity=".3"></circle>
+              <circle cx="117" cy="89" r="51" stroke="#bdd58e" stroke-opacity=".18"></circle>
+              <path d="M74 155V88c0-24 19-43 43-43s43 19 43 43v67" fill="#2b8062" fill-opacity=".55" stroke="#cfe3ae" stroke-opacity=".65" stroke-width="1.5"></path>
+              <path d="M86 155V91c0-17 14-31 31-31s31 14 31 31v64" fill="#0d5d4b" stroke="#d8e8b8" stroke-opacity=".4"></path>
+              <path d="M104 155v-38a13 13 0 0 1 26 0v38" fill="#bad284" fill-opacity=".75"></path>
+              <path d="M117 28v17M108 37h18" stroke="#d9e99a" stroke-width="2" stroke-linecap="round"></path>
+              <path d="M54 155h127M44 164h147" stroke="#bcd18d" stroke-opacity=".45" stroke-width="2" stroke-linecap="round"></path>
+              <path d="M49 155c6-7 12-9 18-6M173 155c-6-7-12-9-18-6" stroke="#a8c87e" stroke-width="2" stroke-linecap="round"></path>
+              <circle cx="39" cy="45" r="3" fill="#d9e99a"></circle>
+              <circle cx="190" cy="67" r="2" fill="#d9e99a" fill-opacity=".8"></circle>
+              <circle cx="183" cy="25" r="1.5" fill="#d9e99a" fill-opacity=".7"></circle>
+            </svg>
+          </div>
+        </section>
+
+        <section class="stats-grid" aria-label="Statistik utama">
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon icon-green"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span><span class="stat-change"><svg aria-hidden="true"><use href="#icon-arrow-up"></use></svg>8,4%</span></div>
+            <span class="stat-label">Total santri</span><strong class="stat-value">486</strong><span class="stat-note">Dari 18 kelas aktif</span>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon icon-blue"><svg aria-hidden="true"><use href="#icon-user"></use></svg></span><span class="stat-change"><svg aria-hidden="true"><use href="#icon-arrow-up"></use></svg>4,1%</span></div>
+            <span class="stat-label">Guru &amp; ustadz</span><strong class="stat-value">32</strong><span class="stat-note">29 aktif mengajar</span>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon icon-gold"><svg aria-hidden="true"><use href="#icon-book"></use></svg></span><span class="stat-change"><svg aria-hidden="true"><use href="#icon-arrow-up"></use></svg>2 kelas</span></div>
+            <span class="stat-label">Kelas aktif</span><strong class="stat-value">18</strong><span class="stat-note">Ibtida hingga Ulya</span>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon icon-coral"><svg aria-hidden="true"><use href="#icon-clipboard"></use></svg></span><span class="stat-change"><svg aria-hidden="true"><use href="#icon-arrow-up"></use></svg>12%</span></div>
+            <span class="stat-label">Tugas aktif</span><strong class="stat-value">24</strong><span class="stat-note">7 mendekati deadline</span>
+          </article>
+          <article class="stat-card">
+            <div class="stat-top"><span class="stat-icon icon-green"><svg aria-hidden="true"><use href="#icon-wallet"></use></svg></span><span class="stat-change">78% lunas</span></div>
+            <span class="stat-label">SPP periode ini</span><strong class="stat-value">Rp 128,4 jt</strong><span class="stat-note">Pembaruan terakhir hari ini</span>
+          </article>
+        </section>
+
+        <div class="dashboard-grid">
+          <section class="panel" id="tugas" aria-labelledby="taskTitle">
+            <div class="panel-header">
+              <div><h2 class="panel-title" id="taskTitle">Tugas dan submission</h2><p class="panel-subtitle">Aktivitas tugas yang perlu perhatian</p></div>
+              <button class="text-link" type="button" data-toast="Daftar seluruh tugas siap dibuka.">Lihat semua <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+            </div>
+            <div class="task-tabs" role="tablist" aria-label="Filter tugas">
+              <button class="tab-button active" type="button" role="tab" aria-selected="true" data-filter="all">Semua tugas</button>
+              <button class="tab-button" type="button" role="tab" aria-selected="false" data-filter="review">Perlu dinilai</button>
+              <button class="tab-button" type="button" role="tab" aria-selected="false" data-filter="soon">Deadline dekat</button>
+            </div>
+            <div class="task-list" id="taskList">
+              <article class="task-row" data-task-status="soon">
+                <div class="task-main"><span class="task-mark"><svg aria-hidden="true"><use href="#icon-book"></use></svg></span><div><div class="task-name">Setoran hafalan Juz Amma</div><div class="task-meta">Tahfidz &middot; Ibtida A</div></div></div>
+                <div class="task-cell"><strong>12 Feb 2026</strong><span>2 hari lagi</span></div>
+                <div class="task-cell"><strong>18 / 28</strong><span>submission</span></div>
+                <span class="status-badge warning">Segera berakhir</span><button class="row-action" type="button" aria-label="Lihat Setoran hafalan Juz Amma" data-toast="Detail tugas Setoran hafalan Juz Amma."><svg aria-hidden="true"><use href="#icon-more"></use></svg></button>
+              </article>
+              <article class="task-row" data-task-status="review">
+                <div class="task-main"><span class="task-mark"><svg aria-hidden="true"><use href="#icon-file"></use></svg></span><div><div class="task-name">Ringkasan Kitab Ta'lim Muta'allim</div><div class="task-meta">Kitab Kuning &middot; Tsanawiyah 1</div></div></div>
+                <div class="task-cell"><strong>15 Feb 2026</strong><span>5 hari lagi</span></div>
+                <div class="task-cell"><strong>31 / 31</strong><span>submission</span></div>
+                <span class="status-badge neutral">12 perlu dinilai</span><button class="row-action" type="button" aria-label="Lihat Ringkasan Kitab Ta'lim Muta'allim" data-toast="Detail tugas Ringkasan Kitab Ta'lim Muta'allim."><svg aria-hidden="true"><use href="#icon-more"></use></svg></button>
+              </article>
+              <article class="task-row" data-task-status="all">
+                <div class="task-main"><span class="task-mark"><svg aria-hidden="true"><use href="#icon-chart"></use></svg></span><div><div class="task-name">Latihan persamaan linear</div><div class="task-meta">Matematika &middot; Ulya B</div></div></div>
+                <div class="task-cell"><strong>18 Feb 2026</strong><span>8 hari lagi</span></div>
+                <div class="task-cell"><strong>24 / 30</strong><span>submission</span></div>
+                <span class="status-badge success">Berjalan</span><button class="row-action" type="button" aria-label="Lihat Latihan persamaan linear" data-toast="Detail tugas Latihan persamaan linear."><svg aria-hidden="true"><use href="#icon-more"></use></svg></button>
+              </article>
+              <article class="task-row" data-task-status="review">
+                <div class="task-main"><span class="task-mark"><svg aria-hidden="true"><use href="#icon-book"></use></svg></span><div><div class="task-name">Praktik membaca Al-Qur'an</div><div class="task-meta">Tilawah &middot; Ibtida B</div></div></div>
+                <div class="task-cell"><strong>20 Feb 2026</strong><span>10 hari lagi</span></div>
+                <div class="task-cell"><strong>22 / 25</strong><span>submission</span></div>
+                <span class="status-badge neutral">5 perlu dinilai</span><button class="row-action" type="button" aria-label="Lihat Praktik membaca Al-Qur'an" data-toast="Detail tugas Praktik membaca Al-Qur'an."><svg aria-hidden="true"><use href="#icon-more"></use></svg></button>
+              </article>
+              <div class="empty-task" id="emptyTask">Tidak ada tugas pada filter ini.</div>
+            </div>
+          </section>
+
+          <section class="panel attendance-panel" id="nilai" aria-labelledby="attendanceTitle">
+            <div class="panel-header">
+              <div><h2 class="panel-title" id="attendanceTitle">Kehadiran santri</h2><p class="panel-subtitle">Rata-rata 7 hari terakhir</p></div>
+              <button class="text-link" type="button" data-toast="Rekap kehadiran siap dibuka.">Lihat rekap <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+            </div>
+            <div class="attendance-summary"><div><strong class="attendance-number">94,8%</strong><span class="attendance-caption">Kehadiran rata-rata</span></div><span class="attendance-growth"><svg aria-hidden="true"><use href="#icon-arrow-up"></use></svg>2,6% vs pekan lalu</span></div>
+            <div class="chart-wrap">
+              <div class="chart" aria-label="Grafik kehadiran dari Senin sampai Minggu">
+                <div class="chart-column"><span class="chart-bar" style="height: 81%" title="Senin 92,4%"></span><span class="chart-label">Sen</span></div>
+                <div class="chart-column"><span class="chart-bar" style="height: 90%" title="Selasa 95,8%"></span><span class="chart-label">Sel</span></div>
+                <div class="chart-column"><span class="chart-bar" style="height: 86%" title="Rabu 94,1%"></span><span class="chart-label">Rab</span></div>
+                <div class="chart-column"><span class="chart-bar" style="height: 96%" title="Kamis 97,2%"></span><span class="chart-label">Kam</span></div>
+                <div class="chart-column"><span class="chart-bar" style="height: 88%" title="Jumat 94,6%"></span><span class="chart-label">Jum</span></div>
+                <div class="chart-column"><span class="chart-bar" style="height: 77%" title="Sabtu 91,8%"></span><span class="chart-label">Sab</span></div>
+                <div class="chart-column"><span class="chart-bar today" style="height: 93%" title="Hari ini 96,4%"></span><span class="chart-label">Ini</span></div>
+              </div>
+              <div class="chart-legend"><span class="legend-item"><i class="legend-dot legend-present"></i>Hadir 94,8%</span><span class="legend-item"><i class="legend-dot legend-permit"></i>Izin / sakit 3,1%</span><span class="legend-item"><i class="legend-dot legend-absent"></i>Alpa 2,1%</span></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="lower-grid">
+          <section class="panel" id="pembayaran" aria-labelledby="paymentTitle">
+            <div class="panel-header">
+              <div><h2 class="panel-title" id="paymentTitle">Pembayaran SPP</h2><p class="panel-subtitle">Ringkasan periode Februari 2026</p></div>
+              <button class="text-link" type="button" data-toast="Monitoring transaksi pembayaran siap dibuka.">Kelola pembayaran <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+            </div>
+            <div class="payment-content">
+              <div class="payment-highlight"><div class="payment-ring" aria-label="78 persen pembayaran berhasil"><strong>78%</strong></div><div><span class="payment-label">Total pembayaran berhasil</span><strong class="payment-amount">Rp 128.400.000</strong><span class="payment-note">Dari 486 tagihan &middot; Terhubung dengan Mayar</span></div></div>
+              <div class="payment-stats"><div class="payment-stat"><strong>378</strong><span>Sudah lunas</span></div><div class="payment-stat"><strong>86</strong><span>Belum dibayar</span></div><div class="payment-stat"><strong>22</strong><span>Menunggu pembayaran</span></div></div>
+            </div>
+          </section>
+
+          <section class="panel" id="pengumuman" aria-labelledby="announcementTitle">
+            <div class="panel-header">
+              <div><h2 class="panel-title" id="announcementTitle">Pengumuman terbaru</h2><p class="panel-subtitle">Informasi untuk warga pesantren</p></div>
+              <button class="text-link" type="button" data-toast="Daftar pengumuman siap dibuka.">Lihat semua <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+            </div>
+            <div class="announcement-list">
+              <article class="announcement"><span class="announcement-icon"><svg aria-hidden="true"><use href="#icon-megaphone"></use></svg></span><div><div class="announcement-title">Jadwal ujian tengah semester</div><div class="announcement-text">Ujian akan dilaksanakan pada 2-7 Maret 2026. Mohon wali kelas memperbarui jadwal.</div></div><time class="announcement-date">Hari ini</time></article>
+              <article class="announcement"><span class="announcement-icon"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span><div><div class="announcement-title">Libur Isra Mi'raj</div><div class="announcement-text">Kegiatan belajar diliburkan pada 16 Februari. Kegiatan kembali normal keesokan harinya.</div></div><time class="announcement-date">Kemarin</time></article>
+              <article class="announcement"><span class="announcement-icon"><svg aria-hidden="true"><use href="#icon-shield"></use></svg></span><div><div class="announcement-title">Pembaruan keamanan akun</div><div class="announcement-text">Seluruh pengguna diminta memperbarui kata sandi secara berkala untuk keamanan bersama.</div></div><time class="announcement-date">3 hari lalu</time></article>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel quick-panel" aria-labelledby="quickTitle">
+          <div class="panel-header"><div><h2 class="panel-title" id="quickTitle">Akses cepat</h2><p class="panel-subtitle">Selesaikan pekerjaan rutin lebih singkat</p></div></div>
+          <div class="quick-grid">
+            <button class="quick-action" type="button" data-toast="Form akun santri siap digunakan."><span class="quick-action-icon"><svg aria-hidden="true"><use href="#icon-user"></use></svg></span><span class="quick-action-copy"><span class="quick-action-title">Tambah akun santri</span><span class="quick-action-note">Daftarkan santri baru</span></span></button>
+            <button class="quick-action" type="button" data-toast="Form kelas dan mapel siap digunakan."><span class="quick-action-icon"><svg aria-hidden="true"><use href="#icon-book"></use></svg></span><span class="quick-action-copy"><span class="quick-action-title">Buat kelas &amp; mapel</span><span class="quick-action-note">Atur struktur akademik</span></span></button>
+            <button class="quick-action" type="button" data-toast="Form penugasan guru siap digunakan."><span class="quick-action-icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span><span class="quick-action-copy"><span class="quick-action-title">Assign guru</span><span class="quick-action-note">Hubungkan kelas dan mapel</span></span></button>
+            <button class="quick-action" type="button" data-toast="Generator rapor siap digunakan."><span class="quick-action-icon"><svg aria-hidden="true"><use href="#icon-file"></use></svg></span><span class="quick-action-copy"><span class="quick-action-title">Generate rapor</span><span class="quick-action-note">Buat snapshot semester</span></span></button>
+          </div>
+        </section>
+
+        <footer class="footer"><span class="footer-brand"><svg aria-hidden="true"><use href="#icon-mosque"></use></svg>ELMS Pesantren &middot; Prototype HTML</span><span class="footer-note">Terakhir diperbarui 09 Februari 2026, 08:45 WIB</span></footer>
+      </div>
+    </main>
+  </div>
+
+  <div class="popover" id="notificationPopover" role="dialog" aria-label="Notifikasi">
+    <div class="popover-head"><strong>Notifikasi</strong><button id="markReadButton" type="button">Tandai dibaca</button></div>
+    <div class="notification-list">
+      <div class="notification-item"><div><strong>12 submission perlu dinilai</strong><span>Ringkasan Kitab Ta'lim Muta'allim</span></div></div>
+      <div class="notification-item"><div><strong>Pengumuman baru diterbitkan</strong><span>Jadwal ujian tengah semester</span></div></div>
+      <div class="notification-item read"><div><strong>Pembayaran SPP masuk</strong><span>Transaksi Mayar #INV-0206 berhasil</span></div></div>
+    </div>
+  </div>
+
+  <div class="popover profile-popover" id="profilePopover" role="dialog" aria-label="Menu profil">
+    <div class="profile-menu-head"><span class="avatar">AF</span><div class="profile-copy"><span class="profile-name">Ahmad Fauzi</span><span class="profile-role">Administrator</span></div></div>
+    <div class="profile-menu-list"><a class="profile-menu-link" href="#profil" data-toast="Halaman profil siap dibuka."><svg aria-hidden="true"><use href="#icon-user"></use></svg>Profil saya</a><a class="profile-menu-link" href="#pengaturan" data-toast="Pengaturan akun siap dibuka."><svg aria-hidden="true"><use href="#icon-settings"></use></svg>Pengaturan akun</a><a class="profile-menu-link" href="#keluar" data-toast="Prototype tidak menjalankan proses keluar."><svg aria-hidden="true"><use href="#icon-log-out"></use></svg>Keluar</a></div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"><svg aria-hidden="true"><use href="#icon-check"></use></svg><span id="toastMessage"></span></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

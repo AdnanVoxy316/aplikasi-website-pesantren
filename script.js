@@ -70,39 +70,70 @@
   const navigation = {
     admin: [
       { label: 'Overview', items: [{ label: 'Beranda', href: 'admin/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=admin', icon: 'calendar' }] },
-      { label: 'Akademik', items: [{ label: 'Akun pengguna', href: 'admin/akun.html', icon: 'users' }, { label: 'Kelas', href: 'admin/kelas.html', icon: 'book' }, { label: 'Mapel', href: 'admin/mapel.html', icon: 'book' }, { label: 'Penugasan guru', href: 'admin/penugasan-guru.html', icon: 'clipboard' }, { label: 'Relasi wali santri', href: 'admin/wali-santri.html', icon: 'users' }, { label: 'Tugas & submission', href: 'admin/dashboard.html#tugas', icon: 'clipboard', count: '24' }, { label: 'Nilai & kehadiran', href: 'admin/dashboard.html#nilai', icon: 'chart' }, { label: 'Rapor', href: 'admin/rapor.html', icon: 'file' }] },
-      { label: 'Pembayaran SPP', items: [{ label: 'Dashboard pembayaran', href: 'admin/pembayaran/dashboard.html', icon: 'wallet', count: '86', group: 'admin/pembayaran/' }, { label: 'Tarif SPP', href: 'admin/pembayaran/tarif-spp.html', icon: 'settings', group: 'admin/pembayaran/' }, { label: 'Tagihan', href: 'admin/pembayaran/tagihan.html', icon: 'file', group: 'admin/pembayaran/' }, { label: 'Transaksi', href: 'admin/pembayaran/transaksi.html', icon: 'chart', group: 'admin/pembayaran/' }, { label: 'Pengaturan pembayaran', href: 'admin/pembayaran/pengaturan.html', icon: 'settings', group: 'admin/pembayaran/' }] },
+      { label: 'Akademik', items: [{ label: 'Akun pengguna', href: 'admin/akun.html', icon: 'users' }, { label: 'Kelas', href: 'admin/kelas.html', icon: 'book' }, { label: 'Mapel', href: 'admin/mapel.html', icon: 'book' }, { label: 'Penugasan guru', href: 'admin/penugasan-guru.html', icon: 'clipboard' }, { label: 'Relasi wali santri', href: 'admin/wali-santri.html', icon: 'users' }, { label: 'Tugas & submission', href: 'admin/dashboard.html#tugas', icon: 'clipboard', count: '24' }, { label: 'Nilai & kehadiran', href: 'admin/kehadiran.html', icon: 'chart' }, { label: 'Rapor', href: 'admin/rapor.html', icon: 'file' }] },
+      { label: 'Pembayaran SPP', items: [{ label: 'Dashboard pembayaran', href: 'admin/pembayaran/dashboard.html', icon: 'wallet', count: '86', group: 'admin/pembayaran/', parent: true }, { label: 'Tarif SPP', href: 'admin/pembayaran/tarif-spp.html', icon: 'settings' }, { label: 'Tagihan', href: 'admin/pembayaran/tagihan.html', icon: 'file' }, { label: 'Transaksi', href: 'admin/pembayaran/transaksi.html', icon: 'chart' }, { label: 'Pengaturan pembayaran', href: 'admin/pembayaran/pengaturan.html', icon: 'settings' }] },
       { label: 'Layanan pesantren', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html', icon: 'megaphone' }, { label: 'Pengaturan', href: 'admin/pengaturan.html', icon: 'settings' }, { label: 'Log aktivitas', href: 'admin/log-aktivitas.html', icon: 'shield' }] }
     ],
     guru: [
       { label: 'Workspace', items: [{ label: 'Dashboard', href: 'guru/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=guru', icon: 'calendar' }] },
-      { label: 'Kegiatan mengajar', items: [{ label: 'Input nilai', href: 'guru/nilai.html', icon: 'chart' }, { label: 'Kehadiran', href: 'guru/kehadiran.html', icon: 'users' }, { label: 'Tugas & submission', href: 'guru/tugas/index.html', icon: 'clipboard', count: '12', group: 'guru/tugas/' }, { label: 'Rapor', href: 'guru/rapor.html', icon: 'file' }] },
+      { label: 'Kegiatan mengajar', items: [{ label: 'Input nilai', href: 'guru/nilai.html', icon: 'chart' }, { label: 'Kehadiran', href: 'guru/kehadiran.html', icon: 'users' }, { label: 'Tugas & submission', href: 'guru/tugas/index.html', icon: 'clipboard', count: '12', group: 'guru/tugas/', parent: true }, { label: 'Rapor', href: 'guru/rapor.html', icon: 'file' }] },
       { label: 'Akun', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html?role=guru', icon: 'megaphone' }, { label: 'Keluar', href: 'login.html', icon: 'log-out' }] }
     ],
     santri: [
       { label: 'Workspace', items: [{ label: 'Dashboard', href: 'santri/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=santri', icon: 'calendar' }] },
-      { label: 'Belajar', items: [{ label: 'Tugas saya', href: 'santri/tugas/index.html', icon: 'clipboard', count: '4', group: 'santri/tugas/' }, { label: 'Nilai', href: 'santri/nilai.html', icon: 'chart' }, { label: 'Kehadiran', href: 'santri/kehadiran.html', icon: 'users' }, { label: 'Rapor', href: 'santri/rapor.html', icon: 'file' }] },
-      { label: 'Keuangan', items: [{ label: 'Pembayaran SPP', href: 'santri/pembayaran/tagihan.html', icon: 'wallet', group: 'santri/pembayaran/' }, { label: 'Riwayat pembayaran', href: 'santri/pembayaran/riwayat.html', icon: 'clock', group: 'santri/pembayaran/' }] },
+      { label: 'Belajar', items: [{ label: 'Tugas saya', href: 'santri/tugas/index.html', icon: 'clipboard', count: '4', group: 'santri/tugas/', parent: true }, { label: 'Nilai', href: 'santri/nilai.html', icon: 'chart' }, { label: 'Kehadiran', href: 'santri/kehadiran.html', icon: 'users' }, { label: 'Rapor', href: 'santri/rapor.html', icon: 'file' }] },
+      { label: 'Keuangan', items: [{ label: 'Pembayaran SPP', href: 'santri/pembayaran/tagihan.html', icon: 'wallet', group: 'santri/pembayaran/', parent: true }, { label: 'Riwayat pembayaran', href: 'santri/pembayaran/riwayat.html', icon: 'clock' }] },
       { label: 'Akun', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html?role=santri', icon: 'megaphone' }, { label: 'Keluar', href: 'login.html', icon: 'log-out' }] }
     ],
     wali_santri: [
       { label: 'Workspace', items: [{ label: 'Dashboard', href: 'wali/dashboard.html', icon: 'grid' }, { label: 'Kalender akademik', href: 'calendar.html?role=wali_santri', icon: 'calendar' }] },
       { label: 'Pantau anak', items: [{ label: 'Nilai anak', href: 'wali/nilai.html', icon: 'chart' }, { label: 'Kehadiran anak', href: 'wali/kehadiran.html', icon: 'users' }, { label: 'Rapor anak', href: 'wali/rapor.html', icon: 'file' }] },
-      { label: 'Keuangan', items: [{ label: 'Pembayaran SPP', href: 'wali/pembayaran/tagihan.html', icon: 'wallet', group: 'wali/pembayaran/' }, { label: 'Riwayat pembayaran', href: 'wali/pembayaran/riwayat.html', icon: 'clock', group: 'wali/pembayaran/' }] },
+      { label: 'Keuangan', items: [{ label: 'Pembayaran SPP', href: 'wali/pembayaran/tagihan.html', icon: 'wallet', group: 'wali/pembayaran/', parent: true }, { label: 'Riwayat pembayaran', href: 'wali/pembayaran/riwayat.html', icon: 'clock' }] },
       { label: 'Akun', items: [{ label: 'Pengumuman', href: 'admin/pengumuman.html?role=wali_santri', icon: 'megaphone' }, { label: 'Keluar', href: 'login.html', icon: 'log-out' }] }
     ]
   };
+
+  function ensureAttendanceExplorer() {
+    if (!window.location.pathname.includes('/kehadiran.html') || document.getElementById('attendanceExplorer')) return;
+    const headingActions = document.querySelector('.page-heading .page-actions');
+    const metricGrid = document.querySelector('.metric-grid');
+    if (!headingActions || !metricGrid) return;
+
+    const toggle = document.createElement('button');
+    toggle.className = 'button button-secondary';
+    toggle.type = 'button';
+    toggle.dataset.toggleTarget = 'attendanceExplorer';
+    toggle.dataset.closedLabel = 'Lihat keseluruhan';
+    toggle.dataset.openLabel = 'Tutup keseluruhan';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.innerHTML = '<span data-icon="plus"></span><span class="toggle-label">Lihat keseluruhan</span>';
+    headingActions.insertBefore(toggle, headingActions.firstChild);
+
+    const isTeacher = currentRole === 'guru';
+    const isGuardian = currentRole === 'wali_santri';
+    const explorer = document.createElement('section');
+    explorer.className = 'panel attendance-explorer';
+    explorer.id = 'attendanceExplorer';
+    explorer.setAttribute('aria-labelledby', 'attendanceExplorerTitle');
+    explorer.innerHTML = '<div class="panel-header"><div><h2 class="panel-title" id="attendanceExplorerTitle">Kehadiran lengkap ' + (isGuardian ? 'anak' : isTeacher ? 'kelas' : 'saya') + '</h2><p class="panel-subtitle">Geser rentang tanggal untuk melihat catatan harian</p></div><span class="role-chip" data-period-label>Pekan 02 - 08 Februari 2026</span></div><div class="attendance-explorer-body"><div class="attendance-toolbar"><div class="period-toggle" data-period-switch data-period-target="attendanceExplorer"><button class="period-button active" type="button" data-period-label="Pekan 02 - 08 Februari 2026">Minggu</button><button class="period-button" type="button" data-period-label="Februari 2026">Bulan</button></div><div class="toolbar-right">' + (isGuardian ? '<select class="select-control" aria-label="Pilih anak"><option>Aisyah Fitria</option><option>Maya Salsabila</option></select>' : '') + '<select class="select-control attendance-month-select" data-attendance-target="attendanceExplorer" aria-label="Pilih bulan"><option value="2026-02">Februari 2026</option><option value="2026-01">Januari 2026</option><option value="2025-12">Desember 2025</option></select></div></div><div class="attendance-explorer-grid"><div><div class="attendance-scroll"><div class="attendance-strip" data-attendance-strip data-month="2026-02"></div></div><div class="attendance-scroll-caption"><span data-icon="chevron-right"></span><span>Geser ke kanan untuk melihat seluruh hari pada <strong data-month-label>Februari 2026</strong>.</span></div></div><div><div class="attendance-overview-box"><div class="attendance-overview-heading"><strong>' + (isTeacher ? 'Kehadiran santri' : isGuardian ? 'Kehadiran anak' : 'Kehadiran saya') + '</strong><span>' + (isTeacher ? '118 santri' : isGuardian ? 'Aisyah Fitria' : 'Ibtida A') + '</span></div><div class="attendance-status-list"><div class="attendance-status-line"><i class="present"></i><span>Hadir</span><strong>' + (isTeacher ? '94,8%' : '97,2%') + '</strong></div><div class="attendance-status-line"><i class="permit"></i><span>Izin</span><strong>1,8%</strong></div><div class="attendance-status-line"><i class="sick"></i><span>Sakit</span><strong>1,3%</strong></div><div class="attendance-status-line"><i class="absent"></i><span>Alpa</span><strong>' + (isTeacher ? '2,1%' : '0%') + '</strong></div></div></div>' + (isTeacher ? '<div class="attendance-scope" style="margin-top:10px"><strong>Kehadiran saya</strong><p>38 hadir mengajar dari 40 jadwal pada semester ini.</p><span class="status-badge success">95% hadir</span></div>' : '<div class="attendance-scope" style="margin-top:10px"><strong>' + (isGuardian ? 'Akses wali santri' : 'Data pribadi') + '</strong><p>' + (isGuardian ? 'Hanya kehadiran anak yang terhubung dengan akun ini.' : 'Hanya kamu yang dapat melihat rekap kehadiran ini.') + '</p><span class="status-badge success">Data tersedia</span></div>') + '</div></div><div class="attendance-matrix-wrap" style="margin-top:20px"><table class="data-table attendance-matrix"><thead><tr><th>' + (isTeacher ? 'Santri / kelas' : isGuardian ? 'Anak / kelas' : 'Tanggal') + '</th><th>Sen 02</th><th>Sel 03</th><th>Rab 04</th><th>Kam 05</th><th>Jum 06</th><th>Sab 07</th><th>Rekap</th></tr></thead><tbody><tr><td><strong>' + (isTeacher ? 'Aisyah Fitria' : isGuardian ? 'Aisyah Fitria' : 'Pekan ini') + '</strong><span class="person-meta">' + (isTeacher || isGuardian ? 'Ibtida A' : '02 - 08 Februari 2026') + '</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell permit">I</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td>5 hadir, 1 izin</td></tr>' + (isTeacher ? '<tr><td><strong>Fauzan Ramadhan</strong><span class="person-meta">Tsanawiyah 1</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell absent">A</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td>5 hadir, 1 alpa</td></tr>' : '') + '</tbody></table></div><div class="attendance-matrix-legend"><span><i class="present"></i>H Hadir</span><span><i class="permit"></i>I Izin</span><span><i class="sick"></i>S Sakit</span><span><i class="absent"></i>A Alpa</span></div></div></section>';
+    metricGrid.insertAdjacentElement('afterend', explorer);
+  }
 
   function renderNavigation() {
     const sidebarNav = document.querySelector('.sidebar nav');
     if (!sidebarNav) return;
     const currentPath = window.location.pathname.replace(/\\/g, '/');
     const roleNavigation = navigation[currentRole];
+    const hasPageItem = roleNavigation.some(function (section) {
+      return section.items.some(function (item) { return new URL(item.href, document.baseURI).pathname.replace(/\\/g, '/') === currentPath; });
+    });
     sidebarNav.innerHTML = roleNavigation.map(function (section, sectionIndex) {
       const sectionId = 'nav-' + currentRole + '-' + sectionIndex;
       const items = section.items.map(function (item) {
-        const targetPath = new URL(item.href, document.baseURI).pathname.replace(/\\/g, '/');
-        const isActive = targetPath === currentPath || (item.group && currentPath.includes('/' + item.group));
+        const targetUrl = new URL(item.href, document.baseURI);
+        const targetPath = targetUrl.pathname.replace(/\\/g, '/');
+        const isExactPage = targetPath === currentPath && targetUrl.hash === window.location.hash;
+        const isActive = isExactPage || (item.parent && item.group && !hasPageItem && currentPath.includes('/' + item.group));
         return '<li><a class="nav-link' + (isActive ? ' active' : '') + '" href="' + item.href + '"' + (isActive ? ' aria-current="page"' : '') + '><span class="nav-icon" data-icon="' + item.icon + '"></span>' + item.label + (item.count ? '<span class="nav-count">' + item.count + '</span>' : '') + '</a></li>';
       }).join('');
       return '<section class="nav-section" aria-labelledby="' + sectionId + '"><h2 class="nav-label" id="' + sectionId + '">' + section.label + '</h2><ul class="nav-list">' + items + '</ul></section>';
@@ -111,9 +142,56 @@
     if (sidebar) sidebar.setAttribute('aria-label', 'Navigasi ' + (currentRole === 'wali_santri' ? 'wali santri' : currentRole));
   }
 
+  ensureAttendanceExplorer();
   renderNavigation();
   injectIcons();
   if (currentRole !== 'admin') document.querySelectorAll('[data-admin-only]').forEach(function (element) { element.remove(); });
+
+  function renderAttendanceStrip(strip) {
+    const parts = (strip.dataset.month || '2026-02').split('-').map(Number);
+    const year = parts[0];
+    const month = parts[1];
+    const period = strip.dataset.period || 'week';
+    const startDay = period === 'week' ? 2 : 1;
+    const dayCount = period === 'week' ? 7 : new Date(year, month, 0).getDate();
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const statuses = ['present', 'present', 'present', 'permit', 'present', 'present', 'present', 'present', 'present', 'present', 'present', 'sick', 'present', 'present', 'present', 'present', 'present', 'present', 'present', 'absent', 'present', 'present', 'present', 'present', 'permit', 'present', 'present', 'present', 'present', 'present', 'present'];
+    strip.innerHTML = Array.from({ length: dayCount }, function (_, index) {
+      const day = index + startDay;
+      const date = new Date(year, month - 1, day);
+      const status = statuses[index % statuses.length];
+      const weekend = date.getDay() === 0 || date.getDay() === 6;
+      const current = day === 9 && month === 2;
+      return '<div class="attendance-day' + (weekend ? ' weekend' : '') + (current ? ' current' : '') + '"><span>' + String(day).padStart(2, '0') + '</span><small>' + dayNames[date.getDay()] + '</small><i class="attendance-day-mark ' + status + '"></i></div>';
+    }).join('');
+  }
+
+  document.querySelectorAll('[data-attendance-strip]').forEach(renderAttendanceStrip);
+
+  document.querySelectorAll('.attendance-month-select').forEach(function (select) {
+    select.addEventListener('change', function () {
+      const target = document.getElementById(select.dataset.attendanceTarget);
+      if (!target) return;
+      const strip = target.querySelector('[data-attendance-strip]');
+      if (strip) {
+        strip.dataset.month = select.value;
+        renderAttendanceStrip(strip);
+      }
+      const option = select.options[select.selectedIndex];
+      const label = target.querySelector('[data-month-label]');
+      if (label) label.textContent = option.textContent;
+    });
+  });
+
+  document.querySelectorAll('.attendance-class-select').forEach(function (select) {
+    select.addEventListener('change', function () {
+      const target = document.getElementById(select.dataset.attendanceTarget);
+      if (!target) return;
+      target.querySelectorAll('[data-attendance-class]').forEach(function (row) {
+        row.classList.toggle('is-hidden', select.value !== 'all' && row.dataset.attendanceClass !== select.value);
+      });
+    });
+  });
 
   const routeMap = {
     'index.html': 'admin/dashboard.html',
@@ -299,6 +377,27 @@
       if (!target) return;
       const isOpen = target.classList.toggle('is-open');
       control.setAttribute('aria-expanded', String(isOpen));
+      const label = control.querySelector('.toggle-label');
+      if (label) label.textContent = isOpen ? (control.dataset.openLabel || 'Tutup keseluruhan') : (control.dataset.closedLabel || 'Lihat keseluruhan');
+    });
+  });
+
+  document.querySelectorAll('[data-period-switch]').forEach(function (group) {
+    const buttons = group.querySelectorAll('.period-button');
+    const target = document.getElementById(group.dataset.periodTarget);
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () {
+        buttons.forEach(function (item) { item.classList.toggle('active', item === button); });
+        if (target) {
+          const strip = target.querySelector('[data-attendance-strip]');
+          if (strip) {
+            strip.dataset.period = button.dataset.periodValue || (button.textContent.toLowerCase().includes('bulan') ? 'month' : 'week');
+            renderAttendanceStrip(strip);
+          }
+          const label = target.querySelector('[data-period-label]');
+          if (label && button.dataset.periodLabel) label.textContent = button.dataset.periodLabel;
+        }
+      });
     });
   });
 

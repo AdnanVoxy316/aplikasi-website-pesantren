@@ -2243,11 +2243,11 @@ svg {
 }
 
 .nav-link.active {
-  background: transparent;
-  border-color: var(--line);
+  background: var(--brand-light);
+  border-color: #c5dfc9;
 }
 
-.nav-link.active::before { display: none; }
+.nav-link.active::before { display: block; }
 
 .nav-link.active:hover {
   background: var(--surface-tint);
@@ -2327,3 +2327,27 @@ svg {
 .attendance-matrix th small { display: block; margin-top: 2px; color: var(--muted-light); font-size: 8px; font-weight: 700; letter-spacing: 0; text-transform: none; }
 
 .payment-total .button-secondary:hover { color: #e9f3e0; background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); }
+
+.attendance-day {
+  width: 58px;
+  min-height: 88px;
+  flex-basis: 58px;
+  font-size: 14px;
+}
+
+.attendance-day small { font-size: 10px; }
+
+.attendance-day-mark { width: 8px; height: 8px; }
+
+.attendance-matrix { min-width: 1720px !important; }
+
+.attendance-matrix th span { font-size: 13px; }
+
+.attendance-matrix th small { font-size: 9px; }
+
+.attendance-cell { width: 27px; height: 27px; font-size: 11px; }
+
+@media (max-width: 760px) {
+  .attendance-day { width: 52px; min-height: 82px; flex-basis: 52px; }
+  .attendance-matrix { min-width: 1720px !important; }
+}

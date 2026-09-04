@@ -123,6 +123,22 @@
     metricGrid.insertAdjacentElement('afterend', explorer);
   }
 
+  function ensureAttendanceExport() {
+    document.querySelectorAll('.attendance-explorer').forEach(function (explorer) {
+      if (explorer.querySelector('[data-export-attendance]')) return;
+      const toolbar = explorer.querySelector('.attendance-toolbar');
+      if (!toolbar) return;
+      const actions = toolbar.querySelector('.toolbar-right') || toolbar;
+      const button = document.createElement('button');
+      button.className = 'button button-secondary attendance-excel-button';
+      button.type = 'button';
+      button.dataset.exportAttendance = 'true';
+      button.setAttribute('aria-label', 'Ekspor kehadiran ke Excel');
+      button.innerHTML = '<span data-icon="download"></span>Ekspor Excel';
+      actions.appendChild(button);
+    });
+  }
+
   function renderNavigation() {
     const sidebarNav = document.querySelector('.sidebar nav');
     if (!sidebarNav) return;
@@ -151,6 +167,7 @@
   document.querySelectorAll('.attendance-explorer [data-period-label]').forEach(function (label) { label.textContent = 'Februari 2026'; });
   document.querySelectorAll('.attendance-scope p').forEach(function (text) { text.textContent = text.textContent.replace('Pekan 02 - 08 Februari 2026', 'Februari 2026'); });
   document.querySelectorAll('.page-description').forEach(function (text) { text.textContent = text.textContent.replace('periode minggu atau bulan', 'periode bulanan'); });
+  ensureAttendanceExport();
   renderNavigation();
   injectIcons();
   if (currentRole !== 'admin') document.querySelectorAll('[data-admin-only]').forEach(function (element) { element.remove(); });
@@ -261,6 +278,7 @@
     'admin-wali-santri.html': 'admin/wali-santri.html',
     'admin-pengumuman.html': 'admin/pengumuman.html',
     'admin-rapor.html': 'admin/rapor.html',
+    'admin-kehadiran.html': 'admin/kehadiran.html',
     'admin-log-aktivitas.html': 'admin/log-aktivitas.html',
     'admin-pengaturan.html': 'admin/pengaturan.html',
     'admin-pembayaran.html': 'admin/pembayaran/dashboard.html',
@@ -446,6 +464,31 @@
       const target = element.getAttribute('href');
       if (target && target.charAt(0) === '#') event.preventDefault();
       showToast(element.dataset.toast);
+    });
+  });
+
+  document.querySelectorAll('[data-export-attendance]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const explorer = button.closest('.attendance-explorer');
+      const table = explorer?.querySelector('.attendance-matrix');
+      if (!table) {
+        showToast('Data kehadiran belum tersedia untuk diekspor.');
+        return;
+      }
+      const rows = [...table.querySelectorAll('tr')].map(function (row) {
+        return [...row.cells].map(function (cell) {
+          return '"' + cell.innerText.replace(/\s+/g, ' ').trim().replace(/"/g, '""') + '"';
+        }).join(',');
+      });
+      const blob = new Blob(['\uFEFF' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const download = document.createElement('a');
+      download.href = URL.createObjectURL(blob);
+      download.download = 'rekap-kehadiran-' + currentRole + '.csv';
+      document.body.appendChild(download);
+      download.click();
+      download.remove();
+      URL.revokeObjectURL(download.href);
+      showToast('Rekap kehadiran berhasil diekspor untuk Excel.');
     });
   });
 

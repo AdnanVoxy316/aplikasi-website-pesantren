@@ -82,11 +82,11 @@ export default async function GuruDashboardPage() {
                       <td>{p.jumlahSantri}</td>
                       <td>
                         <div className="table-actions">
-                          <Link className="table-action" href={`/guru/nilai?pengajaranId=${p.id}`} title="Input nilai">
-                            nilai
+                          <Link className="table-button" href={`/guru/nilai?pengajaranId=${p.id}`}>
+                            Nilai
                           </Link>
-                          <Link className="table-action" href={`/guru/kehadiran?pengajaranId=${p.id}`} title="Input kehadiran">
-                            kehadiran
+                          <Link className="table-button" href={`/guru/kehadiran?pengajaranId=${p.id}`}>
+                            Kehadiran
                           </Link>
                         </div>
                       </td>

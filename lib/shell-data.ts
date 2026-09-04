@@ -2,11 +2,10 @@ import "server-only";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { notifikasi } from "@/db/schema";
-import { requireRole } from "@/lib/auth/session";
+import { requireRole, requireAuth } from "@/lib/auth/session";
 import { getPesantrenSettings } from "@/db/queries/admin";
 import { getSantriProfile } from "@/db/queries/santri";
 import type { ShellUser, ShellNotification } from "@/components/app-shell";
-import type { Role } from "@/lib/nav";
 
 function initialsOf(name: string): string {
   return name
@@ -23,15 +22,32 @@ const ROLE_LABEL: Record<string, string> = {
   wali: "Wali Santri",
 };
 
-export async function getShellData(
-  allowedRole: "admin" | "guru" | "santri" | "wali",
-): Promise<{
+export type ShellData = {
+  role: "admin" | "guru" | "santri" | "wali";
+  userId: string;
   user: ShellUser;
   notifications: ShellNotification[];
   tahunAjaranLabel: string;
   semesterLabel: string;
-}> {
+};
+
+export async function getShellData(
+  allowedRole: "admin" | "guru" | "santri" | "wali",
+): Promise<ShellData> {
   const session = await requireRole(allowedRole);
+  const data = await buildShellData(session);
+  return { role: allowedRole, ...data };
+}
+
+export async function getShellDataAnyRole(): Promise<ShellData> {
+  const session = await requireAuth();
+  const data = await buildShellData(session);
+  return { role: session.user.role as ShellData["role"], ...data };
+}
+
+async function buildShellData(session: {
+  user: { id: string; name: string; email: string; role: string };
+}): Promise<Omit<ShellData, "role">> {
   const role = session.user.role;
   const settings = await getPesantrenSettings();
 
@@ -51,10 +67,12 @@ export async function getShellData(
     .limit(15);
 
   return {
+    userId: session.user.id,
     user: {
       name: session.user.name,
       initials: initialsOf(session.user.name),
       roleLabel,
+      email: session.user.email,
     },
     notifications: notifRows.map((n) => ({
       id: n.id,
@@ -68,5 +86,3 @@ export async function getShellData(
       : "Semester aktif belum diatur",
   };
 }
-
-export type { Role };

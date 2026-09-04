@@ -168,9 +168,15 @@ export default async function SantriDashboardPage() {
             </div>
           )}
           <div className="form-actions" style={{ justifyContent: "flex-start" }}>
-            <Link className="button button-secondary" href="/santri/pembayaran/tagihan">
-              Bayar sekarang
-            </Link>
+            {tagihanAktifRows.length > 0 ? (
+              <Link className="button button-primary" href="/santri/pembayaran/tagihan">
+                Bayar sekarang
+              </Link>
+            ) : (
+              <Link className="button button-secondary" href="/santri/pembayaran/riwayat">
+                Lihat riwayat pembayaran
+              </Link>
+            )}
           </div>
         </Panel>
 

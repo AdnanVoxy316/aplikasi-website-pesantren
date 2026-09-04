@@ -45,7 +45,7 @@ export const navigation: Record<Role, NavSection[]> = {
         { label: "Mapel", href: "/admin/mapel", icon: "book" },
         { label: "Penugasan guru", href: "/admin/penugasan-guru", icon: "clipboard" },
         { label: "Relasi wali santri", href: "/admin/wali-santri", icon: "users" },
-        { label: "Tugas & submission", href: "/admin#tugas", icon: "clipboard", count: "24" },
+        { label: "Tugas & submission", href: "/admin#tugas", icon: "clipboard" },
         { label: "Nilai & kehadiran", href: "/admin/kehadiran", icon: "chart" },
         { label: "Rapor", href: "/admin/rapor", icon: "file" },
       ],
@@ -53,7 +53,7 @@ export const navigation: Record<Role, NavSection[]> = {
     {
       label: "Pembayaran SPP",
       items: [
-        { label: "Dashboard pembayaran", href: "/admin/pembayaran", icon: "wallet", count: "86" },
+        { label: "Dashboard pembayaran", href: "/admin/pembayaran", icon: "wallet" },
         { label: "Tarif SPP", href: "/admin/pembayaran/tarif-spp", icon: "settings" },
         { label: "Tagihan", href: "/admin/pembayaran/tagihan", icon: "file" },
         { label: "Transaksi", href: "/admin/pembayaran/transaksi", icon: "chart" },
@@ -82,7 +82,7 @@ export const navigation: Record<Role, NavSection[]> = {
       items: [
         { label: "Input nilai", href: "/guru/nilai", icon: "chart" },
         { label: "Kehadiran", href: "/guru/kehadiran", icon: "users" },
-        { label: "Tugas & submission", href: "/guru/tugas", icon: "clipboard", count: "12" },
+        { label: "Tugas & submission", href: "/guru/tugas", icon: "clipboard" },
         { label: "Rapor", href: "/guru/rapor", icon: "file" },
       ],
     },
@@ -105,7 +105,7 @@ export const navigation: Record<Role, NavSection[]> = {
     {
       label: "Belajar",
       items: [
-        { label: "Tugas saya", href: "/santri/tugas", icon: "clipboard", count: "4" },
+        { label: "Tugas saya", href: "/santri/tugas", icon: "clipboard" },
         { label: "Nilai", href: "/santri/nilai", icon: "chart" },
         { label: "Kehadiran", href: "/santri/kehadiran", icon: "users" },
         { label: "Rapor", href: "/santri/rapor", icon: "file" },

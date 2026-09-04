@@ -40,6 +40,7 @@ export type ShellUser = {
   name: string;
   initials: string;
   roleLabel: string;
+  email?: string | undefined;
 };
 
 export type ShellNotification = {
@@ -132,7 +133,10 @@ export default function AppShell({
   const navSections = navigation[role];
   const hasNotification = notifItems.some((item) => !item.read);
   const breadcrumb = useMemo(
-    () => resolveBreadcrumb(pathname, role),
+    () =>
+      pathname.startsWith("/profil")
+        ? (["Akun", "Profil saya"] as [string, string])
+        : resolveBreadcrumb(pathname, role),
     [pathname, role],
   );
 
@@ -331,22 +335,14 @@ export default function AppShell({
           </div>
         </div>
         <div className="profile-menu-list">
-          <button
-            className="profile-menu-link"
-            type="button"
-            onClick={() => showToast("Halaman profil siap dibuka.")}
-          >
+          <Link className="profile-menu-link" href="/profil" onClick={() => setOpenPopover("none")}>
             <Icon name="user" />
             Profil saya
-          </button>
-          <button
-            className="profile-menu-link"
-            type="button"
-            onClick={() => showToast("Pengaturan akun siap dibuka.")}
-          >
+          </Link>
+          <Link className="profile-menu-link" href="/profil#keamanan" onClick={() => setOpenPopover("none")}>
             <Icon name="settings" />
             Pengaturan akun
-          </button>
+          </Link>
           <Link className="profile-menu-link" href="/logout">
             <Icon name="log-out" />
             Keluar

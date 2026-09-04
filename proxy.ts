@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
-const PROTECTED_PREFIXES = ["/admin", "/guru", "/santri", "/wali"];
+const PROTECTED_PREFIXES = ["/admin", "/guru", "/santri", "/wali", "/profil"];
 const AUTH_PATHS = ["/login"];
 
 export function proxy(request: NextRequest) {
@@ -26,5 +26,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/guru/:path*", "/santri/:path*", "/wali/:path*", "/login"],
+  matcher: ["/admin/:path*", "/guru/:path*", "/santri/:path*", "/wali/:path*", "/profil/:path*", "/login"],
 };

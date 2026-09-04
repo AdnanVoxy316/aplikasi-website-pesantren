@@ -26,8 +26,6 @@ export default async function AdminDashboardPage() {
     getRekapKehadiranPerKelas(),
   ]);
 
-  const maxKehadiran = Math.max(...kehadiranKelas.map((k) => k.total), 1);
-
   return (
     <>
       <PageHeading
@@ -74,26 +72,9 @@ export default async function AdminDashboardPage() {
 
       <div className="form-layout">
         <Panel
-          title="Kehadiran per kelas"
-          subtitle="Rekap status kehadiran seluruh waktu"
+          title="Nilai tercatat per mapel"
+          subtitle="Rata-rata nilai seluruh santri"
         >
-          {kehadiranKelas.length === 0 ? (
-            <p className="panel-subtitle">Belum ada data kehadiran.</p>
-          ) : (
-            <div>
-              {kehadiranKelas.map((k) => (
-                <ProgressRow
-                  key={k.kelas_nama}
-                  label={`${k.kelas_nama} · hadir ${k.hadir}/${k.total}`}
-                  value={`${persenHadir(k.hadir, k.total)}%`}
-                  percent={Math.round((k.total === 0 ? 0 : k.hadir / maxKehadiran) * 100)}
-                />
-              ))}
-            </div>
-          )}
-        </Panel>
-
-        <Panel title="Nilai tercatat per mapel" subtitle="Rata-rata nilai seluruh santri">
           {nilaiMapel.length === 0 ? (
             <p className="panel-subtitle">Belum ada nilai yang diinput guru.</p>
           ) : (
@@ -120,6 +101,26 @@ export default async function AdminDashboardPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+        </Panel>
+
+        <Panel
+          title="Kehadiran per kelas"
+          subtitle="Rekap status kehadiran seluruh waktu"
+        >
+          {kehadiranKelas.length === 0 ? (
+            <p className="panel-subtitle">Belum ada data kehadiran.</p>
+          ) : (
+            <div>
+              {kehadiranKelas.map((k) => (
+                <ProgressRow
+                  key={k.kelas_nama}
+                  label={`${k.kelas_nama} · hadir ${k.hadir}/${k.total}`}
+                  value={`${persenHadir(k.hadir, k.total)}%`}
+                  percent={persenHadir(k.hadir, k.total)}
+                />
+              ))}
             </div>
           )}
         </Panel>

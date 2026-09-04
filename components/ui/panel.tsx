@@ -57,12 +57,18 @@ export function EmptyState({ children }: { children: ReactNode }) {
 }
 
 export function PageFooter() {
+  const now = new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date());
+
   return (
     <footer className="footer">
       <span className="footer-brand">ELMS Pesantren</span>
-      <span className="footer-note">
-        Terakhir diperbarui 09 Februari 2026, 08:45 WIB
-      </span>
+      <span className="footer-note">Data diperbarui langsung dari database · {now}</span>
     </footer>
   );
 }

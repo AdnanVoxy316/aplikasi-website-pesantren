@@ -228,7 +228,7 @@ svg {
 }
 
 .sidebar-foot {
-  padding: 14px 12px 0;
+  padding: 14px 12px 16px;
   margin-top: auto;
   border-top: 1px solid var(--line);
 }
@@ -244,8 +244,12 @@ svg {
 }
 
 .year-select {
+  display: block;
   width: 100%;
   padding: 8px 30px 8px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: var(--ink-soft);
   background-color: var(--surface-soft);
   background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
@@ -587,7 +591,7 @@ svg {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(215px, 1fr));
   gap: 13px;
   margin-top: 15px;
 }
@@ -1521,6 +1525,7 @@ svg {
 .empty-state p { max-width: 300px; margin: 4px 0 0; font-size: 10px; }
 
 .form-layout { display: grid; grid-template-columns: minmax(0, 1fr) 285px; gap: 15px; align-items: start; }
+.form-layout .table-shell .data-table { min-width: 0; }
 
 .form-card { padding: 22px; }
 
@@ -1635,7 +1640,7 @@ svg {
 
 .progress-row strong { color: var(--ink-soft); font-size: 11px; }
 
-.progress-track { height: 7px; overflow: hidden; background: var(--line); border-radius: 10px; }
+.progress-track { flex: 1; height: 7px; overflow: hidden; background: var(--line); border-radius: 10px; min-width: 60px; }
 
 .progress-fill { height: 100%; background: var(--brand); border-radius: inherit; }
 .progress-fill.gold { background: #c49b4d; }

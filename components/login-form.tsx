@@ -2,27 +2,32 @@
 
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
-import { roleDashboard, type Role } from "@/lib/nav";
-
-const ROLES: { value: Role; label: string }[] = [
-  { value: "admin", label: "Admin" },
-  { value: "guru", label: "Guru / Ustadz" },
-  { value: "santri", label: "Santri" },
-  { value: "wali", label: "Wali Santri" },
-];
+import { Icon } from "@/lib/icons";
+import { findDemoAccount } from "@/lib/data/accounts";
+import { roleDashboard } from "@/lib/nav";
 
 export function LoginForm() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
+    setError("");
     const data = new FormData(event.currentTarget);
-    const role = (data.get("role") as Role) ?? "admin";
+    const email = String(data.get("email") ?? "");
+    const password = String(data.get("password") ?? "");
+    const account = findDemoAccount(email, password);
+    if (!account) {
+      setError(
+        "Email atau kata sandi tidak cocok dengan akun terdaftar mana pun.",
+      );
+      return;
+    }
+    setLoading(true);
     window.setTimeout(() => {
-      router.push(roleDashboard[role]);
+      router.push(roleDashboard[account.role]);
     }, 450);
   };
 
@@ -53,22 +58,22 @@ export function LoginForm() {
           <button
             className="password-toggle"
             type="button"
+            aria-label={
+              showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+            }
+            aria-pressed={showPassword}
             onClick={() => setShowPassword((visible) => !visible)}
           >
-            {showPassword ? "Sembunyikan" : "Lihat"}
+            <Icon name={showPassword ? "eye-off" : "eye"} />
           </button>
         </div>
       </div>
-      <div className="login-field">
-        <label htmlFor="role">Masuk sebagai</label>
-        <select id="role" name="role" defaultValue="admin">
-          {ROLES.map((role) => (
-            <option key={role.value} value={role.value}>
-              {role.label}
-            </option>
-          ))}
-        </select>
-      </div>
+      {error ? (
+        <div className="notice error" role="alert">
+          <Icon name="alert" />
+          <span>{error}</span>
+        </div>
+      ) : null}
       <div className="login-row">
         <label className="login-check">
           <input type="checkbox" name="remember" /> Ingat saya

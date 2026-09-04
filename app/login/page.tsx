@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Icon } from "@/lib/icons";
+import { demoAccounts } from "@/lib/data/accounts";
 import { LoginForm } from "@/components/login-form";
 
 export const metadata: Metadata = {
@@ -62,6 +63,17 @@ export default function LoginPage() {
             </p>
           </div>
           <LoginForm />
+          <div className="notice" style={{ marginTop: 14 }}>
+            <Icon name="sparkle" />
+            <div style={{ display: "grid", gap: 2 }}>
+              <strong>Akun demo — pilih sesuai peran</strong>
+              {demoAccounts.map((account) => (
+                <span key={account.email}>
+                  {account.email} · {account.password} — {account.roleLabel}
+                </span>
+              ))}
+            </div>
+          </div>
           <p className="login-note">
             <Icon name="lock" />
             Akses akun dibatasi berdasarkan peran. Jangan bagikan kata sandi

@@ -2351,3 +2351,16 @@ svg {
   .attendance-day { width: 52px; min-height: 82px; flex-basis: 52px; }
   .attendance-matrix { min-width: 1720px !important; }
 }
+
+.password-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.password-toggle svg { width: 16px; height: 16px; }
+
+.report-card-preview { overflow-x: auto; }
+
+.report-head { flex-wrap: wrap; }

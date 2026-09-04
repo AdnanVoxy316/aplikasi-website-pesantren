@@ -1,4 +1,5 @@
 import type { Role } from "@/lib/nav";
+import { demoAccounts } from "@/lib/data/accounts";
 
 export type ShellUser = {
   name: string;
@@ -12,12 +13,17 @@ export type ShellNotification = {
   read?: boolean;
 };
 
-export const shellUsers: Record<Role, ShellUser> = {
-  admin: { name: "Ahmad Fauzi", initials: "AF", roleLabel: "Administrator" },
-  guru: { name: "Nisa Karimah", initials: "NK", roleLabel: "Guru / Ustadzah" },
-  santri: { name: "Aisyah Fitria", initials: "AF", roleLabel: "Santri · Ibtida A" },
-  wali: { name: "Rizal Hidayat", initials: "RH", roleLabel: "Wali Santri" },
-};
+export const shellUsers: Record<Role, ShellUser> = demoAccounts.reduce(
+  (users, account) => {
+    users[account.role] = {
+      name: account.name,
+      initials: account.initials,
+      roleLabel: account.roleLabel,
+    };
+    return users;
+  },
+  {} as Record<Role, ShellUser>,
+);
 
 export const shellNotifications: Record<Role, ShellNotification[]> = {
   admin: [

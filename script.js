@@ -116,6 +116,10 @@
     explorer.id = 'attendanceExplorer';
     explorer.setAttribute('aria-labelledby', 'attendanceExplorerTitle');
     explorer.innerHTML = '<div class="panel-header"><div><h2 class="panel-title" id="attendanceExplorerTitle">Kehadiran lengkap ' + (isGuardian ? 'anak' : isTeacher ? 'kelas' : 'saya') + '</h2><p class="panel-subtitle">Geser rentang tanggal untuk melihat catatan harian</p></div><span class="role-chip" data-period-label>Pekan 02 - 08 Februari 2026</span></div><div class="attendance-explorer-body"><div class="attendance-toolbar"><div class="period-toggle" data-period-switch data-period-target="attendanceExplorer"><button class="period-button active" type="button" data-period-label="Pekan 02 - 08 Februari 2026">Minggu</button><button class="period-button" type="button" data-period-label="Februari 2026">Bulan</button></div><div class="toolbar-right">' + (isGuardian ? '<select class="select-control" aria-label="Pilih anak"><option>Aisyah Fitria</option><option>Maya Salsabila</option></select>' : '') + '<select class="select-control attendance-month-select" data-attendance-target="attendanceExplorer" aria-label="Pilih bulan"><option value="2026-02">Februari 2026</option><option value="2026-01">Januari 2026</option><option value="2025-12">Desember 2025</option></select></div></div><div class="attendance-explorer-grid"><div><div class="attendance-scroll"><div class="attendance-strip" data-attendance-strip data-month="2026-02"></div></div><div class="attendance-scroll-caption"><span data-icon="chevron-right"></span><span>Geser ke kanan untuk melihat seluruh hari pada <strong data-month-label>Februari 2026</strong>.</span></div></div><div><div class="attendance-overview-box"><div class="attendance-overview-heading"><strong>' + (isTeacher ? 'Kehadiran santri' : isGuardian ? 'Kehadiran anak' : 'Kehadiran saya') + '</strong><span>' + (isTeacher ? '118 santri' : isGuardian ? 'Aisyah Fitria' : 'Ibtida A') + '</span></div><div class="attendance-status-list"><div class="attendance-status-line"><i class="present"></i><span>Hadir</span><strong>' + (isTeacher ? '94,8%' : '97,2%') + '</strong></div><div class="attendance-status-line"><i class="permit"></i><span>Izin</span><strong>1,8%</strong></div><div class="attendance-status-line"><i class="sick"></i><span>Sakit</span><strong>1,3%</strong></div><div class="attendance-status-line"><i class="absent"></i><span>Alpa</span><strong>' + (isTeacher ? '2,1%' : '0%') + '</strong></div></div></div>' + (isTeacher ? '<div class="attendance-scope" style="margin-top:10px"><strong>Kehadiran saya</strong><p>38 hadir mengajar dari 40 jadwal pada semester ini.</p><span class="status-badge success">95% hadir</span></div>' : '<div class="attendance-scope" style="margin-top:10px"><strong>' + (isGuardian ? 'Akses wali santri' : 'Data pribadi') + '</strong><p>' + (isGuardian ? 'Hanya kehadiran anak yang terhubung dengan akun ini.' : 'Hanya kamu yang dapat melihat rekap kehadiran ini.') + '</p><span class="status-badge success">Data tersedia</span></div>') + '</div></div><div class="attendance-matrix-wrap" style="margin-top:20px"><table class="data-table attendance-matrix"><thead><tr><th>' + (isTeacher ? 'Santri / kelas' : isGuardian ? 'Anak / kelas' : 'Tanggal') + '</th><th>Sen 02</th><th>Sel 03</th><th>Rab 04</th><th>Kam 05</th><th>Jum 06</th><th>Sab 07</th><th>Rekap</th></tr></thead><tbody><tr><td><strong>' + (isTeacher ? 'Aisyah Fitria' : isGuardian ? 'Aisyah Fitria' : 'Pekan ini') + '</strong><span class="person-meta">' + (isTeacher || isGuardian ? 'Ibtida A' : '02 - 08 Februari 2026') + '</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell permit">I</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td>5 hadir, 1 izin</td></tr>' + (isTeacher ? '<tr><td><strong>Fauzan Ramadhan</strong><span class="person-meta">Tsanawiyah 1</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell absent">A</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td><span class="attendance-cell present">H</span></td><td>5 hadir, 1 alpa</td></tr>' : '') + '</tbody></table></div><div class="attendance-matrix-legend"><span><i class="present"></i>H Hadir</span><span><i class="permit"></i>I Izin</span><span><i class="sick"></i>S Sakit</span><span><i class="absent"></i>A Alpa</span></div></div></section>';
+    const periodToggle = explorer.querySelector('.period-toggle');
+    if (periodToggle) periodToggle.remove();
+    const periodLabel = explorer.querySelector('[data-period-label]');
+    if (periodLabel) periodLabel.textContent = 'Februari 2026';
     metricGrid.insertAdjacentElement('afterend', explorer);
   }
 
@@ -143,6 +147,10 @@
   }
 
   ensureAttendanceExplorer();
+  document.querySelectorAll('.attendance-explorer .period-toggle').forEach(function (toggle) { toggle.remove(); });
+  document.querySelectorAll('.attendance-explorer [data-period-label]').forEach(function (label) { label.textContent = 'Februari 2026'; });
+  document.querySelectorAll('.attendance-scope p').forEach(function (text) { text.textContent = text.textContent.replace('Pekan 02 - 08 Februari 2026', 'Februari 2026'); });
+  document.querySelectorAll('.page-description').forEach(function (text) { text.textContent = text.textContent.replace('periode minggu atau bulan', 'periode bulanan'); });
   renderNavigation();
   injectIcons();
   if (currentRole !== 'admin') document.querySelectorAll('[data-admin-only]').forEach(function (element) { element.remove(); });
@@ -151,9 +159,8 @@
     const parts = (strip.dataset.month || '2026-02').split('-').map(Number);
     const year = parts[0];
     const month = parts[1];
-    const period = strip.dataset.period || 'week';
-    const startDay = period === 'week' ? 2 : 1;
-    const dayCount = period === 'week' ? 7 : new Date(year, month, 0).getDate();
+    const startDay = 1;
+    const dayCount = new Date(year, month, 0).getDate();
     const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
     const statuses = ['present', 'present', 'present', 'permit', 'present', 'present', 'present', 'present', 'present', 'present', 'present', 'sick', 'present', 'present', 'present', 'present', 'present', 'present', 'present', 'absent', 'present', 'present', 'present', 'present', 'permit', 'present', 'present', 'present', 'present', 'present', 'present'];
     strip.innerHTML = Array.from({ length: dayCount }, function (_, index) {
@@ -166,7 +173,51 @@
     }).join('');
   }
 
+  function renderAttendanceMatrix(table) {
+    const strip = table.closest('.attendance-explorer')?.querySelector('[data-attendance-strip]');
+    const month = table.dataset.month || strip?.dataset.month || '2026-02';
+    const parts = month.split('-').map(Number);
+    const year = parts[0];
+    const monthNumber = parts[1];
+    const dayCount = new Date(year, monthNumber, 0).getDate();
+    const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+    const statuses = ['present', 'present', 'present', 'present', 'permit', 'present', 'present', 'present', 'present', 'present', 'sick', 'present', 'present', 'present', 'present', 'present', 'present', 'present', 'absent', 'present', 'present', 'present', 'permit', 'present', 'present', 'present', 'present', 'present', 'present', 'present', 'present'];
+    const letters = { present: 'H', permit: 'I', sick: 'S', absent: 'A' };
+    const header = table.querySelector('thead tr');
+    const bodyRows = table.querySelectorAll('tbody tr');
+    if (!header) return;
+    const leadHeader = header.firstElementChild?.textContent || 'Santri / kelas';
+    header.innerHTML = '<th>' + leadHeader + '</th>' + Array.from({ length: dayCount }, function (_, index) {
+      const day = index + 1;
+      const date = new Date(year, monthNumber - 1, day);
+      return '<th><span>' + String(day).padStart(2, '0') + '</span><small>' + dayNames[date.getDay()] + '</small></th>';
+    }).join('') + '<th>Rekap</th>';
+    bodyRows.forEach(function (row, rowIndex) {
+      const firstCell = row.firstElementChild;
+      if (!firstCell) return;
+      const label = firstCell.innerHTML.replace('Pekan ini', 'Bulan terpilih');
+      let present = 0;
+      let permit = 0;
+      let sick = 0;
+      let absent = 0;
+      const cells = Array.from({ length: dayCount }, function (_, index) {
+        const day = index + 1;
+        const date = new Date(year, monthNumber - 1, day);
+        if (date.getDay() === 0) return '<td>-</td>';
+        const status = statuses[(index + rowIndex * 2) % statuses.length];
+        if (status === 'present') present += 1;
+        if (status === 'permit') permit += 1;
+        if (status === 'sick') sick += 1;
+        if (status === 'absent') absent += 1;
+        return '<td><span class="attendance-cell ' + status + '">' + letters[status] + '</span></td>';
+      }).join('');
+      const recap = [present ? present + ' hadir' : '', permit ? permit + ' izin' : '', sick ? sick + ' sakit' : '', absent ? absent + ' alpa' : ''].filter(Boolean).join(', ');
+      row.innerHTML = '<td>' + label + '</td>' + cells + '<td>' + (recap || 'Belum ada pertemuan') + '</td>';
+    });
+  }
+
   document.querySelectorAll('[data-attendance-strip]').forEach(renderAttendanceStrip);
+  document.querySelectorAll('.attendance-explorer .attendance-matrix').forEach(renderAttendanceMatrix);
 
   document.querySelectorAll('.attendance-month-select').forEach(function (select) {
     select.addEventListener('change', function () {
@@ -180,6 +231,14 @@
       const option = select.options[select.selectedIndex];
       const label = target.querySelector('[data-month-label]');
       if (label) label.textContent = option.textContent;
+      const periodLabel = target.querySelector('[data-period-label]');
+      if (periodLabel) periodLabel.textContent = option.textContent;
+      target.querySelectorAll('.attendance-scope p').forEach(function (text) { text.textContent = text.textContent.replace(/(?:Januari|Februari|Desember) \d{4}/, option.textContent); });
+      const matrix = target.querySelector('.attendance-matrix');
+      if (matrix) {
+        matrix.dataset.month = select.value;
+        renderAttendanceMatrix(matrix);
+      }
     });
   });
 
@@ -379,25 +438,6 @@
       control.setAttribute('aria-expanded', String(isOpen));
       const label = control.querySelector('.toggle-label');
       if (label) label.textContent = isOpen ? (control.dataset.openLabel || 'Tutup keseluruhan') : (control.dataset.closedLabel || 'Lihat keseluruhan');
-    });
-  });
-
-  document.querySelectorAll('[data-period-switch]').forEach(function (group) {
-    const buttons = group.querySelectorAll('.period-button');
-    const target = document.getElementById(group.dataset.periodTarget);
-    buttons.forEach(function (button) {
-      button.addEventListener('click', function () {
-        buttons.forEach(function (item) { item.classList.toggle('active', item === button); });
-        if (target) {
-          const strip = target.querySelector('[data-attendance-strip]');
-          if (strip) {
-            strip.dataset.period = button.dataset.periodValue || (button.textContent.toLowerCase().includes('bulan') ? 'month' : 'week');
-            renderAttendanceStrip(strip);
-          }
-          const label = target.querySelector('[data-period-label]');
-          if (label && button.dataset.periodLabel) label.textContent = button.dataset.periodLabel;
-        }
-      });
     });
   });
 

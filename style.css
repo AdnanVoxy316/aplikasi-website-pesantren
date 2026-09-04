@@ -2108,6 +2108,8 @@ svg {
 
 .attendance-explorer { display: none; margin-top: 15px; }
 
+.attendance-explorer .period-toggle { display: none; }
+
 .attendance-explorer.is-open { display: block; animation: explorer-in .2s ease-out; }
 
 @keyframes explorer-in { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
@@ -2233,3 +2235,95 @@ svg {
   .invoice-card { padding: 14px; }
   .invoice-card-head { flex-direction: column; gap: 5px; }
 }
+
+/* Controls stay quiet until the pointer reaches them. */
+.nav-link {
+  background: transparent;
+  border-color: var(--line);
+}
+
+.nav-link.active {
+  background: transparent;
+  border-color: var(--line);
+}
+
+.nav-link.active::before { display: none; }
+
+.nav-link.active:hover {
+  background: var(--surface-tint);
+  border-color: #d8ead7;
+}
+
+.button,
+.search-button,
+.icon-button,
+.profile-button,
+.menu-button,
+.quick-action,
+.pagination-button {
+  background: transparent;
+}
+
+.button-primary {
+  color: var(--brand);
+  background: transparent;
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+
+.button-primary:hover { color: #f6fbef; background: var(--brand-dark); border-color: var(--brand-dark); }
+
+.button-secondary { background: transparent; }
+
+.search-button, .icon-button, .profile-button, .menu-button { border-color: var(--line); }
+
+.text-link {
+  padding: 5px 8px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+
+.text-link:hover { color: var(--brand-dark); background: var(--surface-tint); border-color: #c5ddca; }
+
+.row-action, .table-action, .password-toggle, .period-button, .tab-button {
+  background: transparent;
+  border: 1px solid transparent;
+}
+
+.row-action, .table-action { border-color: var(--line); }
+
+.pagination-button { background: transparent; }
+
+.pagination-button.active { background: transparent; }
+
+.quick-action { background: transparent; }
+
+.welcome-actions .button-primary {
+  color: var(--lime);
+  background: transparent;
+  border-color: rgba(217, 233, 154, .42);
+}
+
+.welcome-actions .button-primary:hover { color: var(--brand-dark); background: #e5f2ae; border-color: #e5f2ae; }
+
+.summary-banner .button-secondary,
+.payment-total .button-secondary {
+  color: #e9f3e0;
+  background: transparent;
+  border-color: rgba(255, 255, 255, .2);
+}
+
+.period-button.active { background: transparent; border-color: var(--line); }
+
+.tab-button.active { background: transparent; }
+
+.attendance-matrix { min-width: 1450px !important; }
+
+.attendance-matrix th { text-align: center; }
+
+.attendance-matrix th:first-child, .attendance-matrix th:last-child { text-align: left; }
+
+.attendance-matrix th small { display: block; margin-top: 2px; color: var(--muted-light); font-size: 8px; font-weight: 700; letter-spacing: 0; text-transform: none; }
+
+.payment-total .button-secondary:hover { color: #e9f3e0; background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); }

@@ -1,180 +1,87 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Icon } from "@/lib/icons";
 import { PageHeading } from "@/components/ui/page-heading";
-import { Panel } from "@/components/ui/panel";
+import { Panel, EmptyState } from "@/components/ui/panel";
+import { requireRole } from "@/lib/auth/session";
+import { listNilaiSantri } from "@/db/queries/santri";
+import { getTahunAjaranAktif, getPesantrenSettings } from "@/db/queries/admin";
+import { getAnakUntukWali, AnakSwitcher } from "../wali-helpers";
 
 export const metadata: Metadata = {
-  title: "Nilai Anak",
-  description: "Lihat nilai Aisyah Fitria pada semester berjalan secara read-only.",
+  title: "Nilai anak",
+  description: "Nilai per mapel untuk anak Anda.",
 };
 
-type Grade = {
-  subject: string;
-  category: string;
-  teacher: string;
-  components: string;
-  score: string;
-  mid: boolean;
-  predicate: string;
-};
+export default async function WaliNilaiPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ anak?: string }>;
+}) {
+  const session = await requireRole("wali");
+  const params = await searchParams;
+  const { anakRows, selected } = await getAnakUntukWali(session.user.id, params.anak);
 
-const GRADES: Grade[] = [
-  {
-    subject: "Tahfidz Qur'an",
-    category: "Pesantren",
-    teacher: "Ustz. Nisa Karimah",
-    components: "Hafalan 94 · Tugas 92",
-    score: "94",
-    mid: false,
-    predicate: "Mumtaz",
-  },
-  {
-    subject: "Akhlak",
-    category: "Pesantren",
-    teacher: "Ust. Hadi Santoso",
-    components: "Tugas 88 · Ujian 87",
-    score: "88",
-    mid: false,
-    predicate: "Jayyid",
-  },
-  {
-    subject: "Matematika",
-    category: "Umum",
-    teacher: "Ust. Farid Maulana",
-    components: "Tugas 86 · Ujian 82",
-    score: "84",
-    mid: true,
-    predicate: "Jayyid",
-  },
-  {
-    subject: "Bahasa Arab",
-    category: "Pesantren",
-    teacher: "Ustz. Salma Rahmi",
-    components: "Tugas 89 · Ujian 87",
-    score: "88",
-    mid: false,
-    predicate: "Jayyid",
-  },
-];
+  if (!selected) {
+    return (
+      <>
+        <PageHeading kicker="Pantau anak" title="Nilai anak" />
+        <Panel title="Belum ada anak terhubung">
+          <EmptyState>Akun wali Anda belum dihubungkan dengan santri mana pun.</EmptyState>
+        </Panel>
+      </>
+    );
+  }
 
-export default function WaliNilaiPage() {
+  const [taAktif, settings] = await Promise.all([getTahunAjaranAktif(), getPesantrenSettings()]);
+  const semester = settings?.settings.semesterAktif ?? "ganjil";
+  const rows = taAktif ? await listNilaiSantri(selected.santriId, taAktif.id, semester) : [];
+
   return (
     <>
       <PageHeading
-        compact
-        kicker="Perkembangan akademik"
+        kicker="Pantau anak"
         title="Nilai anak"
-        description="Lihat nilai Aisyah Fitria pada semester berjalan secara read-only."
-        actions={
-          <>
-            <select className="select-control">
-              <option>Aisyah Fitria</option>
-              <option>Maya Salsabila</option>
-            </select>
-            <select className="select-control">
-              <option>Semester Ganjil 2026/2027</option>
-              <option>Semester Genap 2025/2026</option>
-            </select>
-          </>
-        }
+        description={taAktif ? `Semester ${semester} · tahun ajaran ${taAktif.label}` : undefined}
       />
-
-      <section className="child-switcher">
-        <span className="avatar-sm gold">AF</span>
-        <div className="child-switcher-copy">
-          <span className="child-switcher-name">Aisyah Fitria</span>
-          <span className="child-switcher-meta">NIS 20260124 · Ibtida A · Anak terhubung</span>
-        </div>
-        <span className="status-badge success">Read-only</span>
-      </section>
-
-      <div className="content-grid" style={{ marginTop: "15px" }}>
-        <Panel
-          title="Ringkasan nilai"
-          subtitle="Rata-rata gabungan semester ganjil"
-          bodyClassName="panel-body"
-        >
-          <div className="score-overview">
-            <div className="score-ring">
-              <strong>88,4</strong>
-            </div>
-            <div>
-              <div className="score-overview-title">Predikat sangat baik</div>
-              <div className="score-overview-text">Nilai terakhir diperbarui oleh guru pengampu.</div>
-            </div>
-          </div>
-        </Panel>
-
-        <Panel
-          title="Perbandingan kategori"
-          subtitle="Pesantren dan umum"
-          bodyClassName="panel-body"
-        >
-          <div className="progress-row">
-            <span>Mapel pesantren</span>
-            <strong>90,1</strong>
-          </div>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: "90%" }} />
-          </div>
-          <div className="progress-row" style={{ marginTop: "15px" }}>
-            <span>Mapel umum</span>
-            <strong>85,7</strong>
-          </div>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: "86%" }} />
-          </div>
-        </Panel>
-      </div>
-
+      <AnakSwitcher anakRows={anakRows} selectedId={selected.santriId} basePath="/wali/nilai" />
       <Panel
-        title="Nilai per mata pelajaran"
-        subtitle="Data hanya dapat diubah oleh guru yang ditugaskan"
-        actions={
-          <Link className="text-link" href="/wali/rapor">
-            Lihat rapor <Icon name="chevron-right" />
-          </Link>
-        }
+        title={selected.nama}
+        subtitle={`NIS ${selected.nis}${selected.kelasNama ? ` · ${selected.kelasNama}` : ""}`}
       >
-        <div className="table-shell">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Mapel</th>
-                <th>Guru</th>
-                <th>Komponen nilai</th>
-                <th>Nilai akhir</th>
-                <th>Predikat</th>
-              </tr>
-            </thead>
-            <tbody>
-              {GRADES.map((grade) => (
-                <tr key={grade.subject}>
-                  <td>
-                    <strong>{grade.subject}</strong>
-                    <span className="person-meta">{grade.category}</span>
-                  </td>
-                  <td>{grade.teacher}</td>
-                  <td>{grade.components}</td>
-                  <td>
-                    <span className={grade.mid ? "grade-score mid" : "grade-score"}>{grade.score}</span>
-                  </td>
-                  <td>{grade.predicate}</td>
+        {rows.length === 0 ? (
+          <EmptyState>Belum ada nilai pada semester ini.</EmptyState>
+        ) : (
+          <div className="table-shell">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Mapel</th>
+                  <th>Detail nilai</th>
+                  <th>Nilai akhir</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.mapelId}>
+                    <td>
+                      <strong>{row.mapelNama}</strong>
+                    </td>
+                    <td>
+                      {row.detail.map((d) => (
+                        <div key={d.jenis} style={{ fontSize: 11 }}>
+                          {d.jenis}: <strong>{d.nilai}</strong> (bobot {d.bobot})
+                        </div>
+                      ))}
+                    </td>
+                    <td>
+                      <strong style={{ fontSize: 16 }}>{row.nilaiAkhir ?? "—"}</strong>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </Panel>
-
-      <footer className="footer">
-        <span className="footer-brand">
-          <Icon name="mosque" />
-          ELMS Pesantren · Prototype HTML
-        </span>
-        <span className="footer-note">Wali santri memiliki akses baca saja</span>
-      </footer>
     </>
   );
 }

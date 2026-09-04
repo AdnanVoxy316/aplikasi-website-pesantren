@@ -1,204 +1,119 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Icon, type IconName } from "@/lib/icons";
 import { PageHeading } from "@/components/ui/page-heading";
-import { Panel } from "@/components/ui/panel";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { ToastButton } from "@/components/toast-button";
+import { Panel, EmptyState } from "@/components/ui/panel";
+import { requireRole } from "@/lib/auth/session";
+import { listAnakWali } from "@/db/queries/santri";
+import { db } from "@/db";
+import { pembayaranSpp, tagihanSpp, santriProfile, user } from "@/db/schema";
+import { eq, desc, inArray } from "drizzle-orm";
+import { rupiah, labelPeriode, tanggalWaktuIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "Riwayat Pembayaran Anak",
-  description: "Pantau pembayaran SPP untuk semua anak yang terhubung.",
+  title: "Riwayat pembayaran anak",
+  description: "Histori pembayaran SPP anak yang terhubung.",
 };
 
-type Metric = {
-  icon: IconName;
-  tone?: "blue" | "gold" | "coral";
-  label: string;
-  value: string;
-  note: string;
+const STATUS_VARIANT: Record<string, "success" | "warning" | "neutral" | "danger"> = {
+  paid: "success",
+  pending: "warning",
+  processing: "warning",
+  unpaid: "neutral",
+  cancelled: "danger",
+  expired: "danger",
+  failed: "danger",
+  refunded: "neutral",
 };
 
-const METRICS: Metric[] = [
-  { icon: "check-circle", label: "Total dibayar", value: "Rp 4,2 jt", note: "12 periode dua anak" },
-  { icon: "users", tone: "blue", label: "Anak terhubung", value: "2", note: "Aisyah & Maya" },
-  { icon: "clock", tone: "gold", label: "Tagihan aktif", value: "2", note: "Belum dibayar bulan ini" },
-  { icon: "download", tone: "coral", label: "Bukti tersedia", value: "12", note: "Siap diunduh" },
-];
+export default async function WaliRiwayatPage() {
+  const session = await requireRole("wali");
+  const anakRows = await listAnakWali(session.user.id);
 
-type Payment = {
-  initials: string;
-  tone: "gold" | "coral";
-  name: string;
-  className: string;
-  period: string;
-  invoice: string;
-  date: string;
-  amount: string;
-  toast: string;
-};
+  if (anakRows.length === 0) {
+    return (
+      <>
+        <PageHeading kicker="Keuangan" title="Riwayat pembayaran anak" />
+        <Panel title="Belum ada anak terhubung">
+          <EmptyState>Akun wali Anda belum dihubungkan dengan santri mana pun.</EmptyState>
+        </Panel>
+      </>
+    );
+  }
 
-const PAYMENTS: Payment[] = [
-  {
-    initials: "AF",
-    tone: "gold",
-    name: "Aisyah Fitria",
-    className: "Ibtida A",
-    period: "Januari 2026",
-    invoice: "#INV-0106",
-    date: "08 Jan 2026",
-    amount: "Rp 350.000",
-    toast: "Bukti pembayaran Aisyah siap diunduh.",
-  },
-  {
-    initials: "MS",
-    tone: "coral",
-    name: "Maya Salsabila",
-    className: "Tsanawiyah 1",
-    period: "Januari 2026",
-    invoice: "#INV-0107",
-    date: "09 Jan 2026",
-    amount: "Rp 350.000",
-    toast: "Bukti pembayaran Maya siap diunduh.",
-  },
-  {
-    initials: "AF",
-    tone: "gold",
-    name: "Aisyah Fitria",
-    className: "Ibtida A",
-    period: "Desember 2025",
-    invoice: "#INV-1225",
-    date: "08 Des 2025",
-    amount: "Rp 350.000",
-    toast: "Bukti pembayaran Aisyah siap diunduh.",
-  },
-  {
-    initials: "MS",
-    tone: "coral",
-    name: "Maya Salsabila",
-    className: "Tsanawiyah 1",
-    period: "Desember 2025",
-    invoice: "#INV-1226",
-    date: "08 Des 2025",
-    amount: "Rp 350.000",
-    toast: "Bukti pembayaran Maya siap diunduh.",
-  },
-];
+  const rows = await db
+    .select({
+      id: pembayaranSpp.id,
+      santriNama: user.name,
+      periodeBulan: tagihanSpp.periodeBulan,
+      periodeTahun: tagihanSpp.periodeTahun,
+      nomorTagihan: tagihanSpp.nomorTagihan,
+      provider: pembayaranSpp.provider,
+      paymentMethod: pembayaranSpp.paymentMethod,
+      nominalDibayar: pembayaranSpp.nominalDibayar,
+      status: pembayaranSpp.status,
+      paidAt: pembayaranSpp.paidAt,
+      createdAt: pembayaranSpp.createdAt,
+    })
+    .from(pembayaranSpp)
+    .innerJoin(tagihanSpp, eq(pembayaranSpp.tagihanSppId, tagihanSpp.id))
+    .innerJoin(santriProfile, eq(tagihanSpp.santriId, santriProfile.id))
+    .innerJoin(user, eq(santriProfile.userId, user.id))
+    .where(
+      inArray(
+        tagihanSpp.santriId,
+        anakRows.map((a) => a.santriId),
+      ),
+    )
+    .orderBy(desc(pembayaranSpp.createdAt))
+    .limit(100);
 
-export default function WaliPembayaranRiwayatPage() {
   return (
     <>
       <PageHeading
-        compact
-        kicker="Bukti pembayaran keluarga"
-        title="Riwayat pembayaran"
-        description="Pantau pembayaran SPP untuk semua anak yang terhubung."
-        actions={
-          <Link className="button button-primary" href="/wali/pembayaran/tagihan">
-            <Icon name="wallet" />
-            Lihat tagihan aktif
-          </Link>
-        }
+        kicker="Keuangan"
+        title="Riwayat pembayaran anak"
+        description="Pembayaran online via Mayar dan catatan manual dari admin."
       />
-
-      <section className="metric-grid" aria-label="Ringkasan pembayaran">
-        {METRICS.map((metric) => (
-          <article className="metric-card" key={metric.label}>
-            <span className={`metric-icon${metric.tone ? ` ${metric.tone}` : ""}`}>
-              <Icon name={metric.icon} />
-            </span>
-            <div className="metric-copy">
-              <span className="metric-label">{metric.label}</span>
-              <strong className="metric-value">{metric.value}</strong>
-              <span className="metric-note">{metric.note}</span>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <Panel
-        title="Semua pembayaran anak"
-        subtitle="Histori terkonfirmasi dari Mayar"
-        actions={
-          <div className="toolbar-right">
-            <select className="select-control">
-              <option>Semua anak</option>
-              <option>Aisyah Fitria</option>
-              <option>Maya Salsabila</option>
-            </select>
-            <select className="select-control">
-              <option>Semua tahun</option>
-              <option>2026</option>
-              <option>2025</option>
-            </select>
-          </div>
-        }
-      >
-        <div className="table-shell">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Anak</th>
-                <th>Periode</th>
-                <th>Invoice</th>
-                <th>Tanggal bayar</th>
-                <th>Nominal</th>
-                <th>Status</th>
-                <th>Bukti</th>
-              </tr>
-            </thead>
-            <tbody>
-              {PAYMENTS.map((payment) => (
-                <tr key={payment.invoice}>
-                  <td>
-                    <div className="person-cell">
-                      <span className={`avatar-sm ${payment.tone}`}>{payment.initials}</span>
-                      <div>
-                        <span className="person-name">{payment.name}</span>
-                        <span className="person-meta">{payment.className}</span>
-                      </div>
-                    </div>
-                  </td>
-                  <td>{payment.period}</td>
-                  <td>{payment.invoice}</td>
-                  <td>{payment.date}</td>
-                  <td>{payment.amount}</td>
-                  <td>
-                    <StatusBadge variant="success">Paid</StatusBadge>
-                  </td>
-                  <td>
-                    <ToastButton className="table-action" message={payment.toast} ariaLabel="Unduh bukti">
-                      <Icon name="download" />
-                    </ToastButton>
-                  </td>
+      <Panel title="Histori transaksi" subtitle={`${rows.length} transaksi`}>
+        {rows.length === 0 ? (
+          <EmptyState>Belum ada transaksi pembayaran.</EmptyState>
+        ) : (
+          <div className="table-shell">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Anak</th>
+                  <th>Periode</th>
+                  <th>Metode</th>
+                  <th>Nominal</th>
+                  <th>Status</th>
+                  <th>Waktu</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="pagination">
-          <span>Menampilkan 4 dari 12 pembayaran</span>
-          <div className="pagination-buttons">
-            <ToastButton className="pagination-button active" message="Halaman 1 aktif.">
-              1
-            </ToastButton>
-            <ToastButton className="pagination-button" message="Halaman 2 siap dibuka.">
-              2
-            </ToastButton>
-            <ToastButton className="pagination-button" message="Halaman berikutnya siap dibuka.">
-              <Icon name="chevron-right" />
-            </ToastButton>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.id}>
+                    <td>
+                      <strong>{row.santriNama}</strong>
+                      <div style={{ fontFamily: "monospace", fontSize: 9 }}>{row.nomorTagihan}</div>
+                    </td>
+                    <td>{labelPeriode(row.periodeBulan, row.periodeTahun)}</td>
+                    <td>
+                      {row.provider === "manual" ? "manual" : row.paymentMethod ?? row.provider}
+                    </td>
+                    <td>{rupiah(row.nominalDibayar)}</td>
+                    <td>
+                      <span className={`status-badge ${STATUS_VARIANT[row.status] ?? "neutral"}`}>
+                        {row.status}
+                      </span>
+                    </td>
+                    <td>{tanggalWaktuIndo(row.paidAt ?? row.createdAt)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
-        </div>
+        )}
       </Panel>
-
-      <footer className="footer">
-        <span className="footer-brand">
-          <Icon name="mosque" />
-          ELMS Pesantren · Prototype HTML
-        </span>
-        <span className="footer-note">Wali hanya melihat histori pembayaran anak yang terhubung</span>
-      </footer>
     </>
   );
 }

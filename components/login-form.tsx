@@ -3,8 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { Icon } from "@/lib/icons";
-import { findDemoAccount } from "@/lib/data/accounts";
-import { roleDashboard } from "@/lib/nav";
+import { authClient } from "@/lib/auth/client";
 
 export function LoginForm() {
   const router = useRouter();
@@ -12,29 +11,37 @@ export function LoginForm() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
     const data = new FormData(event.currentTarget);
     const email = String(data.get("email") ?? "");
     const password = String(data.get("password") ?? "");
-    const account = findDemoAccount(email, password);
-    if (!account) {
+
+    setLoading(true);
+    const { error: authError } = await authClient.signIn.email({
+      email,
+      password,
+    });
+
+    if (authError) {
       setError(
-        "Email atau kata sandi tidak cocok dengan akun terdaftar mana pun.",
+        authError.message?.includes("dinonaktifkan")
+          ? authError.message
+          : "Email atau kata sandi tidak cocok dengan akun terdaftar mana pun.",
       );
+      setLoading(false);
       return;
     }
-    setLoading(true);
-    window.setTimeout(() => {
-      router.push(roleDashboard[account.role]);
-    }, 450);
+
+    router.push("/");
+    router.refresh();
   };
 
   return (
     <form className="login-form" onSubmit={handleSubmit}>
       <div className="login-field">
-        <label htmlFor="email">Email atau NIS</label>
+        <label htmlFor="email">Email</label>
         <input
           id="email"
           name="email"
@@ -91,7 +98,11 @@ export function LoginForm() {
         type="submit"
         disabled={loading}
       >
-        Masuk ke dashboard <span aria-hidden="true">&rarr;</span>
+        {loading ? "Memproses..." : (
+          <>
+            Masuk ke dashboard <span aria-hidden="true">&rarr;</span>
+          </>
+        )}
       </button>
     </form>
   );

@@ -63,17 +63,19 @@ export default function LoginPage() {
             </p>
           </div>
           <LoginForm />
-          <div className="notice" style={{ marginTop: 14 }}>
-            <Icon name="sparkle" />
-            <div style={{ display: "grid", gap: 2 }}>
-              <strong>Akun demo — pilih sesuai peran</strong>
-              {demoAccounts.map((account) => (
-                <span key={account.email}>
-                  {account.email} · {account.password} — {account.roleLabel}
-                </span>
-              ))}
+          {process.env.NODE_ENV !== "production" ? (
+            <div className="notice" style={{ marginTop: 14 }}>
+              <Icon name="sparkle" />
+              <div style={{ display: "grid", gap: 2 }}>
+                <strong>Akun demo (development) — pilih sesuai peran</strong>
+                {demoAccounts.map((account) => (
+                  <span key={account.email}>
+                    {account.email} · {account.password} — {account.roleLabel}
+                  </span>
+                ))}
+              </div>
             </div>
-          </div>
+          ) : null}
           <p className="login-note">
             <Icon name="lock" />
             Akses akun dibatasi berdasarkan peran. Jangan bagikan kata sandi

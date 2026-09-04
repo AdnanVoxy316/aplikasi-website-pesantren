@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { PengumumanContent } from "@/components/pages/pengumuman-content";
+import { PengumumanSection } from "@/components/shared/sections";
 
-export const metadata: Metadata = { title: "Pengumuman" };
+export const metadata: Metadata = {
+  title: "Pengumuman",
+  description: "Pengumuman untuk guru dan warga pesantren.",
+};
 
 export default function GuruPengumumanPage() {
-  return <PengumumanContent />;
+  return <PengumumanSection role="guru" roleLabel="guru/ustadz(ah)" />;
 }

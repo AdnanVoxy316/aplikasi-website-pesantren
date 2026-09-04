@@ -6,19 +6,29 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx --env-file=.env.local db/seed.ts"
   },
   "dependencies": {
+    "better-auth": "^1.7.2",
+    "better-sqlite3": "^12.11.1",
+    "drizzle-orm": "^0.45.2",
     "next": "16.2.9",
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.39.0",
     "eslint-config-next": "16.2.9",
+    "tsx": "^4.23.13",
     "typescript": "^5.9.0"
   }
 }

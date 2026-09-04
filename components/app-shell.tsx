@@ -21,12 +21,7 @@ import {
   roleLabels,
   roleDashboard,
 } from "@/lib/nav";
-import {
-  academicYears,
-  semesterStatus,
-  shellNotifications,
-  shellUsers,
-} from "@/lib/data/shell";
+import { markAllNotificationsRead } from "@/actions/notifikasi";
 
 type ToastFn = (message: string) => void;
 
@@ -41,20 +36,40 @@ function subscribeToHash(onChange: () => void) {
   return () => window.removeEventListener("hashchange", onChange);
 }
 
+export type ShellUser = {
+  name: string;
+  initials: string;
+  roleLabel: string;
+};
+
+export type ShellNotification = {
+  id: string;
+  title: string;
+  description: string;
+  read: boolean;
+};
+
 export default function AppShell({
   role,
+  user,
+  notifications,
+  tahunAjaranLabel,
+  semesterLabel,
   children,
 }: {
   role: keyof typeof navigation;
+  user: ShellUser;
+  notifications: ShellNotification[];
+  tahunAjaranLabel: string;
+  semesterLabel: string;
   children: ReactNode;
 }) {
-  const user = shellUsers[role];
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [lastPathname, setLastPathname] = useState(pathname);
   const hash = useSyncExternalStore(subscribeToHash, () => window.location.hash, () => "");
   const [openPopover, setOpenPopover] = useState<"none" | "notification" | "profile">("none");
-  const [notifications, setNotifications] = useState(shellNotifications[role]);
+  const [notifItems, setNotifItems] = useState<ShellNotification[]>(notifications);
   const [toastMessage, setToastMessage] = useState("");
   const toastTimer = useRef<number | undefined>(undefined);
 
@@ -115,14 +130,15 @@ export default function AppShell({
   }, [showToast]);
 
   const navSections = navigation[role];
-  const hasNotification = notifications.some((item) => !item.read);
+  const hasNotification = notifItems.some((item) => !item.read);
   const breadcrumb = useMemo(
     () => resolveBreadcrumb(pathname, role),
     [pathname, role],
   );
 
   const markAllRead = () => {
-    setNotifications((items) => items.map((item) => ({ ...item, read: true })));
+    setNotifItems((items) => items.map((item) => ({ ...item, read: true })));
+    void markAllNotificationsRead();
     showToast("Semua notifikasi ditandai sudah dibaca.");
   };
 
@@ -190,22 +206,13 @@ export default function AppShell({
           </nav>
 
           <div className="sidebar-foot">
-            <label className="year-caption" htmlFor="yearSelect">
-              Tahun ajaran aktif
-            </label>
-            <select
-              className="year-select"
-              id="yearSelect"
-              aria-label="Pilih tahun ajaran"
-              onChange={(event) => showToast(`Tahun ajaran diubah ke ${event.target.value}.`)}
-            >
-              {academicYears.map((year) => (
-                <option key={year}>{year}</option>
-              ))}
-            </select>
+            <span className="year-caption">Tahun ajaran aktif</span>
+            <span className="year-select" aria-label="Tahun ajaran aktif">
+              {tahunAjaranLabel || "Belum diatur"}
+            </span>
             <div className="sidebar-meta">
               <span className="live-dot" aria-hidden="true" />
-              <span>{semesterStatus}</span>
+              <span>{semesterLabel}</span>
             </div>
           </div>
         </aside>
@@ -290,14 +297,23 @@ export default function AppShell({
           </button>
         </div>
         <div className="notification-list">
-          {notifications.map((item) => (
-            <div className={`notification-item${item.read ? " read" : ""}`} key={item.title}>
+          {notifItems.length === 0 ? (
+            <div className="notification-item read">
               <div>
-                <strong>{item.title}</strong>
-                <span>{item.description}</span>
+                <strong>Tidak ada notifikasi</strong>
+                <span>Notifikasi baru akan muncul di sini.</span>
               </div>
             </div>
-          ))}
+          ) : (
+            notifItems.map((item) => (
+              <div className={`notification-item${item.read ? " read" : ""}`} key={item.id}>
+                <div>
+                  <strong>{item.title}</strong>
+                  <span>{item.description}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -331,7 +347,7 @@ export default function AppShell({
             <Icon name="settings" />
             Pengaturan akun
           </button>
-          <Link className="profile-menu-link" href="/login">
+          <Link className="profile-menu-link" href="/logout">
             <Icon name="log-out" />
             Keluar
           </Link>

@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { CalendarContent } from "@/components/pages/calendar-content";
+import { KalenderSection } from "@/components/shared/sections";
 
-export const metadata: Metadata = { title: "Kalender akademik" };
+export const metadata: Metadata = {
+  title: "Kalender akademik",
+  description: "Tahun ajaran dan semester aktif.",
+};
 
-export default function KalenderPage() {
-  return <CalendarContent />;
+export default function SantriKalenderPage() {
+  return <KalenderSection />;
 }

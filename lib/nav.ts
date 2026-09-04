@@ -90,7 +90,7 @@ export const navigation: Record<Role, NavSection[]> = {
       label: "Akun",
       items: [
         { label: "Pengumuman", href: "/guru/pengumuman", icon: "megaphone" },
-        { label: "Keluar", href: "/login", icon: "log-out" },
+        { label: "Keluar", href: "/logout", icon: "log-out" },
       ],
     },
   ],
@@ -122,7 +122,7 @@ export const navigation: Record<Role, NavSection[]> = {
       label: "Akun",
       items: [
         { label: "Pengumuman", href: "/santri/pengumuman", icon: "megaphone" },
-        { label: "Keluar", href: "/login", icon: "log-out" },
+        { label: "Keluar", href: "/logout", icon: "log-out" },
       ],
     },
   ],
@@ -153,7 +153,7 @@ export const navigation: Record<Role, NavSection[]> = {
       label: "Akun",
       items: [
         { label: "Pengumuman", href: "/wali/pengumuman", icon: "megaphone" },
-        { label: "Keluar", href: "/login", icon: "log-out" },
+        { label: "Keluar", href: "/logout", icon: "log-out" },
       ],
     },
   ],

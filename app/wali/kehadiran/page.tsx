@@ -1,198 +1,109 @@
 import type { Metadata } from "next";
-import { Icon, type IconName } from "@/lib/icons";
 import { PageHeading } from "@/components/ui/page-heading";
-import { Panel } from "@/components/ui/panel";
+import { Panel, EmptyState } from "@/components/ui/panel";
+import { StatCard } from "@/components/ui/stat-card";
 import { StatusBadge } from "@/components/ui/status-badge";
-import { ToastButton } from "@/components/toast-button";
-import { AttendanceExplorer } from "@/components/attendance-explorer";
+import { requireRole } from "@/lib/auth/session";
+import {
+  getRekapKehadiranSantri,
+  listRiwayatKehadiranSantri,
+} from "@/db/queries/santri";
+import { getTahunAjaranAktif } from "@/db/queries/admin";
+import { getAnakUntukWali, AnakSwitcher } from "../wali-helpers";
+import { persenHadir } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "Kehadiran Anak",
-  description: "Pantau catatan kehadiran Aisyah Fitria pada semester berjalan.",
+  title: "Kehadiran anak",
+  description: "Rekap kehadiran anak Anda.",
 };
 
-type Metric = {
-  icon: IconName;
-  tone?: "blue" | "gold" | "coral";
-  label: string;
-  value: string;
-  note: string;
+const STATUS_VARIANT: Record<string, "success" | "warning" | "danger"> = {
+  hadir: "success",
+  izin: "warning",
+  sakit: "warning",
+  alpa: "danger",
 };
 
-const METRICS: Metric[] = [
-  { icon: "check-circle", label: "Hadir", value: "24", note: "96% pertemuan" },
-  { icon: "clock", tone: "gold", label: "Izin", value: "1", note: "Dengan keterangan" },
-  { icon: "users", tone: "blue", label: "Sakit", value: "0", note: "Tidak ada catatan" },
-  { icon: "alert", tone: "coral", label: "Alpa", value: "0", note: "Tidak ada catatan" },
-];
+export default async function WaliKehadiranPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ anak?: string }>;
+}) {
+  const session = await requireRole("wali");
+  const params = await searchParams;
+  const { anakRows, selected } = await getAnakUntukWali(session.user.id, params.anak);
 
-type Meeting = {
-  date: string;
-  subject: string;
-  teacher: string;
-  variant: "success" | "warning";
-  status: string;
-  note: string;
-};
+  if (!selected) {
+    return (
+      <>
+        <PageHeading kicker="Pantau anak" title="Kehadiran anak" />
+        <Panel title="Belum ada anak terhubung">
+          <EmptyState>Akun wali Anda belum dihubungkan dengan santri mana pun.</EmptyState>
+        </Panel>
+      </>
+    );
+  }
 
-const MEETINGS: Meeting[] = [
-  { date: "09 Feb 2026", subject: "Tahfidz Qur'an", teacher: "Ustz. Nisa Karimah", variant: "success", status: "Hadir", note: "-" },
-  { date: "07 Feb 2026", subject: "Akhlak", teacher: "Ust. Hadi Santoso", variant: "success", status: "Hadir", note: "-" },
-  { date: "05 Feb 2026", subject: "Matematika", teacher: "Ust. Farid Maulana", variant: "warning", status: "Izin", note: "Keperluan keluarga" },
-  { date: "03 Feb 2026", subject: "Bahasa Arab", teacher: "Ustz. Salma Rahmi", variant: "success", status: "Hadir", note: "-" },
-];
+  const taAktif = await getTahunAjaranAktif();
+  const [rekap, riwayat] = await Promise.all([
+    getRekapKehadiranSantri(selected.santriId, taAktif?.id),
+    listRiwayatKehadiranSantri(selected.santriId),
+  ]);
 
-export default function WaliKehadiranPage() {
   return (
     <>
       <PageHeading
-        compact
-        kicker="Rekap presensi anak"
+        kicker="Pantau anak"
         title="Kehadiran anak"
-        description="Pantau catatan kehadiran Aisyah Fitria pada semester berjalan."
-        actions={
-          <select className="select-control">
-            <option>Aisyah Fitria</option>
-            <option>Maya Salsabila</option>
-          </select>
-        }
+        description={taAktif ? `Tahun ajaran ${taAktif.label}` : undefined}
       />
-
-      <section className="child-switcher">
-        <span className="avatar-sm gold">AF</span>
-        <div className="child-switcher-copy">
-          <span className="child-switcher-name">Aisyah Fitria</span>
-          <span className="child-switcher-meta">NIS 20260124 · Ibtida A</span>
-        </div>
-        <span className="status-badge success">97,2% hadir</span>
-      </section>
-
-      <section className="metric-grid" style={{ marginTop: "15px" }} aria-label="Ringkasan kehadiran">
-        {METRICS.map((metric) => (
-          <article className="metric-card" key={metric.label}>
-            <span className={`metric-icon${metric.tone ? ` ${metric.tone}` : ""}`}>
-              <Icon name={metric.icon} />
-            </span>
-            <div className="metric-copy">
-              <span className="metric-label">{metric.label}</span>
-              <strong className="metric-value">{metric.value}</strong>
-              <span className="metric-note">{metric.note}</span>
-            </div>
-          </article>
-        ))}
-      </section>
-
-      <AttendanceExplorer variant="guardian" />
-
-      <div className="content-grid">
-        <Panel
-          title="Kehadiran semester"
-          subtitle="Target minimal kehadiran: 90%"
-          bodyClassName="panel-body"
-        >
-          <div className="score-overview">
-            <div className="score-ring">
-              <strong>97,2%</strong>
-            </div>
-            <div>
-              <div className="score-overview-title">Sangat baik</div>
-              <div className="score-overview-text">Aisyah hadir konsisten dalam kegiatan belajar.</div>
-            </div>
-          </div>
-          <div className="progress-row" style={{ marginTop: "18px" }}>
-            <span>Hadir</span>
-            <strong>24 / 25</strong>
-          </div>
-          <div className="progress-track">
-            <div className="progress-fill" style={{ width: "97%" }} />
-          </div>
-        </Panel>
-
-        <Panel
-          title="Peringatan kehadiran"
-          subtitle="Notifikasi untuk wali"
-          bodyClassName="panel-body"
-        >
-          <div className="notice">
-            <Icon name="check-circle" />
-            <div>
-              <strong>Tidak ada alpa berturut-turut</strong>
-              Keadaan kehadiran Aisyah berada dalam kondisi baik.
-            </div>
-          </div>
-          <div className="notice warning" style={{ marginTop: "10px" }}>
-            <Icon name="clock" />
-            <div>
-              <strong>1 izin tercatat</strong>
-              Keperluan keluarga pada 05 Februari 2026.
-            </div>
-          </div>
-        </Panel>
-      </div>
-
+      <AnakSwitcher anakRows={anakRows} selectedId={selected.santriId} basePath="/wali/kehadiran" />
       <Panel
-        title="Riwayat pertemuan"
-        subtitle="Catatan dari guru pengampu"
-        actions={
-          <div className="toolbar-right">
-            <select className="select-control">
-              <option>Februari 2026</option>
-              <option>Januari 2026</option>
-            </select>
-          </div>
-        }
+        title={selected.nama}
+        subtitle={`NIS ${selected.nis}${selected.kelasNama ? ` · ${selected.kelasNama}` : ""}`}
       >
-        <div className="table-shell">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>Mapel</th>
-                <th>Guru</th>
-                <th>Status</th>
-                <th>Catatan</th>
-              </tr>
-            </thead>
-            <tbody>
-              {MEETINGS.map((meeting) => (
-                <tr key={meeting.date}>
-                  <td>{meeting.date}</td>
-                  <td>
-                    <strong>{meeting.subject}</strong>
-                  </td>
-                  <td>{meeting.teacher}</td>
-                  <td>
-                    <StatusBadge variant={meeting.variant}>{meeting.status}</StatusBadge>
-                  </td>
-                  <td>{meeting.note}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <div className="pagination">
-          <span>Menampilkan 4 dari 25 pertemuan</span>
-          <div className="pagination-buttons">
-            <ToastButton className="pagination-button active" message="Halaman 1 aktif.">
-              1
-            </ToastButton>
-            <ToastButton className="pagination-button" message="Halaman 2 siap dibuka.">
-              2
-            </ToastButton>
-            <ToastButton className="pagination-button" message="Halaman berikutnya siap dibuka.">
-              <Icon name="chevron-right" />
-            </ToastButton>
-          </div>
+        <div className="stats-grid">
+          <StatCard
+            icon="users"
+            tone="icon-green"
+            label="Persentase hadir"
+            value={`${persenHadir(rekap.hadir, rekap.total)}%`}
+            note={`${rekap.hadir} dari ${rekap.total} catatan`}
+          />
+          <StatCard icon="clock" tone="icon-gold" label="Izin / sakit" value={String(rekap.izin + rekap.sakit)} note={`${rekap.izin} izin · ${rekap.sakit} sakit`} />
+          <StatCard icon="alert" tone="icon-coral" label="Alpa" value={String(rekap.alpa)} note="tanpa keterangan" />
         </div>
       </Panel>
-
-      <footer className="footer">
-        <span className="footer-brand">
-          <Icon name="mosque" />
-          ELMS Pesantren · Prototype HTML
-        </span>
-        <span className="footer-note">Akses hanya tersedia untuk anak yang terhubung</span>
-      </footer>
+      <Panel title="Riwayat terakhir" subtitle={`${riwayat.length} catatan`}>
+        {riwayat.length === 0 ? (
+          <EmptyState>Belum ada riwayat kehadiran.</EmptyState>
+        ) : (
+          <div className="table-shell">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Tanggal</th>
+                  <th>Mapel</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {riwayat.map((r, i) => (
+                  <tr key={i}>
+                    <td>
+                      <strong>{r.tanggal}</strong>
+                    </td>
+                    <td>{r.mapelNama ?? "Harian"}</td>
+                    <td>
+                      <StatusBadge variant={STATUS_VARIANT[r.status] ?? "neutral"}>{r.status}</StatusBadge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </Panel>
     </>
   );
 }

@@ -1,170 +1,99 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Icon } from "@/lib/icons";
 import { PageHeading } from "@/components/ui/page-heading";
-import { Panel, PageFooter } from "@/components/ui/panel";
-import { StatusBadge } from "@/components/ui/status-badge";
-import { ToastButton } from "@/components/toast-button";
+import { Panel, EmptyState } from "@/components/ui/panel";
+import { requireRole } from "@/lib/auth/session";
+import { getSantriProfile, listTagihanUntukSantri } from "@/db/queries/santri";
+import { BayarButton } from "@/components/shared/bayar-button";
+import { rupiah, labelPeriode, tanggalIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "Tagihan SPP Saya",
-  description:
-    "Lihat tagihan aktif dan lanjutkan pembayaran SPP secara aman melalui Mayar.",
+  title: "Tagihan SPP",
+  description: "Tagihan SPP Anda dan tombol pembayaran online via Mayar.",
 };
 
-const STEPS = [
-  {
-    number: 1,
-    complete: true,
-    title: "Pilih Bayar sekarang",
-    description: "Sistem membuat invoice pembayaran.",
-  },
-  {
-    number: 2,
-    complete: false,
-    title: "Lanjut ke checkout Mayar",
-    description: "Pilih metode pembayaran yang tersedia.",
-  },
-  {
-    number: 3,
-    complete: false,
-    title: "Tunggu konfirmasi",
-    description: "Status berubah setelah webhook terverifikasi.",
-  },
-];
+const STATUS_VARIANT: Record<string, "success" | "warning" | "neutral" | "danger"> = {
+  paid: "success",
+  pending: "warning",
+  processing: "warning",
+  unpaid: "neutral",
+  draft: "neutral",
+  cancelled: "danger",
+  expired: "danger",
+  failed: "danger",
+};
 
-export default function SantriTagihanPage() {
+export default async function SantriTagihanPage() {
+  const session = await requireRole("santri");
+  const profile = await getSantriProfile(session.user.id);
+
+  if (!profile) {
+    return (
+      <Panel title="Profil belum ada">
+        <EmptyState>Profil santri belum dibuat admin.</EmptyState>
+      </Panel>
+    );
+  }
+
+  const rows = await listTagihanUntukSantri(profile.id);
+
   return (
     <>
       <PageHeading
-        compact
-        kicker="Keuangan santri"
-        title="Pembayaran SPP"
-        description="Lihat tagihan aktif dan lanjutkan pembayaran secara aman melalui Mayar."
-        actions={
-          <Link className="button button-secondary" href="/santri/pembayaran/riwayat">
-            <Icon name="clock" />
-            Riwayat pembayaran
-          </Link>
-        }
+        kicker="Keuangan"
+        title="Tagihan SPP"
+        description="Pembayaran diproses aman melalui Mayar (QRIS, transfer, e-wallet). Status lunas muncul otomatis setelah konfirmasi provider."
       />
-
-      <section className="notice warning">
-        <Icon name="clock" />
-        <div>
-          <strong>Tagihan Februari belum dibayar</strong>
-          Jatuh tempo 10 Februari 2026. Bayar sebelum tanggal tersebut untuk
-          menghindari status expired.
-        </div>
-      </section>
-
-      <section className="bill-summary" style={{ marginTop: 15 }}>
-        <div className="bill-summary-card">
-          <strong>Rp 350.000</strong>
-          <span>Total tagihan aktif</span>
-        </div>
-        <div className="bill-summary-card">
-          <strong>10 Feb 2026</strong>
-          <span>Jatuh tempo</span>
-        </div>
-        <div className="bill-summary-card">
-          <strong>Mayar</strong>
-          <span>Provider pembayaran online</span>
-        </div>
-      </section>
-
-      <div className="content-grid" style={{ marginTop: 0 }}>
-        <Panel
-          title="Tagihan aktif"
-          subtitle="Nominal adalah snapshot saat tagihan dibuat"
-          actions={<StatusBadge variant="warning">Unpaid</StatusBadge>}
-          bodyClassName="panel-body"
-        >
-          <div className="invoice-card">
-            <div className="invoice-card-head">
-              <div>
-                <div className="invoice-label">Nomor tagihan</div>
-                <strong className="invoice-number">#BILL-0206</strong>
-              </div>
-              <span className="invoice-period">Februari 2026</span>
-            </div>
-            <div className="invoice-line">
-              <span>SPP Reguler</span>
-              <strong>Rp 350.000</strong>
-            </div>
-            <div className="invoice-line">
-              <span>Diskon</span>
-              <strong>Rp 0</strong>
-            </div>
-            <div className="invoice-line total">
-              <span>Total pembayaran</span>
-              <strong>Rp 350.000</strong>
-            </div>
-            <ToastButton
-              className="button button-primary invoice-button"
-              message="Checkout Mayar akan dibuka pada versi produksi."
-            >
-              <Icon name="wallet" />
-              Bayar sekarang <Icon name="external" />
-            </ToastButton>
+      <Panel title="Daftar tagihan" subtitle={`${rows.length} tagihan`}>
+        {rows.length === 0 ? (
+          <EmptyState>
+            Belum ada tagihan SPP. Tagihan dibuat oleh admin pesantren per periode.
+          </EmptyState>
+        ) : (
+          <div className="table-shell">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Periode</th>
+                  <th>No. tagihan</th>
+                  <th>Total</th>
+                  <th>Jatuh tempo</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => {
+                  const canPay = row.status === "unpaid" || row.status === "pending";
+                  return (
+                    <tr key={row.id}>
+                      <td>
+                        <strong>{labelPeriode(row.periodeBulan, row.periodeTahun)}</strong>
+                      </td>
+                      <td style={{ fontFamily: "monospace", fontSize: 10 }}>{row.nomorTagihan}</td>
+                      <td>{rupiah(row.totalTagihan)}</td>
+                      <td>{tanggalIndo(row.jatuhTempo)}</td>
+                      <td>
+                        <span className={`status-badge ${STATUS_VARIANT[row.status] ?? "neutral"}`}>
+                          {row.status}
+                        </span>
+                      </td>
+                      <td>
+                        {canPay ? (
+                          <BayarButton tagihanId={row.id} />
+                        ) : row.status === "paid" ? (
+                          <span className="status-badge success">Lunas, alhamdulillah</span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
-        </Panel>
-
-        <Panel
-          title="Cara pembayaran"
-          subtitle="Selesaikan dalam beberapa langkah"
-          bodyClassName="panel-body"
-        >
-          <div className="step-list">
-            {STEPS.map((step) => (
-              <div
-                className={step.complete ? "step-item complete" : "step-item"}
-                key={step.number}
-              >
-                <span className="step-number">
-                  {step.complete ? <Icon name="check" /> : step.number}
-                </span>
-                <div>
-                  <div className="step-title">{step.title}</div>
-                  <div className="step-description">{step.description}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="notice" style={{ marginTop: 15 }}>
-            <Icon name="shield" />
-            <div>
-              <strong>Pembayaran aman</strong>
-              Jangan menganggap redirect browser sebagai bukti pembayaran
-              final.
-            </div>
-          </div>
-        </Panel>
-      </div>
-
-      <Panel
-        title="Riwayat singkat"
-        subtitle="Pembayaran terakhir"
-        actions={
-          <Link className="text-link" href="/santri/pembayaran/riwayat">
-            Lihat semua <Icon name="chevron-right" />
-          </Link>
-        }
-        bodyClassName="panel-body"
-      >
-        <div className="bill-list">
-          <div className="bill-row">
-            <div>
-              <div className="bill-period">Januari 2026</div>
-              <div className="bill-number">#BILL-0106 · Dibayar 08 Jan 2026</div>
-            </div>
-            <strong className="bill-amount">Rp 350.000</strong>
-            <StatusBadge variant="success">Paid</StatusBadge>
-          </div>
-        </div>
+        )}
       </Panel>
-
-      <PageFooter />
     </>
   );
 }

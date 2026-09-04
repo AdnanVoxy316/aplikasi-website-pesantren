@@ -1,0 +1,3054 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "79e08f57-5240-4333-988f-c0ff7f76bfc7",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "tables": {
+    "account": {
+      "name": "account",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "issuer": {
+          "name": "issuer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "account_id": {
+          "name": "account_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider_id": {
+          "name": "provider_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "access_token": {
+          "name": "access_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "refresh_token": {
+          "name": "refresh_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "id_token": {
+          "name": "id_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "access_token_expires_at": {
+          "name": "access_token_expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "refresh_token_expires_at": {
+          "name": "refresh_token_expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "scope": {
+          "name": "scope",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "password": {
+          "name": "password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "account_issuer_accountId_uidx": {
+          "name": "account_issuer_accountId_uidx",
+          "columns": [
+            "issuer",
+            "account_id"
+          ],
+          "isUnique": true
+        },
+        "account_userId_idx": {
+          "name": "account_userId_idx",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "account_user_id_user_id_fk": {
+          "name": "account_user_id_user_id_fk",
+          "tableFrom": "account",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "session": {
+      "name": "session",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "token": {
+          "name": "token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "ip_address": {
+          "name": "ip_address",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_agent": {
+          "name": "user_agent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "session_token_unique": {
+          "name": "session_token_unique",
+          "columns": [
+            "token"
+          ],
+          "isUnique": true
+        },
+        "session_userId_idx": {
+          "name": "session_userId_idx",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "session_user_id_user_id_fk": {
+          "name": "session_user_id_user_id_fk",
+          "tableFrom": "session",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "user": {
+      "name": "user",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email": {
+          "name": "email",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "email_verified": {
+          "name": "email_verified",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "image": {
+          "name": "image",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "role": {
+          "name": "role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'santri'"
+        },
+        "is_disabled": {
+          "name": "is_disabled",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "user_email_unique": {
+          "name": "user_email_unique",
+          "columns": [
+            "email"
+          ],
+          "isUnique": true
+        },
+        "user_role_idx": {
+          "name": "user_role_idx",
+          "columns": [
+            "role"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "verification": {
+      "name": "verification",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "identifier": {
+          "name": "identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "verification_identifier_idx": {
+          "name": "verification_identifier_idx",
+          "columns": [
+            "identifier"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "guru_profile": {
+      "name": "guru_profile",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nip": {
+          "name": "nip",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "no_telp": {
+          "name": "no_telp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "guru_profile_user_id_unique": {
+          "name": "guru_profile_user_id_unique",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "guru_profile_user_id_user_id_fk": {
+          "name": "guru_profile_user_id_user_id_fk",
+          "tableFrom": "guru_profile",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "jenis_nilai": {
+      "name": "jenis_nilai",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama": {
+          "name": "nama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "bobot": {
+          "name": "bobot",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1
+        },
+        "mapel_id": {
+          "name": "mapel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "jenis_nilai_nama_unique": {
+          "name": "jenis_nilai_nama_unique",
+          "columns": [
+            "nama"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "jenis_nilai_mapel_id_mapel_id_fk": {
+          "name": "jenis_nilai_mapel_id_mapel_id_fk",
+          "tableFrom": "jenis_nilai",
+          "tableTo": "mapel",
+          "columnsFrom": [
+            "mapel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "jenis_nilai_bobot_check": {
+          "name": "jenis_nilai_bobot_check",
+          "value": "\"jenis_nilai\".\"bobot\" >= 0"
+        }
+      }
+    },
+    "kehadiran": {
+      "name": "kehadiran",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "santri_id": {
+          "name": "santri_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kelas_id": {
+          "name": "kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mapel_id": {
+          "name": "mapel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tanggal": {
+          "name": "tanggal",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "dicatat_oleh": {
+          "name": "dicatat_oleh",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "kehadiran_uidx": {
+          "name": "kehadiran_uidx",
+          "columns": [
+            "santri_id",
+            "tanggal",
+            "mapel_id"
+          ],
+          "isUnique": true
+        },
+        "kehadiran_santriId_idx": {
+          "name": "kehadiran_santriId_idx",
+          "columns": [
+            "santri_id"
+          ],
+          "isUnique": false
+        },
+        "kehadiran_tanggal_idx": {
+          "name": "kehadiran_tanggal_idx",
+          "columns": [
+            "tanggal"
+          ],
+          "isUnique": false
+        },
+        "kehadiran_tahunAjaranId_idx": {
+          "name": "kehadiran_tahunAjaranId_idx",
+          "columns": [
+            "tahun_ajaran_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "kehadiran_santri_id_santri_profile_id_fk": {
+          "name": "kehadiran_santri_id_santri_profile_id_fk",
+          "tableFrom": "kehadiran",
+          "tableTo": "santri_profile",
+          "columnsFrom": [
+            "santri_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "kehadiran_kelas_id_kelas_id_fk": {
+          "name": "kehadiran_kelas_id_kelas_id_fk",
+          "tableFrom": "kehadiran",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "kehadiran_mapel_id_mapel_id_fk": {
+          "name": "kehadiran_mapel_id_mapel_id_fk",
+          "tableFrom": "kehadiran",
+          "tableTo": "mapel",
+          "columnsFrom": [
+            "mapel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "kehadiran_dicatat_oleh_guru_profile_id_fk": {
+          "name": "kehadiran_dicatat_oleh_guru_profile_id_fk",
+          "tableFrom": "kehadiran",
+          "tableTo": "guru_profile",
+          "columnsFrom": [
+            "dicatat_oleh"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "kehadiran_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "kehadiran_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "kehadiran",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "kelas": {
+      "name": "kelas",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama": {
+          "name": "nama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tingkat": {
+          "name": "tingkat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "wali_kelas_id": {
+          "name": "wali_kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "kelas_nama_tahun_ajaran_uidx": {
+          "name": "kelas_nama_tahun_ajaran_uidx",
+          "columns": [
+            "nama",
+            "tahun_ajaran_id"
+          ],
+          "isUnique": true
+        },
+        "kelas_tahunAjaranId_idx": {
+          "name": "kelas_tahunAjaranId_idx",
+          "columns": [
+            "tahun_ajaran_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "kelas_wali_kelas_id_guru_profile_id_fk": {
+          "name": "kelas_wali_kelas_id_guru_profile_id_fk",
+          "tableFrom": "kelas",
+          "tableTo": "guru_profile",
+          "columnsFrom": [
+            "wali_kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "kelas_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "kelas_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "kelas",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "mapel": {
+      "name": "mapel",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama": {
+          "name": "nama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kategori": {
+          "name": "kategori",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'umum'"
+        },
+        "deskripsi": {
+          "name": "deskripsi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "mapel_nama_unique": {
+          "name": "mapel_nama_unique",
+          "columns": [
+            "nama"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "mapel_kategori_check": {
+          "name": "mapel_kategori_check",
+          "value": "\"mapel\".\"kategori\" in ('umum', 'pesantren')"
+        }
+      }
+    },
+    "nilai": {
+      "name": "nilai",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "santri_id": {
+          "name": "santri_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mapel_id": {
+          "name": "mapel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kelas_id": {
+          "name": "kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jenis_nilai_id": {
+          "name": "jenis_nilai_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "guru_id": {
+          "name": "guru_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nilai": {
+          "name": "nilai",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "catatan": {
+          "name": "catatan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "semester": {
+          "name": "semester",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "nilai_uidx": {
+          "name": "nilai_uidx",
+          "columns": [
+            "santri_id",
+            "mapel_id",
+            "jenis_nilai_id",
+            "tahun_ajaran_id",
+            "semester"
+          ],
+          "isUnique": true
+        },
+        "nilai_santriId_idx": {
+          "name": "nilai_santriId_idx",
+          "columns": [
+            "santri_id"
+          ],
+          "isUnique": false
+        },
+        "nilai_mapelId_idx": {
+          "name": "nilai_mapelId_idx",
+          "columns": [
+            "mapel_id"
+          ],
+          "isUnique": false
+        },
+        "nilai_tahunAjaranId_idx": {
+          "name": "nilai_tahunAjaranId_idx",
+          "columns": [
+            "tahun_ajaran_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "nilai_santri_id_santri_profile_id_fk": {
+          "name": "nilai_santri_id_santri_profile_id_fk",
+          "tableFrom": "nilai",
+          "tableTo": "santri_profile",
+          "columnsFrom": [
+            "santri_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "nilai_mapel_id_mapel_id_fk": {
+          "name": "nilai_mapel_id_mapel_id_fk",
+          "tableFrom": "nilai",
+          "tableTo": "mapel",
+          "columnsFrom": [
+            "mapel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "nilai_kelas_id_kelas_id_fk": {
+          "name": "nilai_kelas_id_kelas_id_fk",
+          "tableFrom": "nilai",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "nilai_jenis_nilai_id_jenis_nilai_id_fk": {
+          "name": "nilai_jenis_nilai_id_jenis_nilai_id_fk",
+          "tableFrom": "nilai",
+          "tableTo": "jenis_nilai",
+          "columnsFrom": [
+            "jenis_nilai_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "nilai_guru_id_guru_profile_id_fk": {
+          "name": "nilai_guru_id_guru_profile_id_fk",
+          "tableFrom": "nilai",
+          "tableTo": "guru_profile",
+          "columnsFrom": [
+            "guru_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "nilai_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "nilai_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "nilai",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "nilai_range_check": {
+          "name": "nilai_range_check",
+          "value": "\"nilai\".\"nilai\" >= 0 and \"nilai\".\"nilai\" <= 100"
+        }
+      }
+    },
+    "pengajaran": {
+      "name": "pengajaran",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "guru_id": {
+          "name": "guru_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kelas_id": {
+          "name": "kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mapel_id": {
+          "name": "mapel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "pengajaran_uidx": {
+          "name": "pengajaran_uidx",
+          "columns": [
+            "guru_id",
+            "kelas_id",
+            "mapel_id",
+            "tahun_ajaran_id"
+          ],
+          "isUnique": true
+        },
+        "pengajaran_guruId_idx": {
+          "name": "pengajaran_guruId_idx",
+          "columns": [
+            "guru_id"
+          ],
+          "isUnique": false
+        },
+        "pengajaran_kelasId_idx": {
+          "name": "pengajaran_kelasId_idx",
+          "columns": [
+            "kelas_id"
+          ],
+          "isUnique": false
+        },
+        "pengajaran_mapelId_idx": {
+          "name": "pengajaran_mapelId_idx",
+          "columns": [
+            "mapel_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "pengajaran_guru_id_guru_profile_id_fk": {
+          "name": "pengajaran_guru_id_guru_profile_id_fk",
+          "tableFrom": "pengajaran",
+          "tableTo": "guru_profile",
+          "columnsFrom": [
+            "guru_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pengajaran_kelas_id_kelas_id_fk": {
+          "name": "pengajaran_kelas_id_kelas_id_fk",
+          "tableFrom": "pengajaran",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pengajaran_mapel_id_mapel_id_fk": {
+          "name": "pengajaran_mapel_id_mapel_id_fk",
+          "tableFrom": "pengajaran",
+          "tableTo": "mapel",
+          "columnsFrom": [
+            "mapel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "pengajaran_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "pengajaran_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "pengajaran",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "pesantren_settings": {
+      "name": "pesantren_settings",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'default'"
+        },
+        "nama_pesantren": {
+          "name": "nama_pesantren",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'ELMS Pesantren'"
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "logo_url": {
+          "name": "logo_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "deskripsi": {
+          "name": "deskripsi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tahun_ajaran_aktif_id": {
+          "name": "tahun_ajaran_aktif_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "semester_aktif": {
+          "name": "semester_aktif",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'ganjil'"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "pesantren_settings_tahun_ajaran_aktif_id_tahun_ajaran_id_fk": {
+          "name": "pesantren_settings_tahun_ajaran_aktif_id_tahun_ajaran_id_fk",
+          "tableFrom": "pesantren_settings",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_aktif_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "rapor": {
+      "name": "rapor",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "santri_id": {
+          "name": "santri_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kelas_id": {
+          "name": "kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "semester": {
+          "name": "semester",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ringkasan_nilai": {
+          "name": "ringkasan_nilai",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ringkasan_kehadiran": {
+          "name": "ringkasan_kehadiran",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "catatan_wali_kelas": {
+          "name": "catatan_wali_kelas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "file_pdf_url": {
+          "name": "file_pdf_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "generated_at": {
+          "name": "generated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "generated_by": {
+          "name": "generated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "rapor_uidx": {
+          "name": "rapor_uidx",
+          "columns": [
+            "santri_id",
+            "tahun_ajaran_id",
+            "semester"
+          ],
+          "isUnique": true
+        },
+        "rapor_santriId_idx": {
+          "name": "rapor_santriId_idx",
+          "columns": [
+            "santri_id"
+          ],
+          "isUnique": false
+        },
+        "rapor_tahunAjaranId_idx": {
+          "name": "rapor_tahunAjaranId_idx",
+          "columns": [
+            "tahun_ajaran_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "rapor_santri_id_santri_profile_id_fk": {
+          "name": "rapor_santri_id_santri_profile_id_fk",
+          "tableFrom": "rapor",
+          "tableTo": "santri_profile",
+          "columnsFrom": [
+            "santri_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "rapor_kelas_id_kelas_id_fk": {
+          "name": "rapor_kelas_id_kelas_id_fk",
+          "tableFrom": "rapor",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "rapor_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "rapor_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "rapor",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "rapor_generated_by_user_id_fk": {
+          "name": "rapor_generated_by_user_id_fk",
+          "tableFrom": "rapor",
+          "tableTo": "user",
+          "columnsFrom": [
+            "generated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "santri_profile": {
+      "name": "santri_profile",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nis": {
+          "name": "nis",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kelas_id": {
+          "name": "kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tempat_lahir": {
+          "name": "tempat_lahir",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tanggal_lahir": {
+          "name": "tanggal_lahir",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "alamat": {
+          "name": "alamat",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "santri_profile_user_id_unique": {
+          "name": "santri_profile_user_id_unique",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": true
+        },
+        "santri_profile_nis_unique": {
+          "name": "santri_profile_nis_unique",
+          "columns": [
+            "nis"
+          ],
+          "isUnique": true
+        },
+        "santri_profile_kelasId_idx": {
+          "name": "santri_profile_kelasId_idx",
+          "columns": [
+            "kelas_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "santri_profile_user_id_user_id_fk": {
+          "name": "santri_profile_user_id_user_id_fk",
+          "tableFrom": "santri_profile",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "santri_profile_kelas_id_kelas_id_fk": {
+          "name": "santri_profile_kelas_id_kelas_id_fk",
+          "tableFrom": "santri_profile",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tahun_ajaran": {
+      "name": "tahun_ajaran",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "label": {
+          "name": "label",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tanggal_mulai": {
+          "name": "tanggal_mulai",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tanggal_selesai": {
+          "name": "tanggal_selesai",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "tahun_ajaran_label_unique": {
+          "name": "tahun_ajaran_label_unique",
+          "columns": [
+            "label"
+          ],
+          "isUnique": true
+        },
+        "tahun_ajaran_isActive_idx": {
+          "name": "tahun_ajaran_isActive_idx",
+          "columns": [
+            "is_active"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "wali_santri_anak": {
+      "name": "wali_santri_anak",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "wali_santri_id": {
+          "name": "wali_santri_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "santri_id": {
+          "name": "santri_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "wali_santri_anak_uidx": {
+          "name": "wali_santri_anak_uidx",
+          "columns": [
+            "wali_santri_id",
+            "santri_id"
+          ],
+          "isUnique": true
+        },
+        "wali_santri_anak_santriId_idx": {
+          "name": "wali_santri_anak_santriId_idx",
+          "columns": [
+            "santri_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "wali_santri_anak_wali_santri_id_wali_santri_profile_id_fk": {
+          "name": "wali_santri_anak_wali_santri_id_wali_santri_profile_id_fk",
+          "tableFrom": "wali_santri_anak",
+          "tableTo": "wali_santri_profile",
+          "columnsFrom": [
+            "wali_santri_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "wali_santri_anak_santri_id_santri_profile_id_fk": {
+          "name": "wali_santri_anak_santri_id_santri_profile_id_fk",
+          "tableFrom": "wali_santri_anak",
+          "tableTo": "santri_profile",
+          "columnsFrom": [
+            "santri_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "wali_santri_profile": {
+      "name": "wali_santri_profile",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "no_telp": {
+          "name": "no_telp",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "wali_santri_profile_user_id_unique": {
+          "name": "wali_santri_profile_user_id_unique",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "wali_santri_profile_user_id_user_id_fk": {
+          "name": "wali_santri_profile_user_id_user_id_fk",
+          "tableFrom": "wali_santri_profile",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tugas": {
+      "name": "tugas",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "judul": {
+          "name": "judul",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deskripsi": {
+          "name": "deskripsi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mapel_id": {
+          "name": "mapel_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kelas_id": {
+          "name": "kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "guru_id": {
+          "name": "guru_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "deadline": {
+          "name": "deadline",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "tugas_kelasId_idx": {
+          "name": "tugas_kelasId_idx",
+          "columns": [
+            "kelas_id"
+          ],
+          "isUnique": false
+        },
+        "tugas_guruId_idx": {
+          "name": "tugas_guruId_idx",
+          "columns": [
+            "guru_id"
+          ],
+          "isUnique": false
+        },
+        "tugas_deadline_idx": {
+          "name": "tugas_deadline_idx",
+          "columns": [
+            "deadline"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tugas_mapel_id_mapel_id_fk": {
+          "name": "tugas_mapel_id_mapel_id_fk",
+          "tableFrom": "tugas",
+          "tableTo": "mapel",
+          "columnsFrom": [
+            "mapel_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tugas_kelas_id_kelas_id_fk": {
+          "name": "tugas_kelas_id_kelas_id_fk",
+          "tableFrom": "tugas",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tugas_guru_id_guru_profile_id_fk": {
+          "name": "tugas_guru_id_guru_profile_id_fk",
+          "tableFrom": "tugas",
+          "tableTo": "guru_profile",
+          "columnsFrom": [
+            "guru_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "tugas_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "tugas_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "tugas",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tugas_submission": {
+      "name": "tugas_submission",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tugas_id": {
+          "name": "tugas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "santri_id": {
+          "name": "santri_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tipe": {
+          "name": "tipe",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "file_nama_asli": {
+          "name": "file_nama_asli",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "file_mime_type": {
+          "name": "file_mime_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "file_size": {
+          "name": "file_size",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'dikumpulkan'"
+        },
+        "nilai": {
+          "name": "nilai",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "feedback_guru": {
+          "name": "feedback_guru",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "submitted_at": {
+          "name": "submitted_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "tugas_submission_uidx": {
+          "name": "tugas_submission_uidx",
+          "columns": [
+            "tugas_id",
+            "santri_id"
+          ],
+          "isUnique": true
+        },
+        "tugas_submission_tugasId_idx": {
+          "name": "tugas_submission_tugasId_idx",
+          "columns": [
+            "tugas_id"
+          ],
+          "isUnique": false
+        },
+        "tugas_submission_santriId_idx": {
+          "name": "tugas_submission_santriId_idx",
+          "columns": [
+            "santri_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tugas_submission_tugas_id_tugas_id_fk": {
+          "name": "tugas_submission_tugas_id_tugas_id_fk",
+          "tableFrom": "tugas_submission",
+          "tableTo": "tugas",
+          "columnsFrom": [
+            "tugas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tugas_submission_santri_id_santri_profile_id_fk": {
+          "name": "tugas_submission_santri_id_santri_profile_id_fk",
+          "tableFrom": "tugas_submission",
+          "tableTo": "santri_profile",
+          "columnsFrom": [
+            "santri_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tugas_submission_updated_by_user_id_fk": {
+          "name": "tugas_submission_updated_by_user_id_fk",
+          "tableFrom": "tugas_submission",
+          "tableTo": "user",
+          "columnsFrom": [
+            "updated_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "activity_log": {
+      "name": "activity_log",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "aksi": {
+          "name": "aksi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entitas": {
+          "name": "entitas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entitas_id": {
+          "name": "entitas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "detail": {
+          "name": "detail",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "activity_log_userId_idx": {
+          "name": "activity_log_userId_idx",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        },
+        "activity_log_createdAt_idx": {
+          "name": "activity_log_createdAt_idx",
+          "columns": [
+            "created_at"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "activity_log_user_id_user_id_fk": {
+          "name": "activity_log_user_id_user_id_fk",
+          "tableFrom": "activity_log",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "notifikasi": {
+      "name": "notifikasi",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "title": {
+          "name": "title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entitas": {
+          "name": "entitas",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "entitas_id": {
+          "name": "entitas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_read": {
+          "name": "is_read",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "notifikasi_userId_idx": {
+          "name": "notifikasi_userId_idx",
+          "columns": [
+            "user_id"
+          ],
+          "isUnique": false
+        },
+        "notifikasi_isRead_idx": {
+          "name": "notifikasi_isRead_idx",
+          "columns": [
+            "is_read"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "notifikasi_user_id_user_id_fk": {
+          "name": "notifikasi_user_id_user_id_fk",
+          "tableFrom": "notifikasi",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "pengumuman": {
+      "name": "pengumuman",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "judul": {
+          "name": "judul",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "isi": {
+          "name": "isi",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_role": {
+          "name": "target_role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'semua'"
+        },
+        "target_kelas_id": {
+          "name": "target_kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "dibuat_oleh": {
+          "name": "dibuat_oleh",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "pengumuman_targetRole_idx": {
+          "name": "pengumuman_targetRole_idx",
+          "columns": [
+            "target_role"
+          ],
+          "isUnique": false
+        },
+        "pengumuman_targetKelasId_idx": {
+          "name": "pengumuman_targetKelasId_idx",
+          "columns": [
+            "target_kelas_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "pengumuman_target_kelas_id_kelas_id_fk": {
+          "name": "pengumuman_target_kelas_id_kelas_id_fk",
+          "tableFrom": "pengumuman",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "target_kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "pengumuman_dibuat_oleh_user_id_fk": {
+          "name": "pengumuman_dibuat_oleh_user_id_fk",
+          "tableFrom": "pengumuman",
+          "tableTo": "user",
+          "columnsFrom": [
+            "dibuat_oleh"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "payment_webhook_events": {
+      "name": "payment_webhook_events",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'mayar'"
+        },
+        "provider_event_id": {
+          "name": "provider_event_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "provider_transaction_id": {
+          "name": "provider_transaction_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "payload": {
+          "name": "payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "processing_status": {
+          "name": "processing_status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'received'"
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "processed_at": {
+          "name": "processed_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "payment_webhook_events_eventId_idx": {
+          "name": "payment_webhook_events_eventId_idx",
+          "columns": [
+            "provider_event_id"
+          ],
+          "isUnique": false
+        },
+        "payment_webhook_events_transactionId_idx": {
+          "name": "payment_webhook_events_transactionId_idx",
+          "columns": [
+            "provider_transaction_id"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "pembayaran_spp": {
+      "name": "pembayaran_spp",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tagihan_spp_id": {
+          "name": "tagihan_spp_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "provider": {
+          "name": "provider",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'mayar'"
+        },
+        "provider_transaction_id": {
+          "name": "provider_transaction_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "provider_invoice_id": {
+          "name": "provider_invoice_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "checkout_url": {
+          "name": "checkout_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "payment_method": {
+          "name": "payment_method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "nominal_dibayar": {
+          "name": "nominal_dibayar",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "biaya_admin": {
+          "name": "biaya_admin",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "total_dibayar": {
+          "name": "total_dibayar",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'pending'"
+        },
+        "paid_at": {
+          "name": "paid_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "provider_payload": {
+          "name": "provider_payload",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "pembayaran_spp_tagihanId_idx": {
+          "name": "pembayaran_spp_tagihanId_idx",
+          "columns": [
+            "tagihan_spp_id"
+          ],
+          "isUnique": false
+        },
+        "pembayaran_spp_status_idx": {
+          "name": "pembayaran_spp_status_idx",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "pembayaran_spp_tagihan_spp_id_tagihan_spp_id_fk": {
+          "name": "pembayaran_spp_tagihan_spp_id_tagihan_spp_id_fk",
+          "tableFrom": "pembayaran_spp",
+          "tableTo": "tagihan_spp",
+          "columnsFrom": [
+            "tagihan_spp_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "tagihan_spp": {
+      "name": "tagihan_spp",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nomor_tagihan": {
+          "name": "nomor_tagihan",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "santri_id": {
+          "name": "santri_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tarif_spp_id": {
+          "name": "tarif_spp_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "periode_bulan": {
+          "name": "periode_bulan",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "periode_tahun": {
+          "name": "periode_tahun",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nominal": {
+          "name": "nominal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nominal_diskon": {
+          "name": "nominal_diskon",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "nominal_denda": {
+          "name": "nominal_denda",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "total_tagihan": {
+          "name": "total_tagihan",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "jatuh_tempo": {
+          "name": "jatuh_tempo",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'unpaid'"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "tagihan_spp_nomor_tagihan_unique": {
+          "name": "tagihan_spp_nomor_tagihan_unique",
+          "columns": [
+            "nomor_tagihan"
+          ],
+          "isUnique": true
+        },
+        "tagihan_spp_uidx": {
+          "name": "tagihan_spp_uidx",
+          "columns": [
+            "santri_id",
+            "periode_bulan",
+            "periode_tahun"
+          ],
+          "isUnique": true
+        },
+        "tagihan_spp_santriId_idx": {
+          "name": "tagihan_spp_santriId_idx",
+          "columns": [
+            "santri_id"
+          ],
+          "isUnique": false
+        },
+        "tagihan_spp_status_idx": {
+          "name": "tagihan_spp_status_idx",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tagihan_spp_santri_id_santri_profile_id_fk": {
+          "name": "tagihan_spp_santri_id_santri_profile_id_fk",
+          "tableFrom": "tagihan_spp",
+          "tableTo": "santri_profile",
+          "columnsFrom": [
+            "santri_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "tagihan_spp_tarif_spp_id_tarif_spp_id_fk": {
+          "name": "tagihan_spp_tarif_spp_id_tarif_spp_id_fk",
+          "tableFrom": "tagihan_spp",
+          "tableTo": "tarif_spp",
+          "columnsFrom": [
+            "tarif_spp_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "tagihan_spp_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "tagihan_spp_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "tagihan_spp",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "tagihan_spp_created_by_user_id_fk": {
+          "name": "tagihan_spp_created_by_user_id_fk",
+          "tableFrom": "tagihan_spp",
+          "tableTo": "user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tagihan_spp_periodeBulan_check": {
+          "name": "tagihan_spp_periodeBulan_check",
+          "value": "\"tagihan_spp\".\"periode_bulan\" >= 1 and \"tagihan_spp\".\"periode_bulan\" <= 12"
+        }
+      }
+    },
+    "tarif_spp": {
+      "name": "tarif_spp",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nama": {
+          "name": "nama",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "nominal": {
+          "name": "nominal",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "kelas_id": {
+          "name": "kelas_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "tahun_ajaran_id": {
+          "name": "tahun_ajaran_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "berlaku_mulai": {
+          "name": "berlaku_mulai",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "berlaku_sampai": {
+          "name": "berlaku_sampai",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": true
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
+        }
+      },
+      "indexes": {
+        "tarif_spp_isActive_idx": {
+          "name": "tarif_spp_isActive_idx",
+          "columns": [
+            "is_active"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "tarif_spp_kelas_id_kelas_id_fk": {
+          "name": "tarif_spp_kelas_id_kelas_id_fk",
+          "tableFrom": "tarif_spp",
+          "tableTo": "kelas",
+          "columnsFrom": [
+            "kelas_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "tarif_spp_tahun_ajaran_id_tahun_ajaran_id_fk": {
+          "name": "tarif_spp_tahun_ajaran_id_tahun_ajaran_id_fk",
+          "tableFrom": "tarif_spp",
+          "tableTo": "tahun_ajaran",
+          "columnsFrom": [
+            "tahun_ajaran_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "tarif_spp_created_by_user_id_fk": {
+          "name": "tarif_spp_created_by_user_id_fk",
+          "tableFrom": "tarif_spp",
+          "tableTo": "user",
+          "columnsFrom": [
+            "created_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {
+        "tarif_spp_nominal_check": {
+          "name": "tarif_spp_nominal_check",
+          "value": "\"tarif_spp\".\"nominal\" > 0"
+        }
+      }
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

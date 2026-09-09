@@ -1,6 +1,8 @@
 import "server-only";
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient, type Client } from "@libsql/client";
+import path from "node:path";
+import fs from "node:fs";
 import * as schema from "./schema";
 
 // Production (Vercel): database di-host di Turso (libSQL) melalui
@@ -22,7 +24,16 @@ const client =
         authToken: TURSO_TOKEN && TURSO_TOKEN.length > 0 ? TURSO_TOKEN : undefined,
       })
     : createClient({
-        url: process.env.DATABASE_URL?.trim() || "file:./data/elms.db",
+        url: (() => {
+          // Pastikan file DB lokal ada sebelum libsql membukanya —
+          // mencegah SQLITE_CANTOPEN saat fase build/collect page data.
+          const dbPath = process.env.DATABASE_URL?.trim().replace(/^file:/, "") || "./data/elms.db";
+          if (!fs.existsSync(dbPath)) {
+            fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+            fs.closeSync(fs.openSync(dbPath, "a"));
+          }
+          return `file:${dbPath}`;
+        })(),
       }));
 
 if (process.env.NODE_ENV !== "production") {

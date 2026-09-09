@@ -1,0 +1,6 @@
+/data
+/docs
+/.next
+/node_modules
+tsconfig.tsbuildinfo
+.env.local

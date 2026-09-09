@@ -1,33 +1,41 @@
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import Database from "better-sqlite3";
-import path from "node:path";
-import fs from "node:fs";
+import "server-only";
+import { drizzle } from "drizzle-orm/libsql";
+import { createClient, type Client } from "@libsql/client";
 import * as schema from "./schema";
 
-const DATABASE_URL =
-  process.env.DATABASE_URL?.replace(/^file:/, "") ??
-  path.join(process.cwd(), "data", "elms.db");
-
-const dbDir = path.dirname(DATABASE_URL);
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
+// Production (Vercel): database di-host di Turso (libSQL) melalui
+// TURSO_DATABASE_URL + TURSO_AUTH_TOKEN. Serverless tidak boleh
+// menyimpan file SQLite lokal karena filesystem-nya ephemeral.
+// Development: SQLite lokal melalui driver libsql (DATABASE_URL / ./data/elms.db).
+const TURSO_URL = process.env.TURSO_DATABASE_URL?.trim();
+const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN?.trim();
 
 const globalForDb = globalThis as unknown as {
-  sqliteConnection: Database.Database | undefined;
+  libsqlClient: Client | undefined;
 };
 
-const connection =
-  globalForDb.sqliteConnection ??
-  new Database(DATABASE_URL, { fileMustExist: false });
-
-connection.pragma("journal_mode = WAL");
-connection.pragma("foreign_keys = ON");
+const client =
+  globalForDb.libsqlClient ??
+  (TURSO_URL
+    ? createClient({
+        url: TURSO_URL,
+        authToken: TURSO_TOKEN && TURSO_TOKEN.length > 0 ? TURSO_TOKEN : undefined,
+      })
+    : createClient({
+        url: process.env.DATABASE_URL?.trim() || "file:./data/elms.db",
+      }));
 
 if (process.env.NODE_ENV !== "production") {
-  globalForDb.sqliteConnection = connection;
+  globalForDb.libsqlClient = client;
 }
 
-export const db = drizzle(connection, { schema });
-export { schema, connection };
-export const DATABASE_PATH = DATABASE_URL;
+if (!TURSO_URL) {
+  // foreign_keys default OFF pada SQLite lokal — aktifkan agar konsisten
+  // dengan perilaku Turso.
+  void client.execute("PRAGMA foreign_keys = ON").catch(() => {});
+}
+
+export const db = drizzle(client, { schema });
+export { schema };
+export const connection = { close: () => client.close() };
+export const DATABASE_PATH = TURSO_URL ?? "file:./data/elms.db";

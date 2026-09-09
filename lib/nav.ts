@@ -137,6 +137,7 @@ export const navigation: Record<Role, NavSection[]> = {
     {
       label: "Pantau anak",
       items: [
+        { label: "Tugas anak", href: "/wali/tugas", icon: "clipboard" },
         { label: "Nilai anak", href: "/wali/nilai", icon: "chart" },
         { label: "Kehadiran anak", href: "/wali/kehadiran", icon: "users" },
         { label: "Rapor anak", href: "/wali/rapor", icon: "file" },
@@ -166,6 +167,9 @@ const pageTitles: Partial<Record<Role, Record<string, string>>> = {
   },
   santri: {
     "/santri/tugas/": "Detail tugas",
+  },
+  wali: {
+    "/wali/tugas": "Detail tugas anak",
   },
 };
 

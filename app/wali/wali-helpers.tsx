@@ -1,5 +1,7 @@
 import "server-only";
+import Link from "next/link";
 import { listAnakWali } from "@/db/queries/santri";
+import { Icon } from "@/lib/icons";
 
 export type AnakRow = {
   santriId: string;
@@ -30,28 +32,25 @@ export function AnakSwitcher({
 }) {
   if (anakRows.length <= 1) return null;
   return (
-    <div className="panel-toolbar" style={{ padding: "0 0 14px" }}>
-      <div className="toolbar-left">
-        {anakRows.map((anak) => (
-          <a
+    <div className="anak-switcher" role="tablist" aria-label="Pilih anak">
+      <span className="anak-switcher-label">
+        <Icon name="users" />
+        Pilih anak
+      </span>
+      {anakRows.map((anak) => {
+        const active = anak.santriId === selectedId;
+        return (
+          <Link
             key={anak.santriId}
             href={`${basePath}?anak=${anak.santriId}`}
-            className="table-button"
-            style={{
-              marginRight: 6,
-              padding: "8px 12px",
-              borderRadius: 10,
-              border: "1px solid var(--line)",
-              background: anak.santriId === selectedId ? "var(--brand)" : "var(--surface)",
-              color: anak.santriId === selectedId ? "#fff" : "inherit",
-              textDecoration: "none",
-              display: "inline-block",
-            }}
+            className={`anak-chip${active ? " active" : ""}`}
+            aria-current={active ? "true" : undefined}
           >
             {anak.nama}
-          </a>
-        ))}
-      </div>
+            <small>NIS {anak.nis}</small>
+          </Link>
+        );
+      })}
     </div>
   );
 }

@@ -69,21 +69,13 @@ export default async function GuruNilaiPage({
         description={`Nilai dihitung berbobot sesuai jenis nilai yang dikonfigurasi admin. Semester ${semester}.`}
       />
 
-      <div className="panel-toolbar" style={{ padding: "0 0 14px" }}>
+      <div className="panel-toolbar selection-toolbar">
         <div className="toolbar-left">
           {pengajaranRows.map((p) => (
             <Link
               key={p.id}
               href={`/guru/nilai?pengajaranId=${p.id}`}
-              className={`table-button${p.id === selected.id ? " button-primary" : ""}`}
-              style={{
-                marginRight: 6,
-                padding: "8px 12px",
-                borderRadius: 10,
-                border: "1px solid var(--line)",
-                background: p.id === selected.id ? "var(--brand)" : "var(--surface)",
-                color: p.id === selected.id ? "#fff" : "inherit",
-              }}
+              className={`task-selector${p.id === selected.id ? " active" : ""}`}
             >
               {p.kelasNama} · {p.mapelNama}
             </Link>

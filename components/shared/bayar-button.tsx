@@ -17,12 +17,19 @@ export function BayarButton({ tagihanId, label = "Bayar Sekarang" }: { tagihanId
         const fd = new FormData();
         fd.set("id", tagihanId);
         startTransition(async () => {
-          const result = await bayarSekarangForm(fd);
-          if (result.ok && result.data?.checkoutUrl) {
-            showToast(result.message ?? "Mengarahkan ke Mayar...");
-            window.location.href = result.data.checkoutUrl;
-          } else {
-            showToast(result.ok ? "Checkout tidak tersedia." : result.error ?? "Gagal.");
+          try {
+            const result = await bayarSekarangForm(fd);
+            if (result.ok && result.data?.checkoutUrl) {
+              showToast(result.message ?? "Mengarahkan ke Mayar...");
+              window.location.href = result.data.checkoutUrl;
+            } else {
+              showToast(
+                result.ok ? "Checkout tidak tersedia." : result.error ?? "Gagal.",
+                "error",
+              );
+            }
+          } catch {
+            showToast("Pembayaran tidak dapat diproses. Coba lagi.", "error");
           }
         });
       }}

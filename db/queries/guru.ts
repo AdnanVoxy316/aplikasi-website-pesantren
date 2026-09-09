@@ -12,7 +12,9 @@ import {
   rapor,
   santriProfile,
   tugas,
+  tugasLampiran,
   tugasSubmission,
+  tugasSubmissionFile,
   user,
   tahunAjaran,
 } from "@/db/schema";
@@ -118,14 +120,20 @@ export async function listTugasDiampu(guruProfileId: string) {
   return rows;
 }
 
+export type SubmissionFileRow = {
+  id: string;
+  filePath: string;
+  namaAsli: string;
+  size: number | null;
+};
+
 export async function listSubmissionsOfTugas(tugasId: string) {
-  return db
+  const rows = await db
     .select({
       id: tugasSubmission.id,
       santriNama: user.name,
       nis: santriProfile.nis,
       tipe: tugasSubmission.tipe,
-      fileNamaAsli: tugasSubmission.fileNamaAsli,
       url: tugasSubmission.url,
       status: tugasSubmission.status,
       nilai: tugasSubmission.nilai,
@@ -137,6 +145,52 @@ export async function listSubmissionsOfTugas(tugasId: string) {
     .innerJoin(user, eq(santriProfile.userId, user.id))
     .where(eq(tugasSubmission.tugasId, tugasId))
     .orderBy(user.name);
+
+  const fileRows = await db
+    .select({
+      id: tugasSubmissionFile.id,
+      submissionId: tugasSubmissionFile.submissionId,
+      filePath: tugasSubmissionFile.filePath,
+      namaAsli: tugasSubmissionFile.namaAsli,
+      size: tugasSubmissionFile.size,
+    })
+    .from(tugasSubmissionFile)
+    .innerJoin(tugasSubmission, eq(tugasSubmissionFile.submissionId, tugasSubmission.id))
+    .where(eq(tugasSubmission.tugasId, tugasId))
+    .orderBy(tugasSubmissionFile.createdAt);
+
+  const bySubmission = new Map<string, SubmissionFileRow[]>();
+  for (const f of fileRows) {
+    const list = bySubmission.get(f.submissionId) ?? [];
+    list.push({ id: f.id, filePath: f.filePath, namaAsli: f.namaAsli, size: f.size });
+    bySubmission.set(f.submissionId, list);
+  }
+
+  return rows.map((row) => ({ ...row, files: bySubmission.get(row.id) ?? [] }));
+}
+
+export type LampiranRow = {
+  id: string;
+  filePath: string | null;
+  namaAsli: string;
+  url: string | null;
+  mimeType: string | null;
+  size: number | null;
+};
+
+export async function getTugasLampiran(tugasId: string): Promise<LampiranRow[]> {
+  return db
+    .select({
+      id: tugasLampiran.id,
+      filePath: tugasLampiran.filePath,
+      namaAsli: tugasLampiran.namaAsli,
+      url: tugasLampiran.url,
+      mimeType: tugasLampiran.mimeType,
+      size: tugasLampiran.size,
+    })
+    .from(tugasLampiran)
+    .where(eq(tugasLampiran.tugasId, tugasId))
+    .orderBy(tugasLampiran.createdAt);
 }
 
 export async function getTugasById(tugasId: string) {

@@ -13,7 +13,9 @@ import {
   santriProfile,
   tagihanSpp,
   tugas,
+  tugasLampiran,
   tugasSubmission,
+  tugasSubmissionFile,
   user,
   waliSantriAnak,
   waliSantriProfile,
@@ -66,7 +68,76 @@ export async function listTugasUntukSantri(santriId: string, kelasId: string | n
     .orderBy(desc(tugas.createdAt));
 }
 
-export async function getTugasDetailUntukSantri(tugasId: string, santriId: string, kelasId: string | null) {
+export type TugasFileRow = {
+  id: string;
+  filePath: string;
+  namaAsli: string;
+  mimeType: string | null;
+  size: number | null;
+};
+
+export type TugasLampiranRow = {
+  id: string;
+  filePath: string | null;
+  namaAsli: string;
+  url: string | null;
+  mimeType: string | null;
+  size: number | null;
+};
+
+export type TugasDetailBase = {
+  id: string;
+  judul: string;
+  deskripsi: string;
+  mapelNama: string;
+  kelasNama: string;
+  deadline: Date;
+  kelasId: string;
+  submissionId: string | null;
+  submissionStatus: "dikumpulkan" | "terlambat" | "dinilai" | null;
+  submissionTipe: "file" | "link_gdrive" | "link_youtube" | "link_lainnya" | null;
+  url: string | null;
+  nilai: number | null;
+  feedbackGuru: string | null;
+  submittedAt: Date | null;
+  files: TugasFileRow[];
+  lampiran: TugasLampiranRow[];
+};
+
+async function lampiranOfTugas(tugasId: string): Promise<TugasLampiranRow[]> {
+  return db
+    .select({
+      id: tugasLampiran.id,
+      filePath: tugasLampiran.filePath,
+      namaAsli: tugasLampiran.namaAsli,
+      url: tugasLampiran.url,
+      mimeType: tugasLampiran.mimeType,
+      size: tugasLampiran.size,
+    })
+    .from(tugasLampiran)
+    .where(eq(tugasLampiran.tugasId, tugasId))
+    .orderBy(tugasLampiran.createdAt);
+}
+
+async function filesOfSubmission(submissionId: string): Promise<TugasFileRow[]> {
+  return db
+    .select({
+      id: tugasSubmissionFile.id,
+      filePath: tugasSubmissionFile.filePath,
+      namaAsli: tugasSubmissionFile.namaAsli,
+      mimeType: tugasSubmissionFile.mimeType,
+      size: tugasSubmissionFile.size,
+    })
+    .from(tugasSubmissionFile)
+    .where(eq(tugasSubmissionFile.submissionId, submissionId))
+    .orderBy(tugasSubmissionFile.createdAt);
+}
+
+export async function getTugasDetailUntukSantri(
+  tugasId: string,
+  santriId: string,
+  kelasId: string | null,
+): Promise<TugasDetailBase | null> {
   if (!kelasId) return null;
   const [row] = await db
     .select({
@@ -80,9 +151,6 @@ export async function getTugasDetailUntukSantri(tugasId: string, santriId: strin
       submissionId: tugasSubmission.id,
       submissionStatus: tugasSubmission.status,
       submissionTipe: tugasSubmission.tipe,
-      filePath: tugasSubmission.filePath,
-      fileNamaAsli: tugasSubmission.fileNamaAsli,
-      fileSize: tugasSubmission.fileSize,
       url: tugasSubmission.url,
       nilai: tugasSubmission.nilai,
       feedbackGuru: tugasSubmission.feedbackGuru,
@@ -97,7 +165,13 @@ export async function getTugasDetailUntukSantri(tugasId: string, santriId: strin
     )
     .where(and(eq(tugas.id, tugasId), eq(tugas.kelasId, kelasId)))
     .limit(1);
-  return row ?? null;
+  if (!row) return null;
+
+  const [files, lampiran] = await Promise.all([
+    row.submissionId ? filesOfSubmission(row.submissionId) : Promise.resolve([]),
+    lampiranOfTugas(tugasId),
+  ]);
+  return { ...row, files, lampiran };
 }
 
 export async function listNilaiSantri(
@@ -374,4 +448,147 @@ export async function listPengumumanUntukSantriWali(kelasId: string | null) {
     .where(and(...conditions))
     .orderBy(desc(pengumuman.createdAt))
     .limit(30);
+}
+
+/* ---- Tugas (read-only untuk wali santri) ---- */
+
+export type TugasAnakWaliRow = {
+  tugasId: string;
+  judul: string;
+  mapelNama: string;
+  kelasNama: string;
+  deadline: Date;
+  santriId: string;
+  anakNama: string;
+  anakNis: string;
+  submissionId: string | null;
+  submissionStatus: "dikumpulkan" | "terlambat" | "dinilai" | null;
+  submissionTipe: "file" | "link_gdrive" | "link_youtube" | "link_lainnya" | null;
+  nilai: number | null;
+  submittedAt: Date | null;
+};
+
+export async function listTugasAnakWali(
+  waliUserId: string,
+  santriId?: string,
+): Promise<TugasAnakWaliRow[]> {
+  const conditions = [eq(waliSantriProfile.userId, waliUserId)];
+  if (santriId) conditions.push(eq(santriProfile.id, santriId));
+
+  return db
+    .select({
+      tugasId: tugas.id,
+      judul: tugas.judul,
+      mapelNama: mapel.nama,
+      kelasNama: kelas.nama,
+      deadline: tugas.deadline,
+      santriId: santriProfile.id,
+      anakNama: user.name,
+      anakNis: santriProfile.nis,
+      submissionId: tugasSubmission.id,
+      submissionStatus: tugasSubmission.status,
+      submissionTipe: tugasSubmission.tipe,
+      nilai: tugasSubmission.nilai,
+      submittedAt: tugasSubmission.submittedAt,
+    })
+    .from(waliSantriProfile)
+    .innerJoin(waliSantriAnak, eq(waliSantriAnak.waliSantriId, waliSantriProfile.id))
+    .innerJoin(santriProfile, eq(waliSantriAnak.santriId, santriProfile.id))
+    .innerJoin(user, eq(santriProfile.userId, user.id))
+    .innerJoin(kelas, eq(santriProfile.kelasId, kelas.id))
+    .innerJoin(tugas, eq(tugas.kelasId, kelas.id))
+    .innerJoin(mapel, eq(tugas.mapelId, mapel.id))
+    .leftJoin(
+      tugasSubmission,
+      and(eq(tugasSubmission.tugasId, tugas.id), eq(tugasSubmission.santriId, santriProfile.id)),
+    )
+    .where(and(...conditions))
+    .orderBy(user.name, desc(tugas.createdAt));
+}
+
+/** Detail tugas untuk wali — hanya jika salah satu anaknya ada di kelas tugas.
+ *  Read-only: lampiran guru + submission (file) anak, tanpa formulir unggah. */
+export async function getTugasDetailUntukWali(
+  tugasId: string,
+  waliUserId: string,
+  santriId?: string,
+): Promise<
+  | (TugasDetailBase & {
+      anakSubmission: {
+        id: string;
+        status: "dikumpulkan" | "terlambat" | "dinilai" | null;
+        tipe: "file" | "link_gdrive" | "link_youtube" | "link_lainnya" | null;
+        url: string | null;
+        nilai: number | null;
+        feedbackGuru: string | null;
+        submittedAt: Date | null;
+        files: TugasFileRow[];
+      } | null;
+    })
+  | null
+> {
+  const [row] = await db
+    .select({
+      id: tugas.id,
+      judul: tugas.judul,
+      deskripsi: tugas.deskripsi,
+      mapelNama: mapel.nama,
+      kelasNama: kelas.nama,
+      deadline: tugas.deadline,
+      kelasId: tugas.kelasId,
+    })
+    .from(tugas)
+    .innerJoin(mapel, eq(tugas.mapelId, mapel.id))
+    .innerJoin(kelas, eq(tugas.kelasId, kelas.id))
+    .where(eq(tugas.id, tugasId))
+    .limit(1);
+  if (!row) return null;
+
+  const anakConditions = [
+    eq(waliSantriProfile.userId, waliUserId),
+    eq(santriProfile.kelasId, row.kelasId),
+  ];
+  if (santriId) anakConditions.push(eq(santriProfile.id, santriId));
+  const [anak] = await db
+    .select({ id: waliSantriAnak.id, santriId: santriProfile.id })
+    .from(waliSantriProfile)
+    .innerJoin(waliSantriAnak, eq(waliSantriAnak.waliSantriId, waliSantriProfile.id))
+    .innerJoin(santriProfile, eq(waliSantriAnak.santriId, santriProfile.id))
+    .where(and(...anakConditions))
+    .limit(1);
+  if (!anak) return null;
+
+  const lampiran = await lampiranOfTugas(tugasId);
+
+  const [submission] = await db
+    .select({
+      id: tugasSubmission.id,
+      status: tugasSubmission.status,
+      tipe: tugasSubmission.tipe,
+      url: tugasSubmission.url,
+      nilai: tugasSubmission.nilai,
+      feedbackGuru: tugasSubmission.feedbackGuru,
+      submittedAt: tugasSubmission.submittedAt,
+    })
+    .from(tugasSubmission)
+    .where(
+      and(eq(tugasSubmission.tugasId, tugasId), eq(tugasSubmission.santriId, anak.santriId)),
+    )
+    .limit(1);
+
+  const files = submission ? await filesOfSubmission(submission.id) : [];
+
+  return {
+    ...row,
+    submissionId: null,
+    submissionStatus: null,
+    submissionTipe: null,
+    url: null,
+    nilai: null,
+    feedbackGuru: null,
+    submittedAt: null,
+    files: [],
+    lampiran,
+    anakSubmission: submission ? { ...submission, files } : null,
+  };
 }

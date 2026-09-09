@@ -11,6 +11,7 @@ import { rupiah, tanggalIndo, sisaWaktu, persenHadir, labelPeriode, masihBerjala
 import { db } from "@/db";
 import { tagihanSpp } from "@/db/schema";
 import { and, eq, inArray } from "drizzle-orm";
+import { paymentStatusLabel, paymentStatusVariant } from "@/lib/status";
 
 export const metadata: Metadata = {
   title: "Dashboard santri",
@@ -92,7 +93,7 @@ export default async function SantriDashboardPage() {
               {tugasBerjalan.map((t) => {
                 const sisa = sisaWaktu(t.deadline);
                 return (
-                  <Link href={`/santri/tugas/${t.id}`} key={t.id} className="announcement" style={{ display: "flex", textDecoration: "none", color: "inherit" }}>
+                  <Link href={`/santri/tugas/${t.id}`} key={t.id} className="announcement dashboard-task-link">
                     <span className="announcement-icon">
                       <Icon name="clipboard" />
                     </span>
@@ -122,7 +123,7 @@ export default async function SantriDashboardPage() {
                       <td>
                         <strong>{n.mapelNama}</strong> · {n.jenisNama}
                       </td>
-                      <td style={{ textAlign: "right" }}>
+                      <td className="align-right">
                         <strong>{n.nilai}</strong>
                       </td>
                     </tr>
@@ -131,7 +132,7 @@ export default async function SantriDashboardPage() {
               </table>
             </div>
           )}
-          <div className="form-actions" style={{ justifyContent: "flex-start" }}>
+          <div className="form-actions task-actions">
             <Link className="button button-secondary" href="/santri/nilai">
               Lihat semua nilai
             </Link>
@@ -151,13 +152,13 @@ export default async function SantriDashboardPage() {
                     <tr key={t.id}>
                       <td>
                         <strong>{labelPeriode(t.periodeBulan, t.periodeTahun)}</strong>
-                        <div style={{ fontSize: 10 }}>jatuh tempo {tanggalIndo(t.jatuhTempo)}</div>
+                        <div className="person-meta">jatuh tempo {tanggalIndo(t.jatuhTempo)}</div>
                       </td>
-                      <td style={{ textAlign: "right" }}>
+                      <td className="align-right">
                         <strong>{rupiah(t.totalTagihan)}</strong>
                         <div>
-                          <span className={`status-badge ${t.status === "unpaid" ? "neutral" : "warning"}`}>
-                            {t.status}
+                           <span className={`status-badge ${paymentStatusVariant(t.status)}`}>
+                             {paymentStatusLabel(t.status)}
                           </span>
                         </div>
                       </td>
@@ -167,7 +168,7 @@ export default async function SantriDashboardPage() {
               </table>
             </div>
           )}
-          <div className="form-actions" style={{ justifyContent: "flex-start" }}>
+          <div className="form-actions task-actions">
             {tagihanAktifRows.length > 0 ? (
               <Link className="button button-primary" href="/santri/pembayaran/tagihan">
                 Bayar sekarang

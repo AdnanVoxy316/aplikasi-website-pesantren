@@ -19,6 +19,8 @@ export type SettingsRow = {
   alamat: string | null;
   deskripsi: string | null;
   logoUrl: string | null;
+  namaPimpinan: string | null;
+  kotaRapor: string | null;
   semesterAktif: string;
 };
 
@@ -87,6 +89,35 @@ export function PengaturanClient({
               Logo URL <span className="optional">(opsional)</span>
             </label>
             <input id="s-logo" name="logoUrl" type="url" defaultValue={settings?.logoUrl ?? ""} style={inputStyle} />
+          </div>
+          <div className="form-divider" />
+          <p className="form-card-description" style={{ marginBottom: 12 }}>
+            Data kop & tanda tangan rapor PDF — dipakai saat mencetak/unduh rapor.
+          </p>
+          <div className="field">
+            <label htmlFor="s-pimpinan">
+              Nama pimpinan pesantren <span className="optional">(ttd rapor)</span>
+            </label>
+            <input
+              id="s-pimpinan"
+              name="namaPimpinan"
+              placeholder="misal K.H. Ahmad Fulan"
+              defaultValue={settings?.namaPimpinan ?? ""}
+              style={inputStyle}
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="s-kota">
+              Kota penerbitan rapor <span className="optional">(mis. Bandung)</span>
+            </label>
+            <input
+              id="s-kota"
+              name="kotaRapor"
+              placeholder="misal Bandung"
+              defaultValue={settings?.kotaRapor ?? ""}
+              style={inputStyle}
+            />
+            <small>Muncul di blok tanda tangan rapor, contoh: &ldquo;Bandung, 5 September 2026&rdquo;.</small>
           </div>
           <div className="field">
             <label htmlFor="s-semester">Semester aktif</label>

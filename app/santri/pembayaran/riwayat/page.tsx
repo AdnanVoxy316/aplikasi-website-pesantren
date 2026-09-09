@@ -4,21 +4,11 @@ import { Panel, EmptyState } from "@/components/ui/panel";
 import { requireRole } from "@/lib/auth/session";
 import { getSantriProfile, listRiwayatPembayaranSantri } from "@/db/queries/santri";
 import { rupiah, labelPeriode, tanggalWaktuIndo } from "@/lib/format";
+import { paymentStatusLabel, paymentStatusVariant } from "@/lib/status";
 
 export const metadata: Metadata = {
   title: "Riwayat pembayaran",
   description: "Histori pembayaran SPP Anda.",
-};
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "neutral" | "danger"> = {
-  paid: "success",
-  pending: "warning",
-  processing: "warning",
-  unpaid: "neutral",
-  cancelled: "danger",
-  expired: "danger",
-  failed: "danger",
-  refunded: "neutral",
 };
 
 export default async function SantriRiwayatPage() {
@@ -46,7 +36,7 @@ export default async function SantriRiwayatPage() {
         {rows.length === 0 ? (
           <EmptyState>Belum ada transaksi pembayaran.</EmptyState>
         ) : (
-          <div className="table-shell">
+          <div className="table-shell table-shell-scroll">
             <table className="data-table">
               <thead>
                 <tr>
@@ -63,14 +53,14 @@ export default async function SantriRiwayatPage() {
                   <tr key={row.id}>
                     <td>
                       <strong>{labelPeriode(row.periodeBulan, row.periodeTahun)}</strong>
-                      <div style={{ fontFamily: "monospace", fontSize: 9 }}>{row.nomorTagihan}</div>
+                      <div className="invoice-number-small">{row.nomorTagihan}</div>
                     </td>
                     <td>{row.provider}</td>
                     <td>{row.paymentMethod ?? "—"}</td>
                     <td>{rupiah(row.nominalDibayar)}</td>
                     <td>
-                      <span className={`status-badge ${STATUS_VARIANT[row.status] ?? "neutral"}`}>
-                        {row.status}
+                        <span className={`status-badge ${paymentStatusVariant(row.status)}`}>
+                          {paymentStatusLabel(row.status)}
                       </span>
                     </td>
                     <td>{tanggalWaktuIndo(row.paidAt ?? row.createdAt)}</td>

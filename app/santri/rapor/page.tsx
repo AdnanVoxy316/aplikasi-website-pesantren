@@ -4,6 +4,7 @@ import { Panel, EmptyState } from "@/components/ui/panel";
 import { requireRole } from "@/lib/auth/session";
 import { getSantriProfile, listRaporSantri } from "@/db/queries/santri";
 import { tanggalWaktuIndo } from "@/lib/format";
+import { Icon } from "@/lib/icons";
 
 export const metadata: Metadata = {
   title: "Rapor",
@@ -24,6 +25,38 @@ type RingkasanKehadiran = {
   alpa: number;
   total: number;
 };
+
+function parseSnapshot<T>(
+  raw: string,
+  isValid: (value: unknown) => value is T,
+  fallback: T,
+): { value: T; valid: boolean } {
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    return isValid(parsed) ? { value: parsed, valid: true } : { value: fallback, valid: false };
+  } catch {
+    return { value: fallback, valid: false };
+  }
+}
+
+function isRingkasanNilai(value: unknown): value is RingkasanNilai[] {
+  return (
+    Array.isArray(value) &&
+    value.every((item) => {
+      if (!item || typeof item !== "object") return false;
+      const row = item as Partial<RingkasanNilai>;
+      return typeof row.mapelId === "string" && typeof row.nama === "string";
+    })
+  );
+}
+
+function isRingkasanKehadiran(value: unknown): value is RingkasanKehadiran {
+  if (!value || typeof value !== "object") return false;
+  const row = value as Partial<RingkasanKehadiran>;
+  return [row.hadir, row.izin, row.sakit, row.alpa, row.total].every(
+    (item) => typeof item === "number" && Number.isFinite(item),
+  );
+}
 
 export default async function SantriRaporPage() {
   const session = await requireRole("santri");
@@ -55,15 +88,24 @@ export default async function SantriRaporPage() {
         </Panel>
       ) : (
         rows.map((row) => {
-          const nilai = JSON.parse(row.ringkasanNilai) as RingkasanNilai[];
-          const kehadiran = JSON.parse(row.ringkasanKehadiran) as RingkasanKehadiran;
+          const nilaiSnapshot = parseSnapshot(row.ringkasanNilai, isRingkasanNilai, []);
+          const kehadiranSnapshot = parseSnapshot(row.ringkasanKehadiran, isRingkasanKehadiran, {
+            hadir: 0,
+            izin: 0,
+            sakit: 0,
+            alpa: 0,
+            total: 0,
+          });
+          const nilai = nilaiSnapshot.value;
+          const kehadiran = kehadiranSnapshot.value;
           return (
             <Panel
               key={row.id}
               title={`Rapor ${row.tahunAjaranLabel} — Semester ${row.semester === "ganjil" ? "Ganjil" : "Genap"}`}
               subtitle={`Digenerate ${tanggalWaktuIndo(row.generatedAt)}`}
             >
-              <div className="form-layout">
+                <div className="form-layout">
+                {nilaiSnapshot.valid ? (
                 <div className="table-shell">
                   <table className="data-table">
                     <thead>
@@ -84,15 +126,27 @@ export default async function SantriRaporPage() {
                     </tbody>
                   </table>
                 </div>
+                ) : null}
                 <div>
-                  <div className="check-list">
-                    <div className="check-row">Hadir: {kehadiran.hadir}</div>
-                    <div className="check-row">Izin: {kehadiran.izin}</div>
-                    <div className="check-row">Sakit: {kehadiran.sakit}</div>
-                    <div className="check-row">Alpa: {kehadiran.alpa}</div>
-                  </div>
+                  {kehadiranSnapshot.valid ? (
+                    <div className="check-list">
+                      <div className="check-row">Hadir: {kehadiran.hadir}</div>
+                      <div className="check-row">Izin: {kehadiran.izin}</div>
+                      <div className="check-row">Sakit: {kehadiran.sakit}</div>
+                      <div className="check-row">Alpa: {kehadiran.alpa}</div>
+                    </div>
+                  ) : null}
+                  {!nilaiSnapshot.valid || !kehadiranSnapshot.valid ? (
+                    <div className="notice error report-note-spacing">
+                      <Icon name="alert" />
+                      <div>
+                        <strong>Data rapor perlu diperiksa</strong>
+                        <span>Ringkasan yang tersimpan tidak lengkap. Hubungi admin pesantren.</span>
+                      </div>
+                    </div>
+                  ) : null}
                   {row.catatan ? (
-                    <div className="notice" style={{ marginTop: 12 }}>
+                    <div className="notice report-note-spacing">
                       <strong>Catatan wali kelas</strong>
                       {row.catatan}
                     </div>

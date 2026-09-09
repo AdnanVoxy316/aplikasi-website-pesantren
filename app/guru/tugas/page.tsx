@@ -78,7 +78,7 @@ export default async function GuruTugasPage() {
                       </td>
                       <td>
                         {row.totalSubmission}/{row.totalSantri} dikumpulkan
-                        <div style={{ fontSize: 10 }}>{row.totalDinilai} dinilai</div>
+                        <div className="person-meta">{row.totalDinilai} dinilai</div>
                       </td>
                       <td>
                         <div className="table-actions">

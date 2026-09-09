@@ -66,14 +66,16 @@ export default async function WaliNilaiPage({
                       <strong>{row.mapelNama}</strong>
                     </td>
                     <td>
-                      {row.detail.map((d) => (
-                        <div key={d.jenis} style={{ fontSize: 11 }}>
-                          {d.jenis}: <strong>{d.nilai}</strong> (bobot {d.bobot})
-                        </div>
-                      ))}
+                      <div className="nilai-detail-chips">
+                        {row.detail.map((d) => (
+                          <span className="nilai-detail-chip" key={d.jenis}>
+                            {d.jenis} <strong>{d.nilai}</strong> · bobot {d.bobot}
+                          </span>
+                        ))}
+                      </div>
                     </td>
                     <td>
-                      <strong style={{ fontSize: 16 }}>{row.nilaiAkhir ?? "—"}</strong>
+                      <strong style={{ fontSize: 14 }}>{row.nilaiAkhir ?? "—"}</strong>
                     </td>
                   </tr>
                 ))}

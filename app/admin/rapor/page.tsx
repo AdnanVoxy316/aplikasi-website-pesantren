@@ -10,6 +10,7 @@ import {
 import { listSantriOfKelas } from "@/db/queries/guru";
 import { tanggalWaktuIndo } from "@/lib/format";
 import { GenerateRaporClient } from "@/components/shared/generate-rapor-client";
+import { RaporPdfButton } from "@/components/shared/rapor-pdf-button";
 
 export const metadata: Metadata = {
   title: "Rapor",
@@ -70,6 +71,7 @@ export default async function AdminRaporPage() {
                   <th>Semester</th>
                   <th>Digenerate</th>
                   <th>Catatan</th>
+                  <th style={{ textAlign: "right" }}>Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -84,6 +86,11 @@ export default async function AdminRaporPage() {
                     </td>
                     <td>{tanggalWaktuIndo(row.generatedAt)}</td>
                     <td>{row.catatan ?? "—"}</td>
+                    <td>
+                      <div className="table-actions">
+                        <RaporPdfButton raporId={row.id} />
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -67,30 +67,22 @@ export default async function GuruKehadiranPage({
         description="Catat hadir/izin/sakit/alpa per pertemuan. Data tersimpan per santri per tanggal."
       />
 
-      <div className="panel-toolbar" style={{ padding: "0 0 14px" }}>
+      <div className="panel-toolbar selection-toolbar">
         <div className="toolbar-left">
           {pengajaranRows.map((p) => (
             <Link
               key={p.id}
               href={`/guru/kehadiran?pengajaranId=${p.id}`}
-              className="table-button"
-              style={{
-                marginRight: 6,
-                padding: "8px 12px",
-                borderRadius: 10,
-                border: "1px solid var(--line)",
-                background: p.id === selected.id ? "var(--brand)" : "var(--surface)",
-                color: p.id === selected.id ? "#fff" : "inherit",
-              }}
+              className={`task-selector${p.id === selected.id ? " active" : ""}`}
             >
               {p.kelasNama} · {p.mapelNama}
             </Link>
           ))}
         </div>
         <div className="toolbar-right">
-          <form method="get" style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <form method="get" className="date-filter-form">
             <input type="hidden" name="pengajaranId" value={selected.id} />
-            <label htmlFor="tanggal" style={{ fontSize: 11, fontWeight: 700 }}>
+            <label htmlFor="tanggal" className="date-filter-label">
               Tanggal
             </label>
             <input

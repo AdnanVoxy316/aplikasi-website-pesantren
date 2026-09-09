@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/session";
 import { getGuruProfile, listPengajaranGuru, listRaporKelas } from "@/db/queries/guru";
 import { getTahunAjaranAktif, getPesantrenSettings } from "@/db/queries/admin";
 import { GenerateRaporClient } from "@/components/shared/generate-rapor-client";
+import { RaporPdfButton } from "@/components/shared/rapor-pdf-button";
 import { listSantriOfKelas } from "@/db/queries/guru";
 import { tanggalWaktuIndo } from "@/lib/format";
 
@@ -92,6 +93,7 @@ export default async function GuruRaporPage() {
                   <th>Semester</th>
                   <th>Digenerate</th>
                   <th>Catatan</th>
+                  <th className="align-right">Aksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,6 +105,11 @@ export default async function GuruRaporPage() {
                     <td>{row.semester}</td>
                     <td>{tanggalWaktuIndo(row.generatedAt)}</td>
                     <td>{row.catatan ?? "—"}</td>
+                    <td>
+                      <div className="table-actions">
+                        <RaporPdfButton raporId={row.id} />
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>

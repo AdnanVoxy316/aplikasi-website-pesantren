@@ -10,16 +10,6 @@ export type KelasGroup = {
   santri: { id: string; nama: string; nis: string }[];
 };
 
-const inputStyle = {
-  display: "block",
-  width: "100%",
-  marginBottom: 10,
-  padding: "9px 11px",
-  borderRadius: 10,
-  border: "1px solid var(--line)",
-  fontSize: 12,
-};
-
 export function GenerateRaporClient({
   kelasGroups,
   tahunAjaranId,
@@ -66,7 +56,7 @@ export function GenerateRaporClient({
               value={kelasId}
               onChange={(event) => setKelasId(event.target.value)}
               required
-              style={inputStyle}
+              className="task-form-control"
             >
               {kelasGroups.map((k) => (
                 <option key={k.id} value={k.id}>
@@ -77,7 +67,7 @@ export function GenerateRaporClient({
           </div>
           <div className="field">
             <label htmlFor="r-santri">Santri</label>
-            <select id="r-santri" name="santriId" required style={inputStyle}>
+              <select id="r-santri" name="santriId" required className="task-form-control">
               {(kelasAktif?.santri ?? []).map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.nama} · NIS {s.nis}
@@ -89,14 +79,18 @@ export function GenerateRaporClient({
             <label htmlFor="r-catatan">
               Catatan wali kelas <span className="optional">(opsional)</span>
             </label>
-            <textarea id="r-catatan" name="catatanWaliKelas" style={{ ...inputStyle, minHeight: 70 }} />
+            <textarea id="r-catatan" name="catatanWaliKelas" className="task-form-control task-form-textarea" />
           </div>
         </div>
         <p className="panel-subtitle">
           Tahun ajaran {tahunAjaranLabel} · semester {semesterAktif}
         </p>
         <div className="form-actions">
-          <button className="button button-primary" type="submit" disabled={pending || !tahunAjaranId}>
+          <button
+            className="button button-primary"
+            type="submit"
+            disabled={pending || !tahunAjaranId || !kelasAktif?.santri.length}
+          >
             {pending ? "Mengenerate..." : "Generate rapor"}
           </button>
         </div>

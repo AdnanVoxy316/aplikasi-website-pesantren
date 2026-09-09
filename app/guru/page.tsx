@@ -122,7 +122,7 @@ export default async function GuruDashboardPage() {
               })}
             </div>
           )}
-          <div className="form-actions" style={{ justifyContent: "flex-start" }}>
+          <div className="form-actions task-actions">
             <Link className="button button-secondary" href="/guru/tugas">
               Lihat semua tugas
             </Link>

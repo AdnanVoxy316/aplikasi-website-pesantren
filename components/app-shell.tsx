@@ -23,7 +23,13 @@ import {
 } from "@/lib/nav";
 import { markAllNotificationsRead } from "@/actions/notifikasi";
 
-type ToastFn = (message: string) => void;
+export type ToastType = "success" | "error" | "warning" | "info";
+type ToastFn = (message: string, type?: ToastType) => void;
+
+type ToastState = {
+  message: string;
+  type: ToastType;
+};
 
 const ToastContext = createContext<ToastFn>(() => {});
 
@@ -67,28 +73,24 @@ export default function AppShell({
 }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [lastPathname, setLastPathname] = useState(pathname);
   const hash = useSyncExternalStore(subscribeToHash, () => window.location.hash, () => "");
   const [openPopover, setOpenPopover] = useState<"none" | "notification" | "profile">("none");
   const [notifItems, setNotifItems] = useState<ShellNotification[]>(notifications);
-  const [toastMessage, setToastMessage] = useState("");
+  const [toast, setToast] = useState<ToastState | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
+  const previousPopoverRef = useRef<"none" | "notification" | "profile">("none");
+  const previousSidebarOpenRef = useRef(false);
 
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const notificationButtonRef = useRef<HTMLButtonElement>(null);
   const notificationPopoverRef = useRef<HTMLDivElement>(null);
   const profileButtonRef = useRef<HTMLButtonElement>(null);
   const profilePopoverRef = useRef<HTMLDivElement>(null);
 
-  if (lastPathname !== pathname) {
-    setLastPathname(pathname);
-    setSidebarOpen(false);
-    setOpenPopover("none");
-  }
-
-  const showToast = useCallback<ToastFn>((message: string) => {
-    setToastMessage(message);
+  const showToast = useCallback<ToastFn>((message: string, type: ToastType = "success") => {
+    setToast({ message, type });
     window.clearTimeout(toastTimer.current);
-    toastTimer.current = window.setTimeout(() => setToastMessage(""), 2600);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3200);
   }, []);
 
   useEffect(() => {
@@ -97,17 +99,39 @@ export default function AppShell({
   }, []);
 
   useEffect(() => {
+    const getActivePopover = () => {
+      if (openPopover === "notification") return notificationPopoverRef.current;
+      if (openPopover === "profile") return profilePopoverRef.current;
+      return null;
+    };
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (
-        event.key === "/" &&
-        !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName ?? "")
-      ) {
-        event.preventDefault();
-        showToast("Pencarian global tersedia pada versi aplikasi berikutnya.");
-      }
       if (event.key === "Escape") {
         setOpenPopover("none");
         setSidebarOpen(false);
+        return;
+      }
+
+      if (event.key === "Tab" && openPopover !== "none") {
+        const popover = getActivePopover();
+        const focusable = popover
+          ? Array.from(
+              popover.querySelectorAll<HTMLElement>(
+                'button:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])',
+              ),
+            )
+          : [];
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
       }
     };
     const onClick = (event: MouseEvent) => {
@@ -128,14 +152,35 @@ export default function AppShell({
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("click", onClick);
     };
-  }, [showToast]);
+  }, [openPopover]);
+
+  useEffect(() => {
+    if (previousSidebarOpenRef.current && !sidebarOpen) menuButtonRef.current?.focus();
+    previousSidebarOpenRef.current = sidebarOpen;
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    const previous = previousPopoverRef.current;
+    if (openPopover === "notification") {
+      notificationPopoverRef.current
+        ?.querySelector<HTMLElement>("[data-popover-focus], button, a[href]")
+        ?.focus();
+    } else if (openPopover === "profile") {
+      profilePopoverRef.current?.querySelector<HTMLElement>("a[href], button")?.focus();
+    } else if (previous === "notification") {
+      notificationButtonRef.current?.focus();
+    } else if (previous === "profile") {
+      profileButtonRef.current?.focus();
+    }
+    previousPopoverRef.current = openPopover;
+  }, [openPopover]);
 
   const navSections = navigation[role];
   const hasNotification = notifItems.some((item) => !item.read);
   const breadcrumb = useMemo(
     () =>
       pathname.startsWith("/profil")
-        ? (["Akun", "Profil saya"] as [string, string])
+        ? (["Akun", "Profil & pengaturan akun"] as [string, string])
         : resolveBreadcrumb(pathname, role),
     [pathname, role],
   );
@@ -155,6 +200,7 @@ export default function AppShell({
       />
       <div className="app-shell">
         <aside
+          id="primary-navigation"
           className={`sidebar${sidebarOpen ? " open" : ""}`}
           aria-label={`Navigasi ${roleLabels[role]}`}
         >
@@ -162,6 +208,10 @@ export default function AppShell({
             className="brand"
             href={roleDashboard[role]}
             aria-label="ELMS Pesantren, kembali ke beranda"
+            onClick={() => {
+              setSidebarOpen(false);
+              setOpenPopover("none");
+            }}
           >
             <span className="brand-mark">
               <Icon name="mosque" />
@@ -193,7 +243,10 @@ export default function AppShell({
                           className={`nav-link${active ? " active" : ""}`}
                           href={item.href}
                           aria-current={active ? "page" : undefined}
-                          onClick={() => setSidebarOpen(false)}
+                          onClick={() => {
+                            setSidebarOpen(false);
+                            setOpenPopover("none");
+                          }}
                         >
                           <span className="nav-icon">
                             <Icon name={item.icon} />
@@ -229,6 +282,8 @@ export default function AppShell({
                 type="button"
                 aria-label="Buka menu navigasi"
                 aria-expanded={sidebarOpen}
+                aria-controls="primary-navigation"
+                ref={menuButtonRef}
                 onClick={() => setSidebarOpen((open) => !open)}
               >
                 <Icon name="menu" />
@@ -241,19 +296,21 @@ export default function AppShell({
             </div>
             <div className="topbar-end">
               <button
-                className="search-button"
+                className="search-button is-disabled"
                 type="button"
-                onClick={() => showToast("Pencarian global tersedia pada versi aplikasi berikutnya.")}
+                disabled
+                aria-label="Pencarian global segera hadir"
+                title="Pencarian global segera hadir"
               >
                 <Icon name="search" />
-                <span>Cari apa saja</span>
-                <kbd className="search-key">/</kbd>
+                <span>Pencarian segera hadir</span>
               </button>
               <button
                 className="icon-button"
                 type="button"
                 aria-label="Buka notifikasi"
                 aria-expanded={openPopover === "notification"}
+                aria-controls="notification-popover"
                 ref={notificationButtonRef}
                 onClick={() =>
                   setOpenPopover((current) =>
@@ -269,6 +326,7 @@ export default function AppShell({
                 type="button"
                 aria-label="Buka menu profil"
                 aria-expanded={openPopover === "profile"}
+                aria-controls="profile-popover"
                 ref={profileButtonRef}
                 onClick={() =>
                   setOpenPopover((current) => (current === "profile" ? "none" : "profile"))
@@ -289,16 +347,28 @@ export default function AppShell({
       </div>
 
       <div
+        id="notification-popover"
         className={`popover${openPopover === "notification" ? " open" : ""}`}
         role="dialog"
-        aria-label="Notifikasi"
+        aria-labelledby="notification-popover-title"
+        aria-hidden={openPopover !== "notification"}
         ref={notificationPopoverRef}
       >
         <div className="popover-head">
-          <strong>Notifikasi</strong>
-          <button type="button" onClick={markAllRead}>
-            Tandai dibaca
-          </button>
+          <strong id="notification-popover-title">Notifikasi</strong>
+          <div className="popover-actions">
+            <button
+              className="popover-close"
+              type="button"
+              aria-label="Tutup notifikasi"
+              onClick={() => setOpenPopover("none")}
+            >
+              <Icon name="close" />
+            </button>
+            <button type="button" data-popover-focus onClick={markAllRead}>
+              Tandai dibaca
+            </button>
+          </div>
         </div>
         <div className="notification-list">
           {notifItems.length === 0 ? (
@@ -322,37 +392,40 @@ export default function AppShell({
       </div>
 
       <div
+        id="profile-popover"
         className={`popover profile-popover${openPopover === "profile" ? " open" : ""}`}
         role="dialog"
-        aria-label="Menu profil"
+        aria-labelledby="profile-popover-title"
+        aria-hidden={openPopover !== "profile"}
         ref={profilePopoverRef}
       >
         <div className="profile-menu-head">
           <span className="avatar">{user.initials}</span>
           <div className="profile-copy">
-            <span className="profile-name">{user.name}</span>
+            <span className="profile-name" id="profile-popover-title">{user.name}</span>
             <span className="profile-role">{user.roleLabel}</span>
           </div>
         </div>
         <div className="profile-menu-list">
           <Link className="profile-menu-link" href="/profil" onClick={() => setOpenPopover("none")}>
             <Icon name="user" />
-            Profil saya
+            Profil &amp; pengaturan akun
           </Link>
-          <Link className="profile-menu-link" href="/profil#keamanan" onClick={() => setOpenPopover("none")}>
-            <Icon name="settings" />
-            Pengaturan akun
-          </Link>
-          <Link className="profile-menu-link" href="/logout">
+          <Link className="profile-menu-link" href="/logout" onClick={() => setOpenPopover("none")}>
             <Icon name="log-out" />
             Keluar
           </Link>
         </div>
       </div>
 
-      <div className={`toast${toastMessage ? " show" : ""}`} role="status" aria-live="polite">
-        <Icon name="check" />
-        <span>{toastMessage}</span>
+      <div
+        className={`toast${toast ? ` show ${toast.type}` : ""}`}
+        role={toast?.type === "error" ? "alert" : "status"}
+        aria-live={toast?.type === "error" ? "assertive" : "polite"}
+        aria-atomic="true"
+      >
+        <Icon name={toast?.type === "success" ? "check" : "alert"} />
+        <span>{toast?.message ?? ""}</span>
       </div>
     </ToastContext.Provider>
   );

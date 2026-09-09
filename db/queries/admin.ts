@@ -1,5 +1,6 @@
 import "server-only";
 import { and, count, desc, eq, inArray, sql, type SQL } from "drizzle-orm";
+import { alias } from "drizzle-orm/sqlite-core";
 import { db } from "@/db";
 import {
   activityLog,
@@ -306,6 +307,37 @@ export async function listRaporRekap() {
     .innerJoin(tahunAjaran, eq(rapor.tahunAjaranId, tahunAjaran.id))
     .orderBy(desc(rapor.generatedAt))
     .limit(200);
+}
+
+/* Data lengkap satu rapor untuk kebutuhan cetak/unduh PDF. */
+export async function getRaporUntukPdf(raporId: string) {
+  const waliKelasUser = alias(user, "wali_kelas_user");
+  const [row] = await db
+    .select({
+      id: rapor.id,
+      kelasId: rapor.kelasId,
+      tahunAjaranId: rapor.tahunAjaranId,
+      semester: rapor.semester,
+      santriNama: user.name,
+      nis: santriProfile.nis,
+      kelasNama: kelas.nama,
+      waliKelasNama: waliKelasUser.name,
+      tahunAjaranLabel: tahunAjaran.label,
+      generatedAt: rapor.generatedAt,
+      catatan: rapor.catatanWaliKelas,
+      ringkasanNilai: rapor.ringkasanNilai,
+      ringkasanKehadiran: rapor.ringkasanKehadiran,
+    })
+    .from(rapor)
+    .innerJoin(santriProfile, eq(rapor.santriId, santriProfile.id))
+    .innerJoin(user, eq(santriProfile.userId, user.id))
+    .innerJoin(kelas, eq(rapor.kelasId, kelas.id))
+    .innerJoin(tahunAjaran, eq(rapor.tahunAjaranId, tahunAjaran.id))
+    .leftJoin(guruProfile, eq(kelas.waliKelasId, guruProfile.id))
+    .leftJoin(waliKelasUser, eq(guruProfile.userId, waliKelasUser.id))
+    .where(eq(rapor.id, raporId))
+    .limit(1);
+  return row ?? null;
 }
 
 export async function listNilaiCountByMapel() {

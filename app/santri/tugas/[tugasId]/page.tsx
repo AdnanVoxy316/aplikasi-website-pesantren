@@ -10,8 +10,13 @@ import {
   SubmitFileForm,
   SubmitLinkForm,
   DeleteSubmissionButton,
+  DeleteFileButton,
+  RemoveLinkButton,
 } from "./tugas-detail-client";
-import { tanggalWaktuIndo, sisaWaktu, masihBerjalan } from "@/lib/format";
+import { PreviewButton } from "@/components/shared/file-preview";
+import { Icon } from "@/lib/icons";
+import { tanggalWaktuIndo, sisaWaktu, masihBerjalan, ukuranFile } from "@/lib/format";
+import { submissionStatusLabel } from "@/lib/status";
 
 export const metadata: Metadata = {
   title: "Detail tugas",
@@ -63,10 +68,48 @@ export default async function SantriTugasDetailPage({
       />
 
       <div className="form-layout">
-        <div style={{ display: "grid", gap: 15 }}>
+        <div className="task-detail-column">
           <Panel title="Instruksi tugas">
-            <p style={{ fontSize: 13, lineHeight: 1.7 }}>{tugas.deskripsi}</p>
+            <p className="task-description">{tugas.deskripsi}</p>
           </Panel>
+
+          {tugas.lampiran.length > 0 ? (
+            <Panel
+              title="Lampiran dari guru"
+              subtitle={`${tugas.lampiran.length} lampiran — dapat dipreview tanpa mengunduh`}
+            >
+              <ul className="file-list attachment-list">
+                {tugas.lampiran.map((f) => (
+                  <li key={f.id}>
+                    {f.filePath ? (
+                      <>
+                        <Icon name="file" />
+                        <span className="file-name">{f.namaAsli}</span>
+                        <span className="file-size">{ukuranFile(f.size)}</span>
+                        <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
+                        <a
+                          href={`/api/files/${f.filePath}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="file-link"
+                        >
+                          unduh
+                        </a>
+                      </>
+                    ) : (
+                      <>
+                        <Icon name="link" />
+                        <span className="file-name">Link dari guru</span>
+                        <a href={f.url ?? "#"} target="_blank" rel="noreferrer" className="file-link">
+                          buka link
+                        </a>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </Panel>
+          ) : null}
 
           <Panel title="Submission saya" subtitle="Status pengumpulan dan penilaian">
             {!sudahSubmit ? (
@@ -75,13 +118,13 @@ export default async function SantriTugasDetailPage({
               </EmptyState>
             ) : (
               <div className="table-shell">
-                <table className="data-table">
+                <table className="data-table submission-summary">
                   <tbody>
                     <tr>
                       <td>Status</td>
                       <td>
                         <StatusBadge variant={STATUS_VARIANT[tugas.submissionStatus ?? "dikumpulkan"] ?? "neutral"}>
-                          {tugas.submissionStatus}
+                          {submissionStatusLabel(tugas.submissionStatus ?? "dikumpulkan")}
                         </StatusBadge>
                       </td>
                     </tr>
@@ -90,19 +133,51 @@ export default async function SantriTugasDetailPage({
                       <td>{tanggalWaktuIndo(tugas.submittedAt)}</td>
                     </tr>
                     <tr>
+                      <td>Link</td>
+                      <td>
+                        {tugas.url ? (
+                          <span className="inline-actions">
+                            <a href={tugas.url} target="_blank" rel="noreferrer" className="file-link">
+                              {tugas.url}
+                            </a>
+                            {bisaEdit ? <RemoveLinkButton submissionId={tugas.submissionId!} /> : null}
+                          </span>
+                        ) : (
+                          "—"
+                        )}
+                      </td>
+                    </tr>
+                    <tr>
                       <td>Berkas</td>
                       <td>
-                        {tugas.submissionTipe === "file" ? (
-                          <>
-                            {tugas.fileNamaAsli}
-                            {tugas.fileSize
-                              ? ` (${Math.round(tugas.fileSize / 1024)} KB)`
-                              : ""}
-                          </>
+                        {tugas.files.length > 0 ? (
+                          <ul className="file-list">
+                            {tugas.files.map((f) => (
+                              <li key={f.id}>
+                                <Icon name="file" />
+                                <span className="file-name">{f.namaAsli}</span>
+                                <span className="file-size">{ukuranFile(f.size)}</span>
+                                <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
+                                <a
+                                  href={`/api/files/${f.filePath}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="file-link"
+                                >
+                                  unduh
+                                </a>
+                                {bisaEdit ? (
+                                  <DeleteFileButton
+                                    submissionId={tugas.submissionId!}
+                                    fileId={f.id}
+                                    nama={f.namaAsli}
+                                  />
+                                ) : null}
+                              </li>
+                            ))}
+                          </ul>
                         ) : (
-                          <a href={tugas.url ?? "#"} target="_blank" rel="noreferrer" className="table-action">
-                            {tugas.url}
-                          </a>
+                          "—"
                         )}
                       </td>
                     </tr>
@@ -111,7 +186,7 @@ export default async function SantriTugasDetailPage({
                       <td>
                         {tugas.nilai ?? "—"}
                         {tugas.feedbackGuru ? (
-                          <div style={{ fontSize: 11, color: "var(--muted)" }}>
+                          <div className="feedback-note">
                             Feedback: {tugas.feedbackGuru}
                           </div>
                         ) : null}
@@ -122,7 +197,7 @@ export default async function SantriTugasDetailPage({
               </div>
             )}
             {sudahSubmit ? (
-              <div className="form-actions" style={{ justifyContent: "flex-start" }}>
+              <div className="form-actions task-actions">
                 {bisaEdit ? (
                   <>
                     <span className="panel-subtitle">
@@ -142,7 +217,7 @@ export default async function SantriTugasDetailPage({
           </Panel>
         </div>
 
-        <Panel title="Kumpulkan tugas" subtitle="Pilih file atau link">
+        <Panel title="Kumpulkan tugas" subtitle="Kirim file dan/atau link — keduanya dapat terkirim bersamaan">
           {sudahSubmit && !bisaEdit ? (
             <EmptyState>
               Submission sudah terkirim{" "}
@@ -150,18 +225,20 @@ export default async function SantriTugasDetailPage({
               Hubungi guru bila perlu perubahan.
             </EmptyState>
           ) : (
-            <div style={{ display: "grid", gap: 16 }}>
+            <div className="submit-options">
               <div className="form-card">
                 <h3 className="form-card-title">Upload file</h3>
                 <p className="form-card-description">
-                  .doc/.docx/.pdf/.jpg/.png — maksimum 10 MB, divalidasi server.
+                   PDF, dokumen Office, gambar, ZIP, dan file teks didukung — maksimum 10 MB per
+                   file, hingga 10 file per tugas. Bisa dipadukan dengan link di bawah.
                 </p>
                 <SubmitFileForm tugasId={tugas.id} />
               </div>
               <div className="form-card">
                 <h3 className="form-card-title">Kirim link</h3>
                 <p className="form-card-description">
-                  Google Drive / YouTube / tautan lain yang dapat diakses guru.
+                  Google Drive / YouTube / tautan lain yang dapat diakses guru. Link tidak
+                  menghapus file yang sudah diunggah.
                 </p>
                 <SubmitLinkForm tugasId={tugas.id} />
               </div>

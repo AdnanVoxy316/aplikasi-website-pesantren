@@ -27,6 +27,16 @@ export function tanggalWaktuIndo(date: Date | null | undefined): string {
   }).format(date);
 }
 
+/* Format panjang untuk blok tanda tangan rapor: "5 September 2026". */
+export function tanggalLengkapIndo(date: Date | null | undefined): string {
+  if (!date) return "—";
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
 const BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
@@ -52,4 +62,11 @@ export function masihBerjalan(deadline: Date): boolean {
 export function persenHadir(hadir: number, total: number): number {
   if (total === 0) return 0;
   return Math.round((hadir / total) * 100);
+}
+
+export function ukuranFile(bytes: number | null | undefined): string {
+  if (!bytes || bytes <= 0) return "—";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }

@@ -4,9 +4,16 @@ import { PageHeading } from "@/components/ui/page-heading";
 import { Panel, EmptyState } from "@/components/ui/panel";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { requireRole } from "@/lib/auth/session";
-import { getGuruProfile, listTugasGuru, listSubmissionsOfTugas } from "@/db/queries/guru";
-import { GradeForm } from "./submission-client";
-import { tanggalWaktuIndo } from "@/lib/format";
+import { getGuruProfile, listTugasGuru, listSubmissionsOfTugas, getTugasLampiran } from "@/db/queries/guru";
+import {
+  GradeForm,
+  DeleteSubmissionFileButton,
+  LampiranManager,
+  DeleteLampiranButton,
+} from "./submission-client";
+import { PreviewButton } from "@/components/shared/file-preview";
+import { Icon } from "@/lib/icons";
+import { tanggalWaktuIndo, ukuranFile } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Submission santri",
@@ -51,7 +58,10 @@ export default async function GuruSubmissionPage({
   }
 
   const selected = tugasRows.find((t) => t.id === params.tugasId) ?? tugasRows[0];
-  const submissions = await listSubmissionsOfTugas(selected.id);
+  const [submissions, lampiran] = await Promise.all([
+    listSubmissionsOfTugas(selected.id),
+    getTugasLampiran(selected.id),
+  ]);
 
   return (
     <>
@@ -61,21 +71,13 @@ export default async function GuruSubmissionPage({
         description="Beri nilai 0–100 dan feedback. Status berubah menjadi dinilai."
       />
 
-      <div className="panel-toolbar" style={{ padding: "0 0 14px" }}>
+      <div className="panel-toolbar submission-toolbar">
         <div className="toolbar-left">
           {tugasRows.slice(0, 8).map((t) => (
             <Link
               key={t.id}
               href={`/guru/tugas/submission?tugasId=${t.id}`}
-              className="table-button"
-              style={{
-                marginRight: 6,
-                padding: "8px 12px",
-                borderRadius: 10,
-                border: "1px solid var(--line)",
-                background: t.id === selected.id ? "var(--brand)" : "var(--surface)",
-                color: t.id === selected.id ? "#fff" : "inherit",
-              }}
+              className={`task-selector${t.id === selected.id ? " active" : ""}`}
             >
               {t.judul}
             </Link>
@@ -87,6 +89,49 @@ export default async function GuruSubmissionPage({
         title={selected.judul}
         subtitle={`${selected.kelasNama} · ${selected.mapelNama} · ${submissions.length}/${selected.totalSantri} dikumpulkan`}
       >
+        <div className="attachment-manager-section">
+          <h3 className="form-card-title attachment-heading">
+            Lampiran tugas
+          </h3>
+          <p className="form-card-description attachment-description">
+            File dan link yang dilampirkan guru untuk santri ({lampiran.length}/10 — semua jenis
+            file, maks 10 MB per file, bisa dipadukan dengan link).
+          </p>
+          {lampiran.length > 0 ? (
+            <ul className="file-list attachment-list">
+              {lampiran.map((f) => (
+                <li key={f.id}>
+                  {f.filePath ? (
+                    <>
+                      <Icon name="file" />
+                      <span className="file-name">{f.namaAsli}</span>
+                      <span className="file-size">{ukuranFile(f.size)}</span>
+                      <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
+                      <a href={`/api/files/${f.filePath}`} target="_blank" rel="noreferrer" className="file-link">
+                        unduh
+                      </a>
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="link" />
+                      <span className="file-name">Link lampiran</span>
+                      <a href={f.url ?? "#"} target="_blank" rel="noreferrer" className="file-link">
+                        buka link
+                      </a>
+                    </>
+                  )}
+                  <DeleteLampiranButton lampiranId={f.id} nama={f.filePath ? f.namaAsli : "link lampiran"} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="panel-subtitle attachment-empty">
+              Belum ada lampiran.
+            </p>
+          )}
+          <LampiranManager tugasId={selected.id} jumlahLampiran={lampiran.length} />
+        </div>
+
         {submissions.length === 0 ? (
           <EmptyState>
             Belum ada santri yang mengumpulkan tugas ini. Submission muncul otomatis setelah santri
@@ -94,7 +139,7 @@ export default async function GuruSubmissionPage({
           </EmptyState>
         ) : (
           <div className="table-shell">
-            <table className="data-table">
+            <table className="data-table submission-table">
               <thead>
                 <tr>
                   <th>Santri</th>
@@ -109,17 +154,32 @@ export default async function GuruSubmissionPage({
                   <tr key={s.id}>
                     <td>
                       <strong>{s.santriNama}</strong>
-                      <div style={{ fontSize: 10 }}>NIS {s.nis}</div>
+                      <div className="person-meta">NIS {s.nis}</div>
                     </td>
                     <td>{tanggalWaktuIndo(s.submittedAt)}</td>
                     <td>
-                      {s.tipe === "file" ? (
-                        s.fileNamaAsli ?? "file"
-                      ) : (
-                        <a href={s.url ?? "#"} target="_blank" rel="noreferrer" className="table-action">
-                          buka link
+                      {s.files.length > 0 ? (
+                        <ul className="file-list">
+                          {s.files.map((f) => (
+                            <li key={f.id}>
+                              <Icon name="file" />
+                              <span className="file-name">{f.namaAsli}</span>
+                                <span className="file-size">{ukuranFile(f.size)}</span>
+                              <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
+                              <a href={`/api/files/${f.filePath}`} target="_blank" rel="noreferrer" className="file-link">
+                                unduh
+                              </a>
+                              <DeleteSubmissionFileButton fileId={f.id} nama={f.namaAsli} />
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {s.url ? (
+                        <a href={s.url} target="_blank" rel="noreferrer" className="file-link">
+                          <Icon name="link" /> buka link santri
                         </a>
-                      )}
+                      ) : null}
+                      {s.files.length === 0 && !s.url ? "—" : null}
                     </td>
                     <td>
                       <StatusBadge variant={STATUS_VARIANT[s.status] ?? "neutral"}>{s.status}</StatusBadge>

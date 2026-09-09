@@ -30,6 +30,8 @@ export default async function AdminPengaturanPage() {
                 alamat: settingsRow.settings.alamat,
                 deskripsi: settingsRow.settings.deskripsi,
                 logoUrl: settingsRow.settings.logoUrl,
+                namaPimpinan: settingsRow.settings.namaPimpinan,
+                kotaRapor: settingsRow.settings.kotaRapor,
                 semesterAktif: settingsRow.settings.semesterAktif,
               }
             : null

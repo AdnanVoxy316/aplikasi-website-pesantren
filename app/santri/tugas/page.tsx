@@ -7,13 +7,14 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { requireRole } from "@/lib/auth/session";
 import { getSantriProfile, listTugasUntukSantri } from "@/db/queries/santri";
 import { tanggalIndo, sisaWaktu, masihBerjalan } from "@/lib/format";
+import { submissionStatusLabel } from "@/lib/status";
 
 export const metadata: Metadata = {
   title: "Tugas saya",
   description: "Daftar tugas kelas Anda beserta status pengumpulan.",
 };
 
-const STATUS_VARIANT: Record<string, "success" | "warning" | "neutral"> = {
+const STATUS_VARIANT: Record<string, "success" | "warning" | "neutral" | "danger"> = {
   dinilai: "success",
   terlambat: "warning",
   dikumpulkan: "neutral",
@@ -48,7 +49,7 @@ export default async function SantriTugasPage() {
               : "Anda belum ditempatkan di kelas mana pun. Hubungi admin."}
           </EmptyState>
         ) : (
-          <div className="table-shell">
+          <div className="table-shell table-shell-scroll">
             <table className="data-table">
               <thead>
                 <tr>
@@ -87,7 +88,7 @@ export default async function SantriTugasPage() {
                           )
                         ) : (
                           <StatusBadge variant={STATUS_VARIANT[row.submissionStatus ?? "dikumpulkan"] ?? "neutral"}>
-                            {row.submissionStatus}
+                            {submissionStatusLabel(row.submissionStatus ?? "dikumpulkan")}
                           </StatusBadge>
                         )}
                       </td>

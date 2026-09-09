@@ -20,7 +20,7 @@ export default async function GuruTugasBaruPage() {
       <PageHeading
         kicker="Kegiatan mengajar"
         title="Buat tugas baru"
-        description="Santri dapat mengumpulkan file (.doc/.docx/.pdf/.jpg/.png, maks 10MB) atau link."
+        description="Santri dapat mengumpulkan file (semua jenis, maks 10 MB per file, hingga 10 file) dan/atau link."
       />
       <Panel title="Formulir tugas" subtitle="Tugas langsung terlihat oleh santri di kelas tujuan">
         <TugasBaruClient

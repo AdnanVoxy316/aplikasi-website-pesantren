@@ -10,7 +10,7 @@ import { ChangePasswordForm } from "@/components/shared/change-password-form";
 import { tanggalIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
-  title: "Profil saya",
+  title: "Profil & pengaturan akun",
   description: "Informasi akun dan pengaturan keamanan.",
 };
 
@@ -74,18 +74,18 @@ export default async function ProfilPage() {
     >
       <PageHeading
         kicker="Akun"
-        title="Profil saya"
-        description="Informasi akun Anda dan pengaturan keamanan."
+        title="Profil & pengaturan akun"
+        description="Kelola informasi akun dan keamanan Anda dari satu tempat."
       />
 
-      <div className="form-layout" style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+      <div className="form-layout profile-layout">
         <Panel title="Informasi akun" subtitle="Data dikelola oleh admin pesantren">
-          <div className="table-shell">
-            <table className="data-table" style={{ minWidth: 0 }}>
+          <div className="table-shell profile-table-shell">
+            <table className="data-table profile-info-table">
               <tbody>
                 {rows.map(([label, value]) => (
                   <tr key={label}>
-                    <td style={{ width: 150 }}>
+                    <td>
                       <strong>{label}</strong>
                     </td>
                     <td>{value}</td>

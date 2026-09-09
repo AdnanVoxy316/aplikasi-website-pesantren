@@ -27,9 +27,23 @@ import { createPengumuman, deletePengumuman } from "@/actions/admin/pengumuman";
 import { updatePengaturan } from "@/actions/admin/pengaturan";
 import { deleteNilai, simpanNilaiMassal } from "@/actions/guru/nilai";
 import { simpanKehadiran } from "@/actions/guru/kehadiran";
-import { createTugas, gradeSubmission, deleteTugas } from "@/actions/guru/tugas";
+import {
+  createTugas,
+  gradeSubmission,
+  deleteTugas,
+  addTugasLampiran,
+  addTugasLampiranLink,
+  deleteTugasLampiran,
+  deleteSubmissionFileGuru,
+} from "@/actions/guru/tugas";
 import { generateRapor } from "@/actions/guru/rapor";
-import { submitLink, submitFile, deleteSubmission } from "@/actions/santri/submission";
+import {
+  submitLink,
+  submitFile,
+  deleteSubmission,
+  deleteOwnSubmissionFile,
+  removeSubmissionLink,
+} from "@/actions/santri/submission";
 import {
   createTarif,
   setTarifAktif,
@@ -195,6 +209,8 @@ export async function updatePengaturanForm(fd: FormData) {
     alamat: opt(fd, "alamat"),
     deskripsi: opt(fd, "deskripsi"),
     logoUrl: opt(fd, "logoUrl"),
+    namaPimpinan: opt(fd, "namaPimpinan"),
+    kotaRapor: opt(fd, "kotaRapor"),
     semesterAktif: str(fd, "semesterAktif") === "genap" ? "genap" : "ganjil",
   });
 }
@@ -266,6 +282,23 @@ export async function deleteTugasForm(fd: FormData) {
   return deleteTugas(str(fd, "id"));
 }
 
+/* Guru — lampiran tugas (satu file per permintaan) */
+export async function addTugasLampiranForm(fd: FormData) {
+  const file = fd.get("file");
+  return addTugasLampiran(
+    str(fd, "tugasId"),
+    file instanceof File ? file : new File([], ""),
+  );
+}
+
+export async function deleteTugasLampiranForm(fd: FormData) {
+  return deleteTugasLampiran(str(fd, "id"));
+}
+
+export async function addTugasLampiranLinkForm(fd: FormData) {
+  return addTugasLampiranLink(str(fd, "tugasId"), str(fd, "url"));
+}
+
 /* Guru/Admin — rapor */
 export async function generateRaporForm(fd: FormData) {
   return generateRapor({
@@ -277,7 +310,7 @@ export async function generateRaporForm(fd: FormData) {
   });
 }
 
-/* Santri — submission */
+/* Santri — submission (satu file per permintaan) */
 export async function submitLinkForm(fd: FormData) {
   return submitLink({
     tugasId: str(fd, "tugasId"),
@@ -290,8 +323,21 @@ export async function submitFileForm(fd: FormData) {
   return submitFile(str(fd, "tugasId"), file instanceof File ? file : new File([], ""));
 }
 
+export async function deleteOwnSubmissionFileForm(fd: FormData) {
+  return deleteOwnSubmissionFile(str(fd, "submissionId"), str(fd, "fileId"));
+}
+
+export async function removeSubmissionLinkForm(fd: FormData) {
+  return removeSubmissionLink(str(fd, "id"));
+}
+
 export async function deleteSubmissionForm(fd: FormData) {
   return deleteSubmission(str(fd, "id"));
+}
+
+/* Guru — hapus file submission santri */
+export async function deleteSubmissionFileGuruForm(fd: FormData) {
+  return deleteSubmissionFileGuru(str(fd, "id"));
 }
 
 /* Pembayaran */

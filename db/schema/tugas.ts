@@ -101,20 +101,74 @@ export const tugasSubmission = sqliteTable(
   ],
 );
 
+/* Lampiran tugas dari guru: bisa file (maks 10 file) dan/atau link,
+   sehingga santri dapat melihat keduanya sekaligus. */
+export const tugasLampiran = sqliteTable(
+  "tugas_lampiran",
+  {
+    id: id(),
+    tugasId: text("tugas_id")
+      .notNull()
+      .references(() => tugas.id, { onDelete: "cascade" }),
+    filePath: text("file_path"),
+    namaAsli: text("nama_asli").notNull(),
+    url: text("url"),
+    mimeType: text("mime_type"),
+    size: integer("size"),
+    uploadedBy: text("uploaded_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: createdAt(),
+  },
+  (table) => [index("tugas_lampiran_tugasId_idx").on(table.tugasId)],
+);
+
+/* File-file submission santri (maks 10 file per tugas). */
+export const tugasSubmissionFile = sqliteTable(
+  "tugas_submission_file",
+  {
+    id: id(),
+    submissionId: text("submission_id")
+      .notNull()
+      .references(() => tugasSubmission.id, { onDelete: "cascade" }),
+    filePath: text("file_path").notNull(),
+    namaAsli: text("nama_asli").notNull(),
+    mimeType: text("mime_type"),
+    size: integer("size"),
+    createdAt: createdAt(),
+  },
+  (table) => [index("tugas_submission_file_submissionId_idx").on(table.submissionId)],
+);
+
 export const tugasRelations = relations(tugas, ({ one, many }) => ({
   kelas: one(kelas, { fields: [tugas.kelasId], references: [kelas.id] }),
   mapel: one(mapel, { fields: [tugas.mapelId], references: [mapel.id] }),
   guru: one(guruProfile, { fields: [tugas.guruId], references: [guruProfile.id] }),
   submissions: many(tugasSubmission),
+  lampiran: many(tugasLampiran),
 }));
 
-export const tugasSubmissionRelations = relations(tugasSubmission, ({ one }) => ({
+export const tugasSubmissionRelations = relations(tugasSubmission, ({ one, many }) => ({
   tugas: one(tugas, { fields: [tugasSubmission.tugasId], references: [tugas.id] }),
   santri: one(santriProfile, {
     fields: [tugasSubmission.santriId],
     references: [santriProfile.id],
   }),
+  files: many(tugasSubmissionFile),
+}));
+
+export const tugasLampiranRelations = relations(tugasLampiran, ({ one }) => ({
+  tugas: one(tugas, { fields: [tugasLampiran.tugasId], references: [tugas.id] }),
+}));
+
+export const tugasSubmissionFileRelations = relations(tugasSubmissionFile, ({ one }) => ({
+  submission: one(tugasSubmission, {
+    fields: [tugasSubmissionFile.submissionId],
+    references: [tugasSubmission.id],
+  }),
 }));
 
 export type Tugas = typeof tugas.$inferSelect;
 export type TugasSubmission = typeof tugasSubmission.$inferSelect;
+export type TugasLampiran = typeof tugasLampiran.$inferSelect;
+export type TugasSubmissionFile = typeof tugasSubmissionFile.$inferSelect;

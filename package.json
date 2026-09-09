@@ -14,10 +14,15 @@
   "dependencies": {
     "better-auth": "^1.7.2",
     "better-sqlite3": "^12.11.1",
+    "docx-preview": "^0.4.0",
     "drizzle-orm": "^0.45.2",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "next": "16.2.9",
+    "pptx-preview": "^1.0.7",
     "react": "19.2.0",
     "react-dom": "19.2.0",
+    "xlsx": "^0.18.5",
     "zod": "^4.5.4"
   },
   "devDependencies": {

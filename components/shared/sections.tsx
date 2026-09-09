@@ -33,8 +33,8 @@ export async function PengumumanSection({
                   <Icon name="megaphone" />
                 </span>
                 <div>
-                  <div className="announcement-title">{item.judul}</div>
-                  <div className="announcement-text">{item.isi}</div>
+                  <div className="announcement-title announcement-title-wrap">{item.judul}</div>
+                  <div className="announcement-text announcement-text-full">{item.isi}</div>
                   <div className="announcement-date">
                     {tanggalIndo(item.createdAt)} · {item.dibuatOlehNama ?? "Admin"} ·
                     target: {item.targetKelasNama ?? item.targetRole}
@@ -57,13 +57,13 @@ export async function KalenderSection() {
       <PageHeading
         kicker="Workspace"
         title="Kalender akademik"
-        description="Tahun ajaran dan semester aktif pesantren."
+        description="Periode tahun ajaran dan semester yang sedang digunakan pesantren."
       />
-      <Panel title="Tahun ajaran" subtitle="Dikelola oleh admin pada menu Pengaturan">
+      <Panel title="Periode tahun ajaran" subtitle="Jadwal periode dikelola oleh admin pesantren">
         {tahunAjaranRows.length === 0 ? (
           <EmptyState>Belum ada tahun ajaran yang dibuat admin.</EmptyState>
         ) : (
-          <div className="table-shell">
+          <div className="table-shell table-shell-scroll">
             <table className="data-table">
               <thead>
                 <tr>

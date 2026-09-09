@@ -5,21 +5,11 @@ import { requireRole } from "@/lib/auth/session";
 import { getSantriProfile, listTagihanUntukSantri } from "@/db/queries/santri";
 import { BayarButton } from "@/components/shared/bayar-button";
 import { rupiah, labelPeriode, tanggalIndo } from "@/lib/format";
+import { paymentStatusLabel, paymentStatusVariant } from "@/lib/status";
 
 export const metadata: Metadata = {
   title: "Tagihan SPP",
   description: "Tagihan SPP Anda dan tombol pembayaran online via Mayar.",
-};
-
-const STATUS_VARIANT: Record<string, "success" | "warning" | "neutral" | "danger"> = {
-  paid: "success",
-  pending: "warning",
-  processing: "warning",
-  unpaid: "neutral",
-  draft: "neutral",
-  cancelled: "danger",
-  expired: "danger",
-  failed: "danger",
 };
 
 export default async function SantriTagihanPage() {
@@ -49,7 +39,7 @@ export default async function SantriTagihanPage() {
             Belum ada tagihan SPP. Tagihan dibuat oleh admin pesantren per periode.
           </EmptyState>
         ) : (
-          <div className="table-shell">
+          <div className="table-shell table-shell-scroll">
             <table className="data-table">
               <thead>
                 <tr>
@@ -69,12 +59,12 @@ export default async function SantriTagihanPage() {
                       <td>
                         <strong>{labelPeriode(row.periodeBulan, row.periodeTahun)}</strong>
                       </td>
-                      <td style={{ fontFamily: "monospace", fontSize: 10 }}>{row.nomorTagihan}</td>
+                      <td className="invoice-number-small">{row.nomorTagihan}</td>
                       <td>{rupiah(row.totalTagihan)}</td>
                       <td>{tanggalIndo(row.jatuhTempo)}</td>
                       <td>
-                        <span className={`status-badge ${STATUS_VARIANT[row.status] ?? "neutral"}`}>
-                          {row.status}
+                        <span className={`status-badge ${paymentStatusVariant(row.status)}`}>
+                          {paymentStatusLabel(row.status)}
                         </span>
                       </td>
                       <td>

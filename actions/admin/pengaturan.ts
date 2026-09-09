@@ -14,6 +14,8 @@ const settingsSchema = z.object({
   alamat: z.string().trim().optional(),
   deskripsi: z.string().trim().optional(),
   logoUrl: z.string().trim().optional(),
+  namaPimpinan: z.string().trim().optional(),
+  kotaRapor: z.string().trim().optional(),
   semesterAktif: z.enum(["ganjil", "genap"]),
 });
 
@@ -36,6 +38,8 @@ export async function updatePengaturan(
       alamat: data.alamat?.trim() || null,
       deskripsi: data.deskripsi?.trim() || null,
       logoUrl: data.logoUrl?.trim() || null,
+      namaPimpinan: data.namaPimpinan?.trim() || null,
+      kotaRapor: data.kotaRapor?.trim() || null,
       semesterAktif: data.semesterAktif,
     };
 

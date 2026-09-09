@@ -12,13 +12,14 @@ import {
 } from "@/db/queries/santri";
 import { getTahunAjaranAktif } from "@/db/queries/admin";
 import { persenHadir } from "@/lib/format";
+import { attendanceStatusLabel } from "@/lib/status";
 
 export const metadata: Metadata = {
   title: "Kehadiran",
   description: "Rekap dan riwayat kehadiran.",
 };
 
-const STATUS_VARIANT: Record<string, "success" | "warning" | "danger"> = {
+const STATUS_VARIANT: Record<string, "success" | "warning" | "danger" | "neutral"> = {
   hadir: "success",
   izin: "warning",
   sakit: "warning",
@@ -100,7 +101,7 @@ export default async function SantriKehadiranPage() {
                       <td>{r.mapelNama ?? "Harian"}</td>
                       <td>
                         <StatusBadge variant={STATUS_VARIANT[r.status] ?? "neutral"}>
-                          {r.status}
+                          {attendanceStatusLabel(r.status)}
                         </StatusBadge>
                       </td>
                     </tr>

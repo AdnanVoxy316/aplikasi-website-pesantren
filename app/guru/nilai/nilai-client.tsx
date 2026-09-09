@@ -12,15 +12,6 @@ export type SantriNilaiRow = {
 
 export type JenisRow = { id: string; nama: string; bobot: number };
 
-const inputStyle = {
-  width: 76,
-  padding: "6px 8px",
-  borderRadius: 8,
-  border: "1px solid var(--line)",
-  fontSize: 12,
-  textAlign: "center" as const,
-};
-
 export function NilaiGridClient({
   kelasId,
   mapelId,
@@ -64,7 +55,7 @@ export function NilaiGridClient({
               {jenisNilai.map((j) => (
                 <th key={j.id}>
                   {j.nama}
-                  <div style={{ fontWeight: 400, fontSize: 9 }}>bobot {j.bobot}</div>
+                  <div className="table-column-note">bobot {j.bobot}</div>
                 </th>
               ))}
             </tr>
@@ -74,7 +65,7 @@ export function NilaiGridClient({
               <tr key={s.id}>
                 <td>
                   <strong>{s.nama}</strong>
-                  <div style={{ fontSize: 10 }}>NIS {s.nis}</div>
+                  <div className="person-meta">NIS {s.nis}</div>
                 </td>
                 {jenisNilai.map((j) => (
                   <td key={j.id}>
@@ -87,7 +78,6 @@ export function NilaiGridClient({
                       step="0.1"
                       defaultValue={existing[s.id]?.[j.id] ?? ""}
                       aria-label={`Nilai ${j.nama} untuk ${s.nama}`}
-                      style={inputStyle}
                     />
                   </td>
                 ))}
@@ -96,7 +86,7 @@ export function NilaiGridClient({
           </tbody>
         </table>
         {santri.length === 0 ? (
-          <p className="panel-subtitle" style={{ padding: 14 }}>
+          <p className="panel-subtitle empty-table-note">
             Kelas ini belum memiliki santri.
           </p>
         ) : null}

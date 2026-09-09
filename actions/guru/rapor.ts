@@ -11,6 +11,7 @@ import {
   mapel,
   nilai,
   pengajaran,
+  pesantrenSettings,
   rapor,
   santriProfile,
 } from "@/db/schema";
@@ -18,6 +19,7 @@ import { getSession } from "@/lib/auth/session";
 import { getGuruProfileId } from "@/lib/permissions";
 import { logActivity } from "@/lib/activity";
 import { fail, ok, toActionError, type ActionResult } from "@/lib/action-result";
+import { getRaporUntukPdf } from "@/db/queries/admin";
 
 type RingkasanMapel = {
   mapelId: string;
@@ -243,4 +245,108 @@ export async function getRaporForSantri(santriProfileId: string) {
     .select()
     .from(rapor)
     .where(eq(rapor.santriId, santriProfileId));
+}
+
+export type RaporPdfPayload = {
+  santriNama: string;
+  nis: string;
+  kelasNama: string;
+  semester: "ganjil" | "genap";
+  tahunAjaranLabel: string;
+  generatedAtIso: string;
+  catatan: string | null;
+  waliKelasNama: string | null;
+  nilai: { nama: string; kategori: string; nilaiAkhir: number | null }[];
+  kehadiran: { hadir: number; izin: number; sakit: number; alpa: number; total: number };
+  settings: {
+    namaPesantren: string;
+    alamat: string | null;
+    namaPimpinan: string | null;
+    kotaRapor: string | null;
+  };
+};
+
+/* Data rapor siap render PDF (dipakai client untuk generate file). */
+export async function fetchRaporPdfData(
+  raporId: string,
+): Promise<ActionResult<RaporPdfPayload>> {
+  try {
+    const session = await getSession();
+    if (!session) return fail("Sesi tidak ditemukan.");
+    if (session.user.role !== "guru" && session.user.role !== "admin") {
+      return fail("Hanya guru atau admin yang dapat mengunduh rapor.");
+    }
+
+    const raporRow = await getRaporUntukPdf(raporId);
+    if (!raporRow) return fail("Rapor tidak ditemukan.");
+
+    if (session.user.role === "guru") {
+      const guruId = await getGuruProfileId(session.user.id);
+      const [isWaliKelas] = await db
+        .select({ id: kelas.id })
+        .from(kelas)
+        .where(and(eq(kelas.id, raporRow.kelasId), eq(kelas.waliKelasId, guruId)))
+        .limit(1);
+      if (!isWaliKelas) {
+        const [hasPengajaran] = await db
+          .select({ id: pengajaran.id })
+          .from(pengajaran)
+          .where(
+            and(
+              eq(pengajaran.guruId, guruId),
+              eq(pengajaran.kelasId, raporRow.kelasId),
+              eq(pengajaran.tahunAjaranId, raporRow.tahunAjaranId),
+            ),
+          )
+          .limit(1);
+        if (!hasPengajaran) {
+          return fail("Anda tidak diizinkan mengunduh rapor kelas ini.");
+        }
+      }
+    }
+
+    const [settings] = await db
+      .select({
+        namaPesantren: pesantrenSettings.namaPesantren,
+        alamat: pesantrenSettings.alamat,
+        namaPimpinan: pesantrenSettings.namaPimpinan,
+        kotaRapor: pesantrenSettings.kotaRapor,
+      })
+      .from(pesantrenSettings)
+      .where(eq(pesantrenSettings.id, "default"))
+      .limit(1);
+
+    const payload: RaporPdfPayload = {
+      santriNama: raporRow.santriNama,
+      nis: raporRow.nis,
+      kelasNama: raporRow.kelasNama,
+      semester: raporRow.semester,
+      tahunAjaranLabel: raporRow.tahunAjaranLabel,
+      generatedAtIso: raporRow.generatedAt.toISOString(),
+      catatan: raporRow.catatan,
+      waliKelasNama: raporRow.waliKelasNama,
+      nilai: (
+        JSON.parse(raporRow.ringkasanNilai) as {
+          nama: string;
+          kategori: string;
+          nilaiAkhir: number | null;
+        }[]
+      ).map((n) => ({
+        nama: n.nama,
+        kategori: n.kategori,
+        nilaiAkhir: n.nilaiAkhir,
+      })),
+      kehadiran: JSON.parse(raporRow.ringkasanKehadiran),
+      settings: settings ?? {
+        namaPesantren: "ELMS Pesantren",
+        alamat: null,
+        namaPimpinan: null,
+        kotaRapor: null,
+      },
+    };
+
+    return ok(payload);
+  } catch (error) {
+    return toActionError(error);
+  }
 }

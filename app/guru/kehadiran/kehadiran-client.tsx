@@ -8,13 +8,6 @@ export type SantriRow = { id: string; nama: string; nis: string };
 
 const STATUS_OPTIONS = ["hadir", "izin", "sakit", "alpa"] as const;
 
-const selectStyle = {
-  padding: "6px 8px",
-  borderRadius: 8,
-  border: "1px solid var(--line)",
-  fontSize: 12,
-};
-
 const STATUS_VARIANT: Record<string, string> = {
   hadir: "success",
   izin: "warning",
@@ -70,15 +63,15 @@ export function KehadiranClient({
                 <tr key={s.id}>
                   <td>
                     <strong>{s.nama}</strong>
-                    <div style={{ fontSize: 10 }}>NIS {s.nis}</div>
+                    <div className="person-meta">NIS {s.nis}</div>
                   </td>
                   <td>
-                    <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                    <div className="attendance-value">
                       <select
                         name={`status__${s.id}`}
                         defaultValue={current}
                         aria-label={`Kehadiran ${s.nama}`}
-                        style={selectStyle}
+                        className="status-select"
                       >
                         {STATUS_OPTIONS.map((status) => (
                           <option key={status} value={status}>
@@ -97,7 +90,7 @@ export function KehadiranClient({
           </tbody>
         </table>
         {santri.length === 0 ? (
-          <p className="panel-subtitle" style={{ padding: 14 }}>
+          <p className="panel-subtitle empty-table-note">
             Kelas ini belum memiliki santri.
           </p>
         ) : null}

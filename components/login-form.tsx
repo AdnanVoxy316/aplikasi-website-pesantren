@@ -10,6 +10,7 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showRecoveryNote, setShowRecoveryNote] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -85,14 +86,20 @@ export function LoginForm() {
         <label className="login-check">
           <input type="checkbox" name="remember" /> Ingat saya
         </label>
-        <a
+        <button
           className="login-link"
-          href="#lupa-password"
-          onClick={(event) => event.preventDefault()}
+          type="button"
+          onClick={() => setShowRecoveryNote((visible) => !visible)}
         >
           Lupa kata sandi?
-        </a>
+        </button>
       </div>
+      {showRecoveryNote ? (
+        <div className="notice" role="note">
+          <Icon name="lock" />
+          <span>Hubungi admin pesantren untuk mengatur ulang kata sandi Anda.</span>
+        </div>
+      ) : null}
       <button
         className="button button-primary login-submit"
         type="submit"

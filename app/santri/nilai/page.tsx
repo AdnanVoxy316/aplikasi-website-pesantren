@@ -44,7 +44,7 @@ export default async function SantriNilaiPage() {
             Belum ada nilai pada semester ini. Nilai muncul setelah guru menginput.
           </EmptyState>
         ) : (
-          <div className="table-shell">
+          <div className="table-shell table-shell-scroll">
             <table className="data-table">
               <thead>
                 <tr>
@@ -58,17 +58,17 @@ export default async function SantriNilaiPage() {
                   <tr key={row.mapelId}>
                     <td>
                       <strong>{row.mapelNama}</strong>
-                      <div style={{ fontSize: 10 }}>kategori {row.kategori}</div>
+                      <div className="person-meta">kategori {row.kategori}</div>
                     </td>
                     <td>
                       {row.detail.map((d) => (
-                        <div key={d.jenis} style={{ fontSize: 11 }}>
+                        <div key={d.jenis} className="grade-detail-line">
                           {d.jenis}: <strong>{d.nilai}</strong> (bobot {d.bobot})
                         </div>
                       ))}
                     </td>
                     <td>
-                      <strong style={{ fontSize: 16 }}>{row.nilaiAkhir ?? "—"}</strong>
+                      <strong className="grade-final">{row.nilaiAkhir ?? "—"}</strong>
                     </td>
                   </tr>
                 ))}

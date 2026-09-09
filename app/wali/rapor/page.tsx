@@ -4,7 +4,7 @@ import { Panel, EmptyState } from "@/components/ui/panel";
 import { requireRole } from "@/lib/auth/session";
 import { listRaporSantri } from "@/db/queries/santri";
 import { getAnakUntukWali, AnakSwitcher } from "../wali-helpers";
-import { tanggalWaktuIndo } from "@/lib/format";
+import { tanggalIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Rapor anak",
@@ -35,6 +35,7 @@ export default async function WaliRaporPage({
   }
 
   const rows = await listRaporSantri(selected.santriId);
+  const identitas = `${selected.nama} · NIS ${selected.nis}${selected.kelasNama ? ` · ${selected.kelasNama}` : ""}`;
 
   return (
     <>
@@ -44,33 +45,35 @@ export default async function WaliRaporPage({
         description="Snapshot nilai & kehadiran per semester — dapat diunduh setelah diterbitkan."
       />
       <AnakSwitcher anakRows={anakRows} selectedId={selected.santriId} basePath="/wali/rapor" />
-      <Panel
-        title={selected.nama}
-        subtitle={`NIS ${selected.nis}${selected.kelasNama ? ` · ${selected.kelasNama}` : ""}`}
-      >
-        {rows.length === 0 ? (
+      {rows.length === 0 ? (
+        <Panel title={selected.nama} subtitle={identitas}>
           <EmptyState>
             Rapor belum tersedia. Rapor terbit setelah wali kelas menggenerate akhir semester.
           </EmptyState>
-        ) : (
-          rows.map((row) => {
-            const nilai = JSON.parse(row.ringkasanNilai) as RingkasanNilai[];
-            const kehadiran = JSON.parse(row.ringkasanKehadiran) as RingkasanKehadiran;
-            return (
-              <div key={row.id} style={{ marginBottom: 18 }}>
-                <h3 style={{ fontSize: 13, marginBottom: 8 }}>
-                  {row.tahunAjaranLabel} — Semester {row.semester === "ganjil" ? "Ganjil" : "Genap"}{" "}
-                  <span style={{ fontWeight: 400, color: "var(--muted)" }}>
-                    ({tanggalWaktuIndo(row.generatedAt)})
-                  </span>
-                </h3>
-                <div className="table-shell">
+        </Panel>
+      ) : (
+        rows.map((row) => {
+          const nilai = JSON.parse(row.ringkasanNilai) as RingkasanNilai[];
+          const kehadiran = JSON.parse(row.ringkasanKehadiran) as RingkasanKehadiran;
+          return (
+            <Panel
+              key={row.id}
+              title={`Semester ${row.semester === "ganjil" ? "Ganjil" : "Genap"} — ${row.tahunAjaranLabel}`}
+              subtitle={`${identitas} · Diterbitkan ${tanggalIndo(row.generatedAt)}`}
+            >
+              <div style={{ padding: "0 22px 22px" }}>
+                <div className="kehadiran-chips" style={{ marginBottom: 14 }}>
+                  <span className="kehadiran-chip"><i className="present" />Hadir <strong>{kehadiran.hadir}</strong></span>
+                  <span className="kehadiran-chip"><i className="permit" />Izin <strong>{kehadiran.izin}</strong></span>
+                  <span className="kehadiran-chip"><i className="sick" />Sakit <strong>{kehadiran.sakit}</strong></span>
+                  <span className="kehadiran-chip"><i className="absent" />Alpa <strong>{kehadiran.alpa}</strong></span>
+                </div>
+                <div className="table-shell" style={{ padding: 0 }}>
                   <table className="data-table">
                     <thead>
                       <tr>
                         <th>Mapel</th>
-                        <th>Nilai akhir</th>
-                        <th>Kehadiran</th>
+                        <th style={{ textAlign: "right" }}>Nilai akhir</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -79,10 +82,8 @@ export default async function WaliRaporPage({
                           <td>
                             <strong>{n.nama}</strong>
                           </td>
-                          <td>{n.nilaiAkhir ?? "—"}</td>
-                          <td rowSpan={nilai.length} style={{ verticalAlign: "top" }}>
-                            H {kehadiran.hadir} · I {kehadiran.izin} · S {kehadiran.sakit} · A{" "}
-                            {kehadiran.alpa}
+                          <td style={{ textAlign: "right" }}>
+                            <strong style={{ fontSize: 13 }}>{n.nilaiAkhir ?? "—"}</strong>
                           </td>
                         </tr>
                       ))}
@@ -90,16 +91,16 @@ export default async function WaliRaporPage({
                   </table>
                 </div>
                 {row.catatan ? (
-                  <div className="notice" style={{ marginTop: 10 }}>
+                  <div className="notice" style={{ marginTop: 14 }}>
                     <strong>Catatan wali kelas</strong>
                     {row.catatan}
                   </div>
                 ) : null}
               </div>
-            );
-          })
-        )}
-      </Panel>
+            </Panel>
+          );
+        })
+      )}
     </>
   );
 }

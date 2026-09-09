@@ -310,6 +310,8 @@ export const pesantrenSettings = sqliteTable("pesantren_settings", {
   alamat: text("alamat"),
   logoUrl: text("logo_url"),
   deskripsi: text("deskripsi"),
+  namaPimpinan: text("nama_pimpinan"),
+  kotaRapor: text("kota_rapor"),
   tahunAjaranAktifId: text("tahun_ajaran_aktif_id").references(
     () => tahunAjaran.id,
     { onDelete: "set null" },

@@ -137,6 +137,7 @@ svg {
   font-weight: 800;
   letter-spacing: -.02em;
   line-height: 1.1;
+  text-transform: uppercase;
 }
 
 .brand-subtitle {
@@ -430,21 +431,12 @@ svg {
 .page-kicker {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
   margin-bottom: 8px;
   color: var(--brand);
   font-size: 10px;
   font-weight: 850;
   letter-spacing: .13em;
   text-transform: uppercase;
-}
-
-.page-kicker::before {
-  width: 20px;
-  height: 2px;
-  content: "";
-  background: var(--lime);
-  border-radius: 2px;
 }
 
 .page-title {
@@ -1287,8 +1279,6 @@ svg {
 
 .page-kicker.plain { margin-bottom: 7px; }
 
-.page-kicker.plain::before { display: none; }
-
 .page-breadcrumbs {
   display: flex;
   align-items: center;
@@ -1579,6 +1569,152 @@ svg {
 .avatar-sm.blue { color: #3f6176; background: var(--blue-light); }
 .avatar-sm.coral { color: #a84f43; background: var(--coral-light); }
 
+/* Foto profil & logo yang diupload (data URL) menempel memenuhi bentuk avatar/logo. */
+.avatar img,
+.avatar-sm img,
+.avatar-lg img,
+.brand-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.avatar-lg {
+  width: 68px;
+  height: 68px;
+  flex: 0 0 68px;
+  font-size: 20px;
+  border-radius: 18px 18px 18px 6px;
+}
+
+.brand-mark-preview { color: #f5fae9; background: var(--brand); }
+
+.brand-logo { border-radius: inherit; }
+
+/* Form upload foto/logo */
+.photo-upload {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.photo-upload-form {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.photo-upload-form small { color: var(--muted-light); font-size: 10px; }
+
+.file-input {
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 10px;
+  color: var(--ink-soft);
+  background: var(--surface-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.file-input::file-selector-button {
+  margin-right: 9px;
+  padding: 5px 10px;
+  color: var(--brand-dark);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.file-input::file-selector-button:hover { background: var(--surface-tint); }
+
+/* Picker file kustom untuk foto profil */
+.file-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  padding: 9px 12px;
+  color: var(--ink-soft);
+  background: var(--surface-soft);
+  border: 1px dashed var(--line-strong);
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.file-picker:hover,
+.file-picker:focus-within {
+  color: var(--brand-dark);
+  background: var(--surface-tint);
+  border-color: #8fbea0;
+}
+
+.file-picker svg { width: 15px; height: 15px; color: var(--brand); flex: 0 0 15px; }
+
+.file-picker-text {
+  min-width: 0;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-picker-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* Tombol aksi form profil — rata kiri, tanpa garis pembatas lebar */
+.profile-form-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+/* Panel yang diakhiri .form-actions (catatan status/tombol) tidak menempel ke tepi kiri/kanan/bawah panel. */
+.panel > .form-actions:last-child {
+  padding-bottom: 20px;
+  padding-left: 22px;
+  padding-right: 22px;
+}
+
+/* Tombol outline: awalnya hanya teks + border, warna muncul saat hover/tekan */
+.button-outline-primary {
+  color: var(--brand-dark);
+  background: transparent;
+  border-color: var(--brand);
+  box-shadow: none;
+}
+
+.button-outline-primary:hover {
+  color: #f6fbef;
+  background: var(--brand);
+  border-color: var(--brand);
+  box-shadow: 0 7px 14px rgba(15, 107, 84, .13);
+}
+
+.button-outline-primary:active {
+  background: var(--brand-dark);
+  border-color: var(--brand-dark);
+}
+
+@media (max-width: 760px) {
+  .photo-upload { align-items: flex-start; flex-direction: column; }
+}
+
 .person-name { display: block; color: var(--ink-soft); font-size: 11px; font-weight: 800; }
 
 .person-meta { display: block; margin-top: 1px; color: var(--muted-light); font-size: 10px; }
@@ -1758,11 +1894,26 @@ svg {
 
 .mini-stat span { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
 
-.progress-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 7px; color: var(--muted); font-size: 10px; }
+.progress-list {
+  display: grid;
+  gap: 10px;
+  padding: 2px 22px 22px;
+}
 
-.progress-row strong { color: var(--ink-soft); font-size: 11px; }
+.progress-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--ink-soft);
+  font-size: 11px;
+  font-weight: 700;
+}
 
-.progress-track { flex: 1; height: 7px; overflow: hidden; background: var(--line); border-radius: 10px; min-width: 60px; }
+.progress-row > span { flex: 0 0 auto; }
+
+.progress-row strong { color: var(--ink-soft); font-size: 11px; flex: 0 0 auto; }
+
+.progress-track { flex: 1; height: 8px; overflow: hidden; background: var(--line); border-radius: 10px; min-width: 60px; }
 
 .progress-fill { height: 100%; background: var(--brand); border-radius: inherit; }
 .progress-fill.gold { background: #c49b4d; }
@@ -3151,6 +3302,19 @@ body {
 .grade-detail-line { color: var(--muted); font-size: 11px; }
 .grade-final { color: var(--brand-dark); font-size: 18px; font-weight: 850; }
 .report-note-spacing { margin-top: 12px; }
+
+/* Catatan wali kelas tampil lebar di bawah tabel rapor, bukan di kolom samping */
+.rapor-catatan {
+  margin: 18px 22px 22px;
+}
+
+.rapor-catatan .notice {
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.rapor-catatan .notice strong { font-size: 12px; margin-bottom: 4px; }
 .invoice-number-small { color: var(--muted-light); font-family: "SFMono-Regular", Consolas, monospace; font-size: 9px; overflow-wrap: anywhere; }
 
 .popover { top: 80px; }
@@ -3340,4 +3504,92 @@ button:disabled {
   .profile-info-table td:first-child { width: 38%; }
   .route-state-card { padding: 24px 18px; }
   .route-skeleton-heading { width: 90%; }
+}
+
+/* ---------------- Dashboard santri (perbaikan CSS) ---------------- */
+
+/* Baris kartu statistik tidak menempel dengan panel di bawahnya. */
+.stats-grid + .form-layout,
+.stats-grid + .detail-layout { margin-top: 16px; }
+
+/* Tombol aksi panel tidak menempel ke pojok kiri & bawah panel. */
+.form-actions.dashboard-actions {
+  justify-content: flex-end;
+  padding: 14px 22px 18px;
+  margin-top: 14px;
+}
+
+@media (max-width: 760px) {
+  .stats-grid + .form-layout,
+  .stats-grid + .detail-layout { margin-top: 12px; }
+
+  .form-actions.dashboard-actions { padding: 12px 16px 14px; }
+}
+
+/* ---------------- Pencarian topbar ---------------- */
+
+.topbar-search { position: relative; }
+
+.topbar-search-field { min-width: 0; width: 220px; }
+
+.topbar-search-field input {
+  min-height: 37px;
+  padding: 8px 10px 8px 31px;
+  background: var(--surface);
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.search-popover {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 50;
+  display: grid;
+  min-width: 250px;
+  padding: 6px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  box-shadow: 0 14px 32px rgba(28, 58, 48, .13);
+}
+
+.search-empty { margin: 0; padding: 9px 11px; color: var(--muted); font-size: 11px; }
+
+.search-result {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  color: var(--ink-soft);
+  border-radius: 8px;
+  font-size: 11px;
+}
+
+.search-result:hover,
+.search-result:focus-visible { color: var(--brand-dark); background: var(--surface-tint); }
+
+.search-result svg { width: 15px; height: 15px; color: var(--muted-light); flex: 0 0 auto; }
+
+.search-result:hover svg,
+.search-result:focus-visible svg { color: var(--brand); }
+
+.search-result span { display: grid; min-width: 0; }
+
+.search-result strong { color: inherit; font-size: 11px; font-weight: 750; }
+
+.search-result small { color: var(--muted-light); font-size: 9.5px; }
+
+@media (max-width: 1280px) {
+  .topbar-search-field { width: 170px; }
+}
+
+@media (max-width: 1050px) {
+  .topbar-search-field { width: 140px; }
+}
+
+@media (max-width: 760px) {
+  .topbar-search-field { width: 108px; }
+
+  .search-popover { min-width: 210px; }
 }

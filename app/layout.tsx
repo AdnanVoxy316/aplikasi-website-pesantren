@@ -3,8 +3,8 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "ELMS Pesantren",
-    template: "%s | ELMS Pesantren",
+    default: "LMS Pesantren",
+    template: "%s | LMS Pesantren",
   },
   description:
     "Learning Management System pesantren: akademik, tugas, kehadiran, rapor, dan pembayaran SPP dalam satu ruang.",

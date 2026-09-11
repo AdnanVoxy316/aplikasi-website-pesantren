@@ -55,7 +55,7 @@ export async function KalenderSection() {
   return (
     <>
       <PageHeading
-        kicker="Workspace"
+        kicker="Beranda"
         title="Kalender akademik"
         description="Periode tahun ajaran dan semester yang sedang digunakan pesantren."
       />

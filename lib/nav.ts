@@ -71,7 +71,7 @@ export const navigation: Record<Role, NavSection[]> = {
   ],
   guru: [
     {
-      label: "Workspace",
+      label: "Beranda",
       items: [
         { label: "Dashboard", href: "/guru", icon: "grid" },
         { label: "Kalender akademik", href: "/guru/kalender", icon: "calendar" },
@@ -96,7 +96,7 @@ export const navigation: Record<Role, NavSection[]> = {
   ],
   santri: [
     {
-      label: "Workspace",
+      label: "Beranda",
       items: [
         { label: "Dashboard", href: "/santri", icon: "grid" },
         { label: "Kalender akademik", href: "/santri/kalender", icon: "calendar" },
@@ -128,7 +128,7 @@ export const navigation: Record<Role, NavSection[]> = {
   ],
   wali: [
     {
-      label: "Workspace",
+      label: "Beranda",
       items: [
         { label: "Dashboard", href: "/wali", icon: "grid" },
         { label: "Kalender akademik", href: "/wali/kalender", icon: "calendar" },
@@ -188,7 +188,7 @@ export function resolveBreadcrumb(
       }
     }
   }
-  if (!best) return ["Workspace", "ELMS Pesantren"];
+  if (!best) return ["Beranda", "LMS Pesantren"];
   const overrides = pageTitles[role];
   if (overrides) {
     for (const [prefix, title] of Object.entries(overrides)) {

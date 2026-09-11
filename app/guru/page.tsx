@@ -20,7 +20,7 @@ export default async function GuruDashboardPage() {
   if (!guru) {
     return (
       <>
-        <PageHeading kicker="Workspace" title="Dashboard guru" />
+        <PageHeading kicker="Beranda" title="Dashboard guru" />
         <Panel title="Profil guru belum ada">
           <EmptyState>
             Profil guru untuk akun Anda belum dibuat admin. Hubungi admin pesantren.
@@ -38,7 +38,7 @@ export default async function GuruDashboardPage() {
   return (
     <>
       <PageHeading
-        kicker="Workspace"
+        kicker="Beranda"
         title={`Assalamu'alaikum, ${session.user.name}`}
         description="Kelas yang diampu, tugas berjalan, dan submission yang perlu dinilai."
         actions={

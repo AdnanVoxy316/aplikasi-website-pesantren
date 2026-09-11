@@ -1,12 +1,21 @@
 import type { Metadata } from "next";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import AppShell from "@/components/app-shell";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Panel } from "@/components/ui/panel";
 import { getShellDataAnyRole } from "@/lib/shell-data";
 import { db } from "@/db";
-import { guruProfile, kelas, santriProfile, user, waliSantriProfile } from "@/db/schema";
+import {
+  account,
+  guruProfile,
+  kelas,
+  santriProfile,
+  user,
+  waliSantriProfile,
+} from "@/db/schema";
 import { ChangePasswordForm } from "@/components/shared/change-password-form";
+import { ProfilePhotoForm } from "@/components/shared/profile-photo-form";
+import { GoogleAccountPanel } from "@/components/admin/google-account-panel";
 import { tanggalIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -23,6 +32,17 @@ const ROLE_LABEL: Record<string, string> = {
 
 export default async function ProfilPage() {
   const shell = await getShellDataAnyRole();
+
+  const googleConfigured = Boolean(
+    process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim(),
+  );
+  const [googleRow] = googleConfigured
+    ? await db
+        .select({ id: account.id })
+        .from(account)
+        .where(and(eq(account.userId, shell.userId), eq(account.providerId, "google")))
+        .limit(1)
+    : [];
 
   const [detail] = await db
     .select({
@@ -71,6 +91,7 @@ export default async function ProfilPage() {
       notifications={shell.notifications}
       tahunAjaranLabel={shell.tahunAjaranLabel}
       semesterLabel={shell.semesterLabel}
+      brandLogo={shell.brandLogo}
     >
       <PageHeading
         kicker="Akun"
@@ -96,9 +117,39 @@ export default async function ProfilPage() {
           </div>
         </Panel>
 
-        <Panel title="Keamanan akun" subtitle="Ubah kata sandi Anda secara berkala">
+        <Panel
+          title="Foto profil"
+          subtitle="Ganti foto tampilan akun Anda di sini"
+          bodyClassName="panel-body"
+        >
+          <ProfilePhotoForm
+            name={shell.user.name}
+            initials={shell.user.initials}
+            image={shell.user.image ?? null}
+          />
+        </Panel>
+
+        <Panel
+          title="Keamanan akun"
+          subtitle="Ubah kata sandi Anda secara berkala"
+          bodyClassName="panel-body"
+        >
           <ChangePasswordForm />
         </Panel>
+
+        {googleConfigured && shell.role !== "admin" ? (
+          <Panel
+            title="Akun Google"
+            subtitle="Masuk tanpa kata sandi — bisa dilepas kapan saja"
+            bodyClassName="panel-body"
+          >
+            <GoogleAccountPanel
+              terhubung={Boolean(googleRow)}
+              terkonfigurasi={googleConfigured}
+              kembali="/profil"
+            />
+          </Panel>
+        ) : null}
       </div>
     </AppShell>
   );

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { and, eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db";
 import {
@@ -18,6 +18,7 @@ import { hashPasswordWithAuth } from "@/lib/auth/server";
 import { getSession } from "@/lib/auth/session";
 import { logActivity } from "@/lib/activity";
 import { fail, ok, toActionError, type ActionResult } from "@/lib/action-result";
+import { fileToDataUrl } from "@/lib/image-file";
 
 const signUpSchema = z.object({
   name: z.string().trim().min(2, "Nama minimal 2 karakter"),
@@ -97,6 +98,7 @@ export async function createAkun(
 const updateAkunSchema = z.object({
   userId: z.string().min(1),
   name: z.string().trim().min(2),
+  email: z.string().trim().toLowerCase().email("Format email tidak valid").optional(),
   noTelp: z.string().trim().optional(),
   nip: z.string().trim().optional(),
   nis: z.string().trim().optional(),
@@ -105,6 +107,48 @@ const updateAkunSchema = z.object({
   tanggalLahir: z.string().trim().optional(),
   alamat: z.string().trim().optional(),
 });
+
+export async function updateFotoAkun(input: {
+  userId: string;
+  file: FormDataEntryValue | null;
+  hapus?: boolean;
+}): Promise<ActionResult<undefined>> {
+  try {
+    const session_ = await getSession();
+    if (session_?.user.role !== "admin") {
+      return fail("Hanya admin yang dapat mengubah foto akun.");
+    }
+
+    const [target] = await db
+      .select({ id: user.id, name: user.name })
+      .from(user)
+      .where(eq(user.id, input.userId))
+      .limit(1);
+    if (!target) return fail("Akun tidak ditemukan.");
+
+    const dataUrl = input.hapus ? null : await fileToDataUrl(input.file, "Foto profil");
+    if (!input.hapus && !dataUrl) return fail("Pilih file foto terlebih dahulu.");
+
+    await db.update(user).set({ image: dataUrl }).where(eq(user.id, input.userId));
+
+    await logActivity({
+      userId: session_?.user.id,
+      aksi: input.hapus ? "hapus_foto_akun" : "update_foto_akun",
+      entitas: "user",
+      entitasId: input.userId,
+    });
+
+    revalidatePath("/", "layout");
+    return ok(
+      undefined,
+      input.hapus
+        ? `Foto profil ${target.name} dihapus.`
+        : `Foto profil ${target.name} berhasil diperbarui.`,
+    );
+  } catch (error) {
+    return toActionError(error);
+  }
+}
 
 export async function updateAkun(
   input: z.input<typeof updateAkunSchema>,
@@ -121,7 +165,23 @@ export async function updateAkun(
       .limit(1);
     if (!target) return fail("Akun tidak ditemukan.");
 
-    await db.update(user).set({ name: data.name }).where(eq(user.id, data.userId));
+    /* Email akun admin hanya boleh diubah lewat alur OTP di Pengaturan admin. */
+    if (data.email !== undefined) {
+      if (target.role === "admin") {
+        return fail("Email akun admin hanya dapat diubah melalui OTP di menu Pengaturan.");
+      }
+      const [dipakai] = await db
+        .select({ id: user.id })
+        .from(user)
+        .where(and(eq(user.email, data.email), ne(user.id, data.userId)))
+        .limit(1);
+      if (dipakai) return fail("Email sudah dipakai akun lain.");
+    }
+
+    await db
+      .update(user)
+      .set({ name: data.name, ...(data.email !== undefined ? { email: data.email } : {}) })
+      .where(eq(user.id, data.userId));
 
     if (target.role === "guru") {
       await db
@@ -219,8 +279,43 @@ export async function setAkunAktif(
   }
 }
 
-export async function deleteAkun(userId: string): Promise<ActionResult<undefined>> {
+/* Pengguna melepas integrasi akun Google miliknya sendiri (semua peran) —
+   tetap masuk dengan email/password. */
+export async function lepasAkunGoogle(): Promise<ActionResult<undefined>> {
   try {
+    const session_ = await getSession();
+    if (!session_) {
+      return fail("Harus masuk terlebih dahulu.");
+    }
+
+    const [credential] = await db
+      .select({ id: account.id })
+      .from(account)
+      .where(and(eq(account.userId, session_.user.id), eq(account.providerId, "credential")))
+      .limit(1);
+    if (!credential) {
+      return fail("Akun belum punya kata sandi. Setel kata sandi dulu sebelum melepas akun Google.");
+    }
+
+    await db
+      .delete(account)
+      .where(and(eq(account.userId, session_.user.id), eq(account.providerId, "google")));
+
+    await logActivity({
+      userId: session_.user.id,
+      aksi: "lepas_akun_google",
+      entitas: "user",
+      entitasId: session_.user.id,
+    });
+
+    revalidatePath("/admin/pengaturan");
+    return ok(undefined, "Akun Google berhasil dilepas. Masuk kembali dengan email/kata sandi.");
+  } catch (error) {
+    return toActionError(error);
+  }
+}
+
+export async function deleteAkun(userId: string): Promise<ActionResult<undefined>> {  try {
     const session_ = await getSession();
     if (session_?.user.role !== "admin") return fail("Hanya admin yang dapat menghapus akun.");
     if (userId === session_?.user.id) return fail("Tidak dapat menghapus akun sendiri.");

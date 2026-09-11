@@ -76,14 +76,16 @@ function PreviewBody({ src, nama, kind }: { src: string; nama: string; kind: Pre
   );
 }
 
-function PreviewModal({
+export function PreviewModal({
   src,
   nama,
   onClose,
+  hideDownload = false,
 }: {
   src: string;
   nama: string;
   onClose: () => void;
+  hideDownload?: boolean;
 }) {
   const kind = detectKind(nama);
   const titleId = useId();
@@ -148,9 +150,11 @@ function PreviewModal({
             <span className="panel-subtitle">Preview {KIND_LABEL[kind]} — tidak otomatis terunduh</span>
           </div>
           <div className="preview-actions">
-            <a href={src} download={nama} className="button button-secondary">
-              Unduh
-            </a>
+            {!hideDownload ? (
+              <a href={src} download={nama} className="button button-secondary">
+                Unduh
+              </a>
+            ) : null}
             <button
               ref={closeButtonRef}
               className="table-action danger"

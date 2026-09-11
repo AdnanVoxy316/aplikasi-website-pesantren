@@ -29,6 +29,7 @@ export type ShellData = {
   notifications: ShellNotification[];
   tahunAjaranLabel: string;
   semesterLabel: string;
+  brandLogo: string | null;
 };
 
 export async function getShellData(
@@ -46,7 +47,7 @@ export async function getShellDataAnyRole(): Promise<ShellData> {
 }
 
 async function buildShellData(session: {
-  user: { id: string; name: string; email: string; role: string };
+  user: { id: string; name: string; email: string; image: string | null; role: string };
 }): Promise<Omit<ShellData, "role">> {
   const role = session.user.role;
   const settings = await getPesantrenSettings();
@@ -73,6 +74,7 @@ async function buildShellData(session: {
       initials: initialsOf(session.user.name),
       roleLabel,
       email: session.user.email,
+      image: session.user.image ?? null,
     },
     notifications: notifRows.map((n) => ({
       id: n.id,
@@ -80,6 +82,7 @@ async function buildShellData(session: {
       description: n.message,
       read: n.isRead,
     })),
+    brandLogo: settings?.settings.logoUrl ?? null,
     tahunAjaranLabel: settings?.tahunAjaranLabel ?? "",
     semesterLabel: settings
       ? `Semester ${settings.settings.semesterAktif === "ganjil" ? "Ganjil" : "Genap"} · Sistem aktif`

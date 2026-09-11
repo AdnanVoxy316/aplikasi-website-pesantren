@@ -25,7 +25,7 @@ export default async function WaliDashboardPage() {
   if (anakRows.length === 0) {
     return (
       <>
-        <PageHeading kicker="Workspace" title="Dashboard wali santri" />
+        <PageHeading kicker="Beranda" title="Dashboard wali santri" />
         <Panel title="Belum ada anak terhubung">
           <EmptyState>
             Akun wali Anda belum dihubungkan dengan santri mana pun. Hubungi admin pesantren
@@ -68,7 +68,7 @@ export default async function WaliDashboardPage() {
   return (
     <>
       <PageHeading
-        kicker="Workspace"
+        kicker="Beranda"
         title={`Assalamu'alaikum, ${session.user.name}`}
         description="Ringkasan perkembangan akademik dan keuangan anak Anda."
       />

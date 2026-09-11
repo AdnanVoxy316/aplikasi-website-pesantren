@@ -132,8 +132,10 @@ async function main() {
 
   await db.insert(pesantrenSettings).values({
     id: "default",
-    namaPesantren: "Pesantren Cendekia Nusantara",
-    alamat: "Jl. Kebon Jeruk No. 10, Bogor",
+    namaPesantren: "Pondok Pesantren Miftahul Mukhlishin",
+    alamat:
+      "Jl. Cikadut RT.02/RW.03, Kel. Karang Pamulang, Kec. Mandalajati, Kota Bandung, Jawa Barat 40195",
+    kotaRapor: "Bandung",
     deskripsi: "Pesantren modern yang memadukan ilmu agama dan umum.",
     tahunAjaranAktifId: ta.id,
     semesterAktif: "ganjil",

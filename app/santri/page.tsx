@@ -25,7 +25,7 @@ export default async function SantriDashboardPage() {
   if (!profile) {
     return (
       <>
-        <PageHeading kicker="Workspace" title="Dashboard santri" />
+        <PageHeading kicker="Beranda" title="Dashboard santri" />
         <Panel title="Profil belum ada">
           <EmptyState>Profil santri belum dibuat admin. Hubungi admin pesantren.</EmptyState>
         </Panel>
@@ -57,7 +57,7 @@ export default async function SantriDashboardPage() {
   return (
     <>
       <PageHeading
-        kicker="Workspace"
+        kicker="Beranda"
         title={`Assalamu'alaikum, ${session.user.name}`}
         description={profile.kelasNama ? `Kelas ${profile.kelasNama} · NIS ${profile.nis}` : `NIS ${profile.nis}`}
       />
@@ -132,7 +132,7 @@ export default async function SantriDashboardPage() {
               </table>
             </div>
           )}
-          <div className="form-actions task-actions">
+          <div className="form-actions task-actions dashboard-actions">
             <Link className="button button-secondary" href="/santri/nilai">
               Lihat semua nilai
             </Link>
@@ -168,7 +168,7 @@ export default async function SantriDashboardPage() {
               </table>
             </div>
           )}
-          <div className="form-actions task-actions">
+          <div className="form-actions task-actions dashboard-actions">
             {tagihanAktifRows.length > 0 ? (
               <Link className="button button-primary" href="/santri/pembayaran/tagihan">
                 Bayar sekarang

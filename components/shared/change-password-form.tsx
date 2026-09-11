@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Icon } from "@/lib/icons";
 import { useToast } from "@/components/app-shell";
 import { authClient } from "@/lib/auth/client";
 
@@ -67,11 +68,12 @@ export function ChangePasswordForm() {
       </div>
       {error ? (
         <div className="notice error" role="alert" aria-live="assertive">
+          <Icon name="alert" />
           <span>{error}</span>
         </div>
       ) : null}
-      <div className="form-actions">
-        <button className="button button-primary" type="submit" disabled={pending}>
+      <div className="profile-form-actions">
+        <button className="button button-outline-primary" type="submit" disabled={pending}>
           {pending ? "Menyimpan..." : "Ubah kata sandi"}
         </button>
       </div>

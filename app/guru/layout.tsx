@@ -15,6 +15,7 @@ export default async function guruLayout({
       notifications={shell.notifications}
       tahunAjaranLabel={shell.tahunAjaranLabel}
       semesterLabel={shell.semesterLabel}
+      brandLogo={shell.brandLogo}
     >
       {children}
     </AppShell>

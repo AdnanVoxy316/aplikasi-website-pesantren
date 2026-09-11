@@ -14,6 +14,9 @@ import {
   pesantrenSettings,
   rapor,
   santriProfile,
+  user,
+  waliSantriAnak,
+  waliSantriProfile,
 } from "@/db/schema";
 import { getSession } from "@/lib/auth/session";
 import { getGuruProfileId } from "@/lib/permissions";
@@ -256,6 +259,7 @@ export type RaporPdfPayload = {
   generatedAtIso: string;
   catatan: string | null;
   waliKelasNama: string | null;
+  orangTuaWaliNama: string | null;
   nilai: { nama: string; kategori: string; nilaiAkhir: number | null }[];
   kehadiran: { hadir: number; izin: number; sakit: number; alpa: number; total: number };
   settings: {
@@ -273,14 +277,18 @@ export async function fetchRaporPdfData(
   try {
     const session = await getSession();
     if (!session) return fail("Sesi tidak ditemukan.");
-    if (session.user.role !== "guru" && session.user.role !== "admin") {
-      return fail("Hanya guru atau admin yang dapat mengunduh rapor.");
+    if (!["admin", "guru", "santri"].includes(session.user.role)) {
+      return fail("Anda tidak diizinkan mengunduh rapor.");
     }
 
     const raporRow = await getRaporUntukPdf(raporId);
     if (!raporRow) return fail("Rapor tidak ditemukan.");
 
-    if (session.user.role === "guru") {
+    if (session.user.role === "santri") {
+      if (raporRow.santriUserId !== session.user.id) {
+        return fail("Anda hanya dapat mengunduh rapor Anda sendiri.");
+      }
+    } else if (session.user.role === "guru") {
       const guruId = await getGuruProfileId(session.user.id);
       const [isWaliKelas] = await db
         .select({ id: kelas.id })
@@ -316,6 +324,15 @@ export async function fetchRaporPdfData(
       .where(eq(pesantrenSettings.id, "default"))
       .limit(1);
 
+    /* Nama orang tua/wali dari relasi wali santri (kosong bila belum ada relasi). */
+    const [waliAnak] = await db
+      .select({ nama: user.name })
+      .from(waliSantriAnak)
+      .innerJoin(waliSantriProfile, eq(waliSantriProfile.id, waliSantriAnak.waliSantriId))
+      .innerJoin(user, eq(user.id, waliSantriProfile.userId))
+      .where(eq(waliSantriAnak.santriId, raporRow.santriId))
+      .limit(1);
+
     const payload: RaporPdfPayload = {
       santriNama: raporRow.santriNama,
       nis: raporRow.nis,
@@ -325,6 +342,7 @@ export async function fetchRaporPdfData(
       generatedAtIso: raporRow.generatedAt.toISOString(),
       catatan: raporRow.catatan,
       waliKelasNama: raporRow.waliKelasNama,
+      orangTuaWaliNama: waliAnak?.nama ?? null,
       nilai: (
         JSON.parse(raporRow.ringkasanNilai) as {
           nama: string;
@@ -338,7 +356,7 @@ export async function fetchRaporPdfData(
       })),
       kehadiran: JSON.parse(raporRow.ringkasanKehadiran),
       settings: settings ?? {
-        namaPesantren: "ELMS Pesantren",
+        namaPesantren: "LMS Pesantren",
         alamat: null,
         namaPimpinan: null,
         kotaRapor: null,

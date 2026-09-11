@@ -104,7 +104,7 @@ export function CalendarContent() {
       </Panel>
 
       <footer className="footer">
-        <span className="footer-brand">ELMS Pesantren</span>
+        <span className="footer-brand">LMS Pesantren</span>
         <span className="footer-note">Kalender akademik dapat digunakan lintas role</span>
       </footer>
     </>

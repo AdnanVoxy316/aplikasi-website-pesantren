@@ -6,7 +6,7 @@ export default function NotFound() {
       <div style={{ textAlign: "center" }}>
         <h1 style={{ fontSize: 20, marginBottom: 8 }}>Halaman tidak ditemukan</h1>
         <p style={{ color: "#71817a", marginBottom: 16 }}>
-          Halaman yang Anda cari tidak tersedia pada ELMS Pesantren.
+          Halaman yang Anda cari tidak tersedia pada LMS Pesantren.
         </p>
         <Link className="button button-primary" href="/login">
           Kembali ke halaman masuk

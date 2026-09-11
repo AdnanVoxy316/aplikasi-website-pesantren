@@ -6,6 +6,8 @@ import { useToast } from "@/components/app-shell";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
   updatePengaturanForm,
+  updateLogoForm,
+  hapusLogoForm,
   createTahunAjaranForm,
   activateTahunAjaranForm,
   createJenisNilaiForm,
@@ -84,11 +86,62 @@ export function PengaturanClient({
               style={{ ...inputStyle, minHeight: 70 }}
             />
           </div>
-          <div className="field">
-            <label htmlFor="s-logo">
-              Logo URL <span className="optional">(opsional)</span>
-            </label>
-            <input id="s-logo" name="logoUrl" type="url" defaultValue={settings?.logoUrl ?? ""} style={inputStyle} />
+          <div className="form-divider" />
+          <p className="form-card-description" style={{ marginBottom: 12 }}>
+            Logo pesantren — tampil di sidebar dan halaman masuk. Semua format gambar, maksimal 10MB.
+          </p>
+          <div className="photo-upload">
+            <span className="avatar avatar-lg brand-mark-preview">
+              {settings?.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={settings.logoUrl} alt="Logo saat ini" />
+              ) : (
+                <Icon name="mosque" />
+              )}
+            </span>
+            <div className="photo-upload-form">
+              <input
+                id="logo-input"
+                className="file-input"
+                type="file"
+                accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.heic,.heif,.avif"
+                disabled={pending}
+              />
+              <div className="inline-actions">
+                <button
+                  className="button button-secondary"
+                  type="button"
+                  disabled={pending}
+                  onClick={() => {
+                    const input = document.getElementById("logo-input") as HTMLInputElement | null;
+                    const file = input?.files?.[0];
+                    if (!file) {
+                      showToast("Pilih logo terlebih dahulu.");
+                      return;
+                    }
+                    const fd = new FormData();
+                    fd.set("logo", file);
+                    run(() => updateLogoForm(fd));
+                    if (input) input.value = "";
+                  }}
+                >
+                  Ganti logo
+                </button>
+                {settings?.logoUrl ? (
+                  <button
+                    className="button button-secondary"
+                    type="button"
+                    disabled={pending}
+                    onClick={() => {
+                      if (!window.confirm("Hapus logo pesantren?")) return;
+                      run(() => hapusLogoForm());
+                    }}
+                  >
+                    Hapus logo
+                  </button>
+                ) : null}
+              </div>
+            </div>
           </div>
           <div className="form-divider" />
           <p className="form-card-description" style={{ marginBottom: 12 }}>

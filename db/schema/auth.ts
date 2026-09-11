@@ -7,6 +7,22 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
+const createdAt = () =>
+  integer("created_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .notNull();
+
+const id = () =>
+  text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID());
+
+const updatedAt = () =>
+  integer("updated_at", { mode: "timestamp_ms" })
+    .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+    .$onUpdate(() => new Date())
+    .notNull();
+
 export const ROLES = ["admin", "guru", "santri", "wali_santri"] as const;
 export type Role = (typeof ROLES)[number];
 
@@ -78,13 +94,8 @@ export const account = sqliteTable(
     }),
     scope: text("scope"),
     password: text("password"),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-      .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
-      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
-      .$onUpdate(() => new Date())
-      .notNull(),
+    createdAt: createdAt(),
+    updatedAt: updatedAt(),
   },
   (table) => [
     uniqueIndex("account_issuer_accountId_uidx").on(
@@ -93,6 +104,58 @@ export const account = sqliteTable(
     ),
     index("account_userId_idx").on(table.userId),
   ],
+);
+
+/* Kode OTP perubahan email admin — 2 langkah:
+   1. "konfirmasi_lama": kode konfirmasi dikirim ke email LAMA (persetujuan pemilik akun).
+   2. "verifikasi_baru": kode verifikasi dikirim ke email BARU (kepemilikan email baru). */
+export const emailOtp = sqliteTable(
+  "email_otp",
+  {
+    id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    codeHash: text("code_hash").notNull(),
+    stage: text("stage", { enum: ["konfirmasi_lama", "verifikasi_baru"] })
+      .notNull()
+      .default("konfirmasi_lama"),
+    sentCount: integer("sent_count").notNull().default(1),
+    lastSentAt: integer("last_sent_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: createdAt(),
+  },
+  (table) => [index("email_otp_userId_idx").on(table.userId)],
+);
+
+/* Kode OTP reset kata sandi mandiri (non-admin):
+   user mengisi email LMS, OTP dikirim ke email akun Google ter-link. */
+export const resetOtp = sqliteTable(
+  "reset_otp",
+  {
+    id: id(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    accountEmail: text("account_email").notNull(),
+    codeHash: text("code_hash").notNull(),
+    stage: text("stage", { enum: ["verifikasi", "reset_sandi"] })
+      .notNull()
+      .default("verifikasi"),
+    sentCount: integer("sent_count").notNull().default(1),
+    lastSentAt: integer("last_sent_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
+    attempts: integer("attempts").notNull().default(0),
+    createdAt: createdAt(),
+  },
+  (table) => [index("reset_otp_userId_idx").on(table.userId)],
 );
 
 export const verification = sqliteTable(

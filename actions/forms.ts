@@ -3,10 +3,17 @@
 import {
   createAkun,
   updateAkun,
+  updateFotoAkun,
   resetPassword,
   setAkunAktif,
   deleteAkun,
+  lepasAkunGoogle,
 } from "@/actions/admin/akun";
+import {
+  kirimOtpEmailAdmin,
+  konfirmasiOtpEmailLama,
+  verifikasiOtpEmailAdmin,
+} from "@/actions/admin/email-otp";
 import {
   createTahunAjaran,
   activateTahunAjaran,
@@ -24,7 +31,13 @@ import {
   deleteJenisNilai,
 } from "@/actions/admin/akademik";
 import { createPengumuman, deletePengumuman } from "@/actions/admin/pengumuman";
-import { updatePengaturan } from "@/actions/admin/pengaturan";
+import { hapusLogo, updateLogo, updatePengaturan } from "@/actions/admin/pengaturan";
+import { updateFotoProfil } from "@/actions/profil";
+import {
+  mintaOtpLupaSandi,
+  verifikasiOtpLupaSandi,
+  resetSandiLupa,
+} from "@/actions/lupa-sandi";
 import { deleteNilai, simpanNilaiMassal } from "@/actions/guru/nilai";
 import { simpanKehadiran } from "@/actions/guru/kehadiran";
 import {
@@ -77,6 +90,7 @@ export async function updateAkunForm(fd: FormData) {
   return updateAkun({
     userId: str(fd, "userId"),
     name: str(fd, "name"),
+    email: opt(fd, "email"),
     noTelp: opt(fd, "noTelp"),
     nip: opt(fd, "nip"),
     nis: opt(fd, "nis"),
@@ -95,6 +109,38 @@ export async function toggleAkunForm(fd: FormData) {
 
 export async function deleteAkunForm(fd: FormData) {
   return deleteAkun(str(fd, "userId"));
+}
+
+export async function kirimOtpEmailAdminForm(fd: FormData) {
+  return kirimOtpEmailAdmin({ emailBaru: str(fd, "emailBaru") });
+}
+
+export async function konfirmasiOtpEmailLamaForm(fd: FormData) {
+  return konfirmasiOtpEmailLama({ kode: str(fd, "kode") });
+}
+
+export async function verifikasiOtpEmailAdminForm(fd: FormData) {
+  return verifikasiOtpEmailAdmin({ kode: str(fd, "kode") });
+}
+
+export async function mintaOtpLupaSandiForm(fd: FormData) {
+  return mintaOtpLupaSandi({ emailLms: str(fd, "emailLms") });
+}
+
+export async function verifikasiOtpLupaSandiForm(fd: FormData) {
+  return verifikasiOtpLupaSandi({ emailLms: str(fd, "emailLms"), kode: str(fd, "kode") });
+}
+
+export async function resetSandiLupaForm(fd: FormData) {
+  return resetSandiLupa({
+    emailLms: str(fd, "emailLms"),
+    sandiBaru: str(fd, "sandiBaru"),
+    konfirmasi: str(fd, "konfirmasi"),
+  });
+}
+
+export async function lepasAkunGoogleForm() {
+  return lepasAkunGoogle();
 }
 
 /* Admin — akademik */
@@ -208,10 +254,32 @@ export async function updatePengaturanForm(fd: FormData) {
     namaPesantren: str(fd, "namaPesantren"),
     alamat: opt(fd, "alamat"),
     deskripsi: opt(fd, "deskripsi"),
-    logoUrl: opt(fd, "logoUrl"),
     namaPimpinan: opt(fd, "namaPimpinan"),
     kotaRapor: opt(fd, "kotaRapor"),
     semesterAktif: str(fd, "semesterAktif") === "genap" ? "genap" : "ganjil",
+  });
+}
+
+export async function updateLogoForm(fd: FormData) {
+  return updateLogo(fd.get("logo"));
+}
+
+export async function hapusLogoForm() {
+  return hapusLogo();
+}
+
+export async function updateFotoProfilForm(fd: FormData) {
+  return updateFotoProfil({
+    file: fd.get("foto"),
+    hapus: str(fd, "hapus") === "1",
+  });
+}
+
+export async function updateFotoAkunForm(fd: FormData) {
+  return updateFotoAkun({
+    userId: str(fd, "userId"),
+    file: fd.get("foto"),
+    hapus: str(fd, "hapus") === "1",
   });
 }
 

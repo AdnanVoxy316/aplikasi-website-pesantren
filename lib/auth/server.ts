@@ -4,12 +4,12 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { account, session, user, verification } from "@/db/schema";
+import { account, session, user as userTable, verification } from "@/db/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "sqlite",
-    schema: { user, session, account, verification },
+    schema: { user: userTable, session, account, verification },
   }),
   emailAndPassword: {
     enabled: true,
@@ -19,6 +19,22 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24 * 7,
     updateAge: 60 * 60 * 24,
+  },
+  account: {
+    accountLinking: {
+      /* Email lokal tidak pernah diverifikasi via link, jadi jangan blokir
+         linking hanya karena emailVerified=false di sisi lokal. Google sudah
+         memverifikasi kepemilikan email di sisi mereka. */
+      requireLocalEmailVerified: false,
+      /* Linking hanya boleh eksplisit (tombol "Hubungkan" saat login).
+         Tanpa ini, Google yang belum ter-link bisa me-link ulang diam-diam
+         saat sign-in — mengalahkan tombol "Lepas akun Google". */
+      disableImplicitLinking: true,
+      /* Guru/santri/wali boleh me-link Google yang emailnya berbeda
+         dari email LMS (mis. LMS @pesantren.sch.id, Google @gmail.com).
+         Admin tetap dikunci email sama lewat gerbang validateUserInfo. */
+      allowDifferentEmails: true,
+    },
   },
   user: {
     additionalFields: {
@@ -35,21 +51,78 @@ export const auth = betterAuth({
         input: false,
       },
     },
+    /* Gerbang identitas OAuth:
+       1. Blokir akun nonaktif masuk lewat Google.
+       2. Admin hanya boleh link Google yang emailnya sama dengan email admin.
+       Linking implisit sudah ditolak global via disableImplicitLinking;
+       sign-up implicit diblokir lewat disableSignUp pada provider google. */
+    validateUserInfo: async (data) => {
+      if (data.source.method !== "oauth" || data.source.oauth?.providerId !== "google") return;
+      /* action ada di level source: "link-account" (linking) / "sign-in" (masuk). */
+      const action = (data.source as { action?: string } | undefined)?.action ?? "sign-in";
+      const oauthUserId = data.user.id ?? "";
+      if (!oauthUserId) return;
+
+      const [row] = await db
+        .select({
+          id: userTable.id,
+          role: userTable.role,
+          email: userTable.email,
+          isDisabled: userTable.isDisabled,
+        })
+        .from(userTable)
+        .where(eq(userTable.id, oauthUserId))
+        .limit(1);
+      if (!row) return;
+      if (row.isDisabled) {
+        throw new APIError("FORBIDDEN", {
+          code: "account_disabled",
+          message: "Akun Anda dinonaktifkan. Hubungi admin pesantren.",
+        });
+      }
+      if (
+        row.role === "admin" &&
+        action === "link-account" &&
+        (data.user.email?.toLowerCase() ?? "") !== row.email
+      ) {
+        throw new APIError("FORBIDDEN", {
+          code: "admin_email_mismatch",
+          message:
+            "Akun admin hanya boleh dihubungkan dengan akun Google yang emailnya sama dengan email admin.",
+        });
+      }
+    },
   },
   rateLimit: {
     enabled: true,
     window: 60,
     max: 20,
   },
+  ...(process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim()
+    ? {
+        socialProviders: {
+          google: {
+            clientId: process.env.GOOGLE_CLIENT_ID.trim(),
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET.trim(),
+            /* Google tidak boleh menjadi jalur pendaftaran akun baru —
+               hanya akun yang didaftarkan admin yang bisa login. */
+            disableSignUp: true,
+            /* Selalu tampilkan layar pilih akun — tanpa ini Google bisa
+               diam-diam memakai sesi akun yang salah dan gagal link/masuk. */
+            prompt: "select_account",
+          },
+        },
+      }
+    : {}),
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
       if (ctx.path === "/sign-in/email") {
         const email = (ctx.body as { email?: string } | undefined)?.email;
         if (email) {
           const [row] = await db
-            .select({ isDisabled: user.isDisabled })
-            .from(user)
-            .where(eq(user.email, email.toLowerCase()))
+            .select({ isDisabled: userTable.isDisabled })
+            .from(userTable)
+            .where(eq(userTable.email, email.toLowerCase()))
             .limit(1);
           if (row?.isDisabled) {
             throw new APIError("FORBIDDEN", {

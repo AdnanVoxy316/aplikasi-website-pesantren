@@ -15,7 +15,7 @@ import { rupiah, tanggalIndo, persenHadir } from "@/lib/format";
 
 export const metadata: Metadata = {
   title: "Beranda",
-  description: "Dashboard ELMS Pesantren dengan data akademik dan pembayaran real-time.",
+  description: "Dashboard LMS Pesantren dengan data akademik dan pembayaran real-time.",
 };
 
 export default async function AdminDashboardPage() {

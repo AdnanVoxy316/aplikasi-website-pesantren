@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -20,6 +20,7 @@ import {
   resolveBreadcrumb,
   roleLabels,
   roleDashboard,
+  type NavItem,
 } from "@/lib/nav";
 import { markAllNotificationsRead } from "@/actions/notifikasi";
 
@@ -47,6 +48,7 @@ export type ShellUser = {
   initials: string;
   roleLabel: string;
   email?: string | undefined;
+  image?: string | null;
 };
 
 export type ShellNotification = {
@@ -56,12 +58,15 @@ export type ShellNotification = {
   read: boolean;
 };
 
+type SearchResult = NavItem & { section: string };
+
 export default function AppShell({
   role,
   user,
   notifications,
   tahunAjaranLabel,
   semesterLabel,
+  brandLogo = null,
   children,
 }: {
   role: keyof typeof navigation;
@@ -69,10 +74,14 @@ export default function AppShell({
   notifications: ShellNotification[];
   tahunAjaranLabel: string;
   semesterLabel: string;
+  brandLogo?: string | null;
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchFocused, setSearchFocused] = useState(false);
   const hash = useSyncExternalStore(subscribeToHash, () => window.location.hash, () => "");
   const [openPopover, setOpenPopover] = useState<"none" | "notification" | "profile">("none");
   const [notifItems, setNotifItems] = useState<ShellNotification[]>(notifications);
@@ -185,6 +194,23 @@ export default function AppShell({
     [pathname, role],
   );
 
+  const searchResults = useMemo<SearchResult[]>(() => {
+    const query = searchQuery.trim().toLowerCase();
+    if (!query) return [];
+    const results: SearchResult[] = [];
+    for (const section of navSections) {
+      for (const item of section.items) {
+        if (
+          item.label.toLowerCase().includes(query) ||
+          section.label.toLowerCase().includes(query)
+        ) {
+          results.push({ ...item, section: section.label });
+        }
+      }
+    }
+    return results.slice(0, 6);
+  }, [navSections, searchQuery]);
+
   const markAllRead = () => {
     setNotifItems((items) => items.map((item) => ({ ...item, read: true })));
     void markAllNotificationsRead();
@@ -207,18 +233,23 @@ export default function AppShell({
           <Link
             className="brand"
             href={roleDashboard[role]}
-            aria-label="ELMS Pesantren, kembali ke beranda"
+            aria-label="LMS Pesantren, kembali ke beranda"
             onClick={() => {
               setSidebarOpen(false);
               setOpenPopover("none");
             }}
           >
             <span className="brand-mark">
-              <Icon name="mosque" />
+              {brandLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="brand-logo" src={brandLogo} alt="Logo pesantren" />
+              ) : (
+                <Icon name="mosque" />
+              )}
             </span>
             <span>
-              <strong className="brand-name">ELMS Pesantren</strong>
-              <span className="brand-subtitle">Ruang belajar terpadu</span>
+              <strong className="brand-name">LMS Pesantren</strong>
+              <span className="brand-subtitle">Miftahul Mukhlishin Kota Bandung</span>
             </span>
           </Link>
 
@@ -295,16 +326,63 @@ export default function AppShell({
               </div>
             </div>
             <div className="topbar-end">
-              <button
-                className="search-button is-disabled"
-                type="button"
-                disabled
-                aria-label="Pencarian global segera hadir"
-                title="Pencarian global segera hadir"
-              >
-                <Icon name="search" />
-                <span>Pencarian segera hadir</span>
-              </button>
+              <div className="topbar-search">
+                <label className="search-field topbar-search-field">
+                  <Icon name="search" />
+                  <input
+                    type="search"
+                    placeholder="Cari menu…"
+                    aria-label="Cari menu navigasi"
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => setSearchFocused(false)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Escape") {
+                        setSearchQuery("");
+                        setSearchFocused(false);
+                        event.currentTarget.blur();
+                        return;
+                      }
+                      if (event.key === "Enter") {
+                        const target = searchResults[0];
+                        if (target) {
+                          setSearchQuery("");
+                          setSearchFocused(false);
+                          event.currentTarget.blur();
+                          router.push(target.href);
+                        }
+                      }
+                    }}
+                  />
+                </label>
+                {searchFocused && searchQuery.trim().length > 0 ? (
+                  <div className="search-popover">
+                    {searchResults.length === 0 ? (
+                      <p className="search-empty">Tidak ada menu yang cocok.</p>
+                    ) : (
+                      searchResults.map((item) => (
+                        <Link
+                          key={`${item.section}-${item.label}-${item.href}`}
+                          className="search-result"
+                          href={item.href}
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => {
+                            setSearchQuery("");
+                            setSearchFocused(false);
+                          }}
+                        >
+                          <Icon name={item.icon} />
+                          <span>
+                            <strong>{item.label}</strong>
+                            <small>{item.section}</small>
+                          </span>
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                ) : null}
+              </div>
               <button
                 className="icon-button"
                 type="button"
@@ -332,7 +410,12 @@ export default function AppShell({
                   setOpenPopover((current) => (current === "profile" ? "none" : "profile"))
                 }
               >
+              {user.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img className="avatar avatar-photo" src={user.image} alt="" />
+              ) : (
                 <span className="avatar">{user.initials}</span>
+              )}
                 <span className="profile-copy">
                   <span className="profile-name">{user.name}</span>
                   <span className="profile-role">{user.roleLabel}</span>

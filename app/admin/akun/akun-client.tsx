@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import {
   createAkunForm,
   updateAkunForm,
+  updateFotoAkunForm,
   resetPasswordForm,
   toggleAkunForm,
   deleteAkunForm,
@@ -19,12 +20,22 @@ type AkunRow = {
   email: string;
   role: string;
   isDisabled: boolean;
+  image: string | null;
   nip: string | null;
   noTelp: string | null;
   nis: string | null;
   kelasId: string | null;
   kelasNama: string | null;
 };
+
+function initialsOf(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]!.toUpperCase())
+    .join("");
+}
 
 const ROLE_LABEL: Record<string, string> = {
   admin: "Admin",
@@ -84,9 +95,21 @@ export function AkunClient({
     event.preventDefault();
     const fd = new FormData(event.currentTarget);
     const password = String(fd.get("password") ?? "");
+    const foto = fd.get("foto");
+    const hasFoto = foto instanceof File && foto.size > 0;
+    const hapusFoto = String(fd.get("hapusFoto") ?? "") === "1";
     run(async () => {
-      const result = await updateAkunForm(fd);
-      if (result.ok && password.length >= 8) {
+      let result = await updateAkunForm(fd);
+      if (!result.ok) return result;
+      if (hasFoto || hapusFoto) {
+        const fdFoto = new FormData();
+        fdFoto.set("userId", String(fd.get("userId") ?? ""));
+        if (hasFoto) fdFoto.set("foto", foto);
+        if (hapusFoto) fdFoto.set("hapus", "1");
+        result = await updateFotoAkunForm(fdFoto);
+        if (!result.ok) return result;
+      }
+      if (password.length >= 8) {
         return resetPasswordForm(fd);
       }
       return result;
@@ -197,11 +220,44 @@ export function AkunClient({
           >
             <h3 className="form-card-title">Edit akun — {editing.name}</h3>
             <input type="hidden" name="userId" value={editing.id} />
+            <div className="photo-upload" style={{ marginBottom: 14 }}>
+              <span className="avatar avatar-lg">
+                {editing.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={editing.image} alt="" />
+                ) : (
+                  initialsOf(editing.name)
+                )}
+              </span>
+              <div className="photo-upload-form">
+                <input
+                  className="file-input"
+                  name="foto"
+                  type="file"
+                  accept="image/*,.jpg,.jpeg,.png,.webp,.gif,.bmp,.heic,.heif,.avif"
+                  disabled={pending}
+                />
+                <small>Semua format gambar, maksimal 10MB. Kosongkan bila tidak diganti.</small>
+                {editing.image ? (
+                  <label className="check-row" style={{ fontSize: 11 }}>
+                    <input type="checkbox" name="hapusFoto" value="1" /> Hapus foto profil
+                  </label>
+                ) : null}
+              </div>
+            </div>
             <div className="form-grid">
               <div className="field">
                 <label htmlFor="edit-name">Nama lengkap</label>
                 <input id="edit-name" name="name" defaultValue={editing.name} required style={inputStyle} />
               </div>
+              {editing.role === "admin" ? null : (
+                <div className="field">
+                  <label htmlFor="edit-email">
+                    Email <span className="optional">(email admin hanya via OTP di Pengaturan)</span>
+                  </label>
+                  <input id="edit-email" name="email" type="email" defaultValue={editing.email} style={inputStyle} />
+                </div>
+              )}
               {editing.role === "santri" ? (
                 <>
                   <div className="field">
@@ -300,7 +356,17 @@ export function AkunClient({
               {filtered.map((row) => (
                 <tr key={row.id}>
                   <td>
-                    <strong>{row.name}</strong>
+                    <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+                      <span className="avatar avatar-sm">
+                        {row.image ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={row.image} alt="" />
+                        ) : (
+                          initialsOf(row.name)
+                        )}
+                      </span>
+                      <strong>{row.name}</strong>
+                    </div>
                   </td>
                   <td>{row.email}</td>
                   <td>{ROLE_LABEL[row.role] ?? row.role}</td>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Panel, EmptyState } from "@/components/ui/panel";
+import { SantriRaporActions } from "@/components/shared/rapor-pdf-button";
 import { requireRole } from "@/lib/auth/session";
 import { getSantriProfile, listRaporSantri } from "@/db/queries/santri";
 import { tanggalWaktuIndo } from "@/lib/format";
@@ -103,6 +104,7 @@ export default async function SantriRaporPage() {
               key={row.id}
               title={`Rapor ${row.tahunAjaranLabel} — Semester ${row.semester === "ganjil" ? "Ganjil" : "Genap"}`}
               subtitle={`Digenerate ${tanggalWaktuIndo(row.generatedAt)}`}
+              actions={<SantriRaporActions raporId={row.id} />}
             >
                 <div className="form-layout">
                 {nilaiSnapshot.valid ? (
@@ -145,14 +147,16 @@ export default async function SantriRaporPage() {
                       </div>
                     </div>
                   ) : null}
-                  {row.catatan ? (
-                    <div className="notice report-note-spacing">
-                      <strong>Catatan wali kelas</strong>
-                      {row.catatan}
-                    </div>
-                  ) : null}
                 </div>
               </div>
+              {row.catatan ? (
+                <div className="rapor-catatan">
+                  <div className="notice">
+                    <strong>Catatan wali kelas</strong>
+                    {row.catatan}
+                  </div>
+                </div>
+              ) : null}
             </Panel>
           );
         })

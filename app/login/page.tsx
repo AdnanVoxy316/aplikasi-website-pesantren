@@ -1,24 +1,36 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Icon } from "@/lib/icons";
+import { getPesantrenSettings } from "@/db/queries/admin";
 import { demoAccounts } from "@/lib/data/accounts";
 import { LoginForm } from "@/components/login-form";
 
 export const metadata: Metadata = {
   title: "Masuk",
-  description: "Masuk ke ruang belajar ELMS Pesantren.",
+  description: "Masuk ke ruang belajar LMS Pesantren.",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const settings = await getPesantrenSettings();
+  const brandLogo = settings?.settings.logoUrl ?? null;
+  const googleConfigured = Boolean(
+    process.env.GOOGLE_CLIENT_ID?.trim() && process.env.GOOGLE_CLIENT_SECRET?.trim(),
+  );
+
   return (
     <main className="login-page">
       <section className="login-story" aria-labelledby="storyTitle">
-        <Link className="login-brand" href="/" aria-label="ELMS Pesantren, kembali ke beranda">
+        <Link className="login-brand" href="/" aria-label="LMS Pesantren, kembali ke beranda">
           <span className="brand-mark">
-            <Icon name="mosque" />
+            {brandLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img className="brand-logo" src={brandLogo} alt="Logo pesantren" />
+            ) : (
+              <Icon name="mosque" />
+            )}
           </span>
           <span>
-            <strong className="brand-name">ELMS Pesantren</strong>
+            <strong className="brand-name">LMS Pesantren</strong>
             <span className="brand-subtitle">Ruang belajar terpadu</span>
           </span>
         </Link>
@@ -62,7 +74,7 @@ export default function LoginPage() {
               Gunakan akun pesantren untuk melanjutkan aktivitas Anda.
             </p>
           </div>
-          <LoginForm />
+          <LoginForm googleConfigured={googleConfigured} />
           {process.env.NODE_ENV !== "production" ? (
             <div className="notice" style={{ marginTop: 14 }}>
               <Icon name="sparkle" />

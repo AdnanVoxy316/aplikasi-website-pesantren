@@ -70,7 +70,7 @@ export default async function SantriKehadiranPage() {
           {rekap.total === 0 ? (
             <EmptyState>Belum ada catatan kehadiran dari guru.</EmptyState>
           ) : (
-            <div>
+            <div className="progress-list">
               <ProgressRow label="Hadir" value={String(rekap.hadir)} percent={persenHadir(rekap.hadir, rekap.total)} />
               <ProgressRow label="Izin" value={String(rekap.izin)} percent={persenHadir(rekap.izin, rekap.total)} />
               <ProgressRow label="Sakit" value={String(rekap.sakit)} percent={persenHadir(rekap.sakit, rekap.total)} />

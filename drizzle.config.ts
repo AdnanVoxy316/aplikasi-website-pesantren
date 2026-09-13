@@ -9,11 +9,14 @@ const url = (() => {
   return raw.startsWith("file:") ? raw : `file:${raw}`;
 })();
 
+const authToken = process.env.TURSO_AUTH_TOKEN?.trim();
+
 export default defineConfig({
-  dialect: "sqlite",
+  dialect: "turso",
   schema: "./db/schema/index.ts",
   out: "./db/migrations",
   dbCredentials: {
     url,
+    ...(authToken ? { authToken } : {}),
   },
 });

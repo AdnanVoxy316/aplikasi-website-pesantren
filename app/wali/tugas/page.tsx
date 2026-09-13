@@ -8,6 +8,7 @@ import { listAnakWali, listTugasAnakWali, getTugasDetailUntukWali } from "@/db/q
 import { PreviewButton } from "@/components/shared/file-preview";
 import { Icon } from "@/lib/icons";
 import { tanggalIndo, sisaWaktu, ukuranFile } from "@/lib/format";
+import { submissionStatusLabel } from "@/lib/status";
 
 export const metadata: Metadata = {
   title: "Tugas anak",
@@ -144,132 +145,122 @@ export default async function WaliTugasPage({
       </Panel>
 
       {detail ? (
-        <>
-          <Panel
-            title={detail.judul}
-            subtitle={`${detail.mapelNama} · kelas ${detail.kelasNama} · deadline ${tanggalIndo(detail.deadline)}`}
-            actions={
-              <Link className="button button-secondary" href={`/wali/tugas?anak=${selectedAnak.santriId}`}>
-                Tutup detail
-              </Link>
-            }
-          >
-            <div style={{ display: "grid", gap: 16 }}>
-              <div>
-                <h3 className="form-card-title">Instruksi tugas</h3>
-                <p style={{ fontSize: 13, lineHeight: 1.7 }}>{detail.deskripsi}</p>
-              </div>
+        <Panel
+          title={detail.judul}
+          subtitle={`${detail.mapelNama} · kelas ${detail.kelasNama} · deadline ${tanggalIndo(detail.deadline)}`}
+          actions={
+            <Link className="button button-secondary" href={`/wali/tugas?anak=${selectedAnak.santriId}`}>
+              Tutup detail
+            </Link>
+          }
+        >
+          <div className="tugas-detail">
+            <section className="tugas-detail-section">
+              <h3 className="tugas-detail-title">Instruksi tugas</h3>
+              <p className="tugas-detail-text">{detail.deskripsi}</p>
+            </section>
 
-              <div>
-                <h3 className="form-card-title">Lampiran dari guru</h3>
-                {detail.lampiran.length === 0 ? (
-                  <p className="panel-subtitle">Tidak ada lampiran.</p>
-                ) : (
-                  <ul className="file-list">
-                    {detail.lampiran.map((f) => (
-                      <li key={f.id}>
-                        {f.filePath ? (
-                          <>
-                            <Icon name="file" />
-                            <span className="file-name">{f.namaAsli}</span>
-                            <span style={{ fontSize: 11, color: "var(--muted)" }}>{ukuranFile(f.size)}</span>
-                            <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
-                            <a href={`/api/files/${f.filePath}`} target="_blank" rel="noreferrer" className="file-link">
-                              unduh
-                            </a>
-                          </>
-                        ) : (
-                          <>
-                            <Icon name="link" />
-                            <span className="file-name">Link dari guru</span>
-                            <a href={f.url ?? "#"} target="_blank" rel="noreferrer" className="file-link">
-                              buka link
-                            </a>
-                          </>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+            <section className="tugas-detail-section">
+              <h3 className="tugas-detail-title">Lampiran dari guru</h3>
+              {detail.lampiran.length === 0 ? (
+                <p className="tugas-detail-empty">Tidak ada lampiran.</p>
+              ) : (
+                <ul className="file-list">
+                  {detail.lampiran.map((f) => (
+                    <li key={f.id}>
+                      {f.filePath ? (
+                        <>
+                          <Icon name="file" />
+                          <span className="file-name">{f.namaAsli}</span>
+                          <span className="file-size">{ukuranFile(f.size)}</span>
+                          <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
+                          <a href={`/api/files/${f.filePath}`} target="_blank" rel="noreferrer" className="file-link">
+                            unduh
+                          </a>
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="link" />
+                          <span className="file-name">Link dari guru</span>
+                          <a href={f.url ?? "#"} target="_blank" rel="noreferrer" className="file-link">
+                            buka link
+                          </a>
+                        </>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
 
-              <div>
-                <h3 className="form-card-title">Pengumpulan {selectedAnak.nama}</h3>
-                {!detail.anakSubmission ? (
-                  <p className="panel-subtitle">Belum mengumpulkan tugas ini.</p>
-                ) : (
-                  <div className="table-shell" style={{ margin: 0 }}>
-                    <table className="data-table">
-                      <tbody>
-                        <tr>
-                          <td>Status</td>
-                          <td>
-                            <StatusBadge
-                              variant={STATUS_VARIANT[detail.anakSubmission.status ?? "dikumpulkan"] ?? "neutral"}
-                            >
-                              {detail.anakSubmission.status}
-                            </StatusBadge>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Nilai</td>
-                          <td>
-                            {detail.anakSubmission.nilai ?? "—"}
-                            {detail.anakSubmission.feedbackGuru ? (
-                              <div style={{ fontSize: 11, color: "var(--muted)" }}>
-                                Feedback: {detail.anakSubmission.feedbackGuru}
-                              </div>
-                            ) : null}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>File</td>
-                          <td>
-                            {detail.anakSubmission.files.length > 0 ? (
-                              <ul className="file-list">
-                                {detail.anakSubmission.files.map((f) => (
-                                  <li key={f.id}>
-                                    <Icon name="file" />
-                                    <span className="file-name">{f.namaAsli}</span>
-                                    <span style={{ fontSize: 11, color: "var(--muted)" }}>
-                                      {ukuranFile(f.size)}
-                                    </span>
-                                    <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
-                                    <a href={`/api/files/${f.filePath}`} target="_blank" rel="noreferrer" className="file-link">
-                                      unduh
-                                    </a>
-                                  </li>
-                                ))}
-                              </ul>
-                            ) : (
-                              "—"
-                            )}
-                          </td>
-                        </tr>
-                        <tr>
-                          <td>Link</td>
-                          <td>
-                            {detail.anakSubmission.url ? (
-                              <a href={detail.anakSubmission.url} target="_blank" rel="noreferrer" className="file-link">
-                                {detail.anakSubmission.url}
-                              </a>
-                            ) : (
-                              "—"
-                            )}
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+            <section className="tugas-detail-section">
+              <h3 className="tugas-detail-title">Pengumpulan {selectedAnak.nama}</h3>
+              {!detail.anakSubmission ? (
+                <p className="tugas-detail-empty">Belum mengumpulkan tugas ini.</p>
+              ) : (
+                <dl className="detail-list">
+                  <div className="detail-list-row">
+                    <dt>Status</dt>
+                    <dd>
+                      <StatusBadge
+                        variant={STATUS_VARIANT[detail.anakSubmission.status ?? "dikumpulkan"] ?? "neutral"}
+                      >
+                        {submissionStatusLabel(detail.anakSubmission.status)}
+                      </StatusBadge>
+                    </dd>
                   </div>
-                )}
-                <p className="panel-subtitle" style={{ marginTop: 12 }}>
-                  Wali santri hanya dapat melihat. Pengunggahan hanya dilakukan oleh santri melalui
-                  akunnya sendiri.
-                </p>
-              </div>
-            </div>
-          </Panel>
-        </>
+                  <div className="detail-list-row">
+                    <dt>Nilai</dt>
+                    <dd>
+                      {detail.anakSubmission.nilai ?? "—"}
+                      {detail.anakSubmission.feedbackGuru ? (
+                        <div className="feedback-note">Feedback: {detail.anakSubmission.feedbackGuru}</div>
+                      ) : null}
+                    </dd>
+                  </div>
+                  <div className="detail-list-row">
+                    <dt>Berkas</dt>
+                    <dd>
+                      {detail.anakSubmission.files.length > 0 ? (
+                        <ul className="file-list">
+                          {detail.anakSubmission.files.map((f) => (
+                            <li key={f.id}>
+                              <Icon name="file" />
+                              <span className="file-name">{f.namaAsli}</span>
+                              <span className="file-size">{ukuranFile(f.size)}</span>
+                              <PreviewButton href={`/api/files/${f.filePath}`} nama={f.namaAsli} />
+                              <a href={`/api/files/${f.filePath}`} target="_blank" rel="noreferrer" className="file-link">
+                                unduh
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        "—"
+                      )}
+                    </dd>
+                  </div>
+                  <div className="detail-list-row">
+                    <dt>Link</dt>
+                    <dd>
+                      {detail.anakSubmission.url ? (
+                        <a href={detail.anakSubmission.url} target="_blank" rel="noreferrer" className="file-link">
+                          {detail.anakSubmission.url}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </dd>
+                  </div>
+                </dl>
+              )}
+              <p className="tugas-detail-note">
+                Wali santri hanya dapat melihat. Pengunggahan hanya dilakukan oleh santri melalui
+                akunnya sendiri.
+              </p>
+            </section>
+          </div>
+        </Panel>
       ) : null}
     </>
   );

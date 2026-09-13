@@ -11,6 +11,7 @@ import {
   pengumuman,
   pesantrenSettings,
   santriProfile,
+  tagihanItem,
   tagihanSpp,
   tugas,
   tugasSubmission,
@@ -327,6 +328,7 @@ async function main() {
     santriId: santri.id,
     tarifSppId: tarif.id,
     tahunAjaranId: ta.id,
+    sumber: "spp" as const,
     periodeBulan: bulanIni.getMonth() + 1,
     periodeTahun: bulanIni.getFullYear(),
     nominal: 300000,
@@ -335,7 +337,54 @@ async function main() {
     status: index === 0 ? ("paid" as const) : ("unpaid" as const),
     createdBy: userIds.get("admin@pesantren.sch.id")!,
   }));
-  await db.insert(tagihanSpp).values(tagihanValues);
+  const tagihanTersimpan = await db
+    .insert(tagihanSpp)
+    .values(tagihanValues)
+    .returning({ id: tagihanSpp.id, nominal: tagihanSpp.nominal });
+  await db.insert(tagihanItem).values(
+    tagihanTersimpan.map((row) => ({
+      tagihanSppId: row.id,
+      jenisPembayaranId: "jp-spp-bulanan",
+      nama: "SPP Bulanan",
+      nominal: row.nominal,
+      urutan: 1,
+    })),
+  );
+
+  // Contoh tagihan manual multi-item: daftar ulang + perlengkapan, sekali bayar.
+  const [tagihanManual] = await db
+    .insert(tagihanSpp)
+    .values({
+      nomorTagihan: `TGH-2026${String(bulanIni.getMonth() + 1).padStart(2, "0")}-DEMO0001`,
+      santriId: ibtidaASantri[0].id,
+      tahunAjaranId: ta.id,
+      sumber: "manual",
+      periodeBulan: bulanIni.getMonth() + 1,
+      periodeTahun: bulanIni.getFullYear(),
+      nominal: 650000,
+      totalTagihan: 650000,
+      jatuhTempo: new Date(new Date().setDate(25)),
+      status: "unpaid",
+      createdBy: userIds.get("admin@pesantren.sch.id")!,
+    })
+    .returning({ id: tagihanSpp.id });
+  await db.insert(tagihanItem).values([
+    {
+      tagihanSppId: tagihanManual.id,
+      jenisPembayaranId: "jp-daftar-ulang",
+      nama: "Daftar Ulang / Registrasi",
+      nominal: 500000,
+      urutan: 1,
+    },
+    {
+      tagihanSppId: tagihanManual.id,
+      jenisPembayaranId: "jp-perlengkapan",
+      nama: "Perlengkapan Santri",
+      nominal: 150000,
+      keterangan: "Seragam + kitab",
+      urutan: 2,
+    },
+  ]);
 
   await db.insert(pengumuman).values([
     {

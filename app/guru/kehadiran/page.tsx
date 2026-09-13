@@ -2,14 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Panel, EmptyState } from "@/components/ui/panel";
+import { TaskSelect } from "@/components/ui/task-select";
 import { requireRole } from "@/lib/auth/session";
 import {
   getGuruProfile,
   listPengajaranGuru,
   listKehadiranTanggal,
+  listKehadiranKelasMapel,
   listRiwayatKehadiranKelas,
 } from "@/db/queries/guru";
 import { KehadiranClient } from "./kehadiran-client";
+import { RiwayatKehadiran } from "./riwayat-modal";
+import { ExportKehadiran } from "./export-kehadiran";
 import { tanggalIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -50,10 +54,11 @@ export default async function GuruKehadiranPage({
     pengajaranRows.find((p) => p.id === params.pengajaranId) ?? pengajaranRows[0];
   const tanggal = params.tanggal ?? new Date().toISOString().slice(0, 10);
 
-  const [santri, existingMap, riwayat] = await Promise.all([
+  const [santri, existingMap, riwayat, kehadiranSemua] = await Promise.all([
     import("@/db/queries/guru").then((m) => m.listSantriOfKelas(selected.kelasId)),
     listKehadiranTanggal(selected.kelasId, selected.mapelId, tanggal),
-    listRiwayatKehadiranKelas(selected.kelasId, selected.mapelId, 10),
+    listRiwayatKehadiranKelas(selected.kelasId, selected.mapelId),
+    listKehadiranKelasMapel(selected.kelasId, selected.mapelId),
   ]);
 
   const existing: Record<string, string> = {};
@@ -78,6 +83,14 @@ export default async function GuruKehadiranPage({
               {p.kelasNama} · {p.mapelNama}
             </Link>
           ))}
+          <TaskSelect
+            basePath="/guru/kehadiran"
+            selectedId={selected.id}
+            options={pengajaranRows.map((p) => ({
+              id: p.id,
+              label: `${p.kelasNama} · ${p.mapelNama}`,
+            }))}
+          />
         </div>
         <div className="toolbar-right">
           <form method="get" className="date-filter-form">
@@ -91,62 +104,36 @@ export default async function GuruKehadiranPage({
               type="date"
               defaultValue={tanggal}
               className="date-input"
+              aria-label="Tanggal"
             />
             <button className="button button-secondary" type="submit">
               Tampilkan
             </button>
           </form>
+          <ExportKehadiran
+            santri={santri}
+            kehadiran={kehadiranSemua}
+            namaKelas={selected.kelasNama}
+            namaMapel={selected.mapelNama}
+            tanggalAwal={tanggal}
+          />
+          <RiwayatKehadiran riwayat={riwayat} />
         </div>
       </div>
 
-      <div className="form-layout">
-        <Panel
-          title={`${selected.kelasNama} — ${selected.mapelNama}`}
-          subtitle={`Pertemuan ${tanggalIndo(new Date(tanggal))}`}
-        >
-          <KehadiranClient
-            kelasId={selected.kelasId}
-            mapelId={selected.mapelId}
-            tahunAjaranId={selected.tahunAjaranId}
-            tanggal={tanggal}
-            santri={santri}
-            existing={existing}
-          />
-        </Panel>
-
-        <Panel title="Riwayat pertemuan" subtitle="10 pertemuan terakhir">
-          {riwayat.length === 0 ? (
-            <EmptyState>Belum ada catatan kehadiran untuk kelas & mapel ini.</EmptyState>
-          ) : (
-            <div className="table-shell">
-              <table className="data-table">
-                <thead>
-                  <tr>
-                    <th>Tanggal</th>
-                    <th>H</th>
-                    <th>I</th>
-                    <th>S</th>
-                    <th>A</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {riwayat.map((r) => (
-                    <tr key={r.tanggal}>
-                      <td>
-                        <strong>{r.tanggal}</strong>
-                      </td>
-                      <td>{r.hadir}</td>
-                      <td>{r.izin}</td>
-                      <td>{r.sakit}</td>
-                      <td>{r.alpa}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </Panel>
-      </div>
+      <Panel
+        title={`${selected.kelasNama} — ${selected.mapelNama}`}
+        subtitle={`Pertemuan ${tanggalIndo(new Date(tanggal))}`}
+      >
+        <KehadiranClient
+          kelasId={selected.kelasId}
+          mapelId={selected.mapelId}
+          tahunAjaranId={selected.tahunAjaranId}
+          tanggal={tanggal}
+          santri={santri}
+          existing={existing}
+        />
+      </Panel>
     </>
   );
 }

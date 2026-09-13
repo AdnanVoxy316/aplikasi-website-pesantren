@@ -4,6 +4,7 @@ import { Panel, EmptyState } from "@/components/ui/panel";
 import { requireRole } from "@/lib/auth/session";
 import { listRaporSantri } from "@/db/queries/santri";
 import { getAnakUntukWali, AnakSwitcher } from "../wali-helpers";
+import { RaporPdfButton } from "@/components/shared/rapor-pdf-button";
 import { tanggalIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -60,6 +61,7 @@ export default async function WaliRaporPage({
               key={row.id}
               title={`Semester ${row.semester === "ganjil" ? "Ganjil" : "Genap"} — ${row.tahunAjaranLabel}`}
               subtitle={`${identitas} · Diterbitkan ${tanggalIndo(row.generatedAt)}`}
+              actions={<RaporPdfButton raporId={row.id} variant="button" />}
             >
               <div style={{ padding: "0 22px 22px" }}>
                 <div className="kehadiran-chips" style={{ marginBottom: 14 }}>

@@ -277,7 +277,7 @@ export async function fetchRaporPdfData(
   try {
     const session = await getSession();
     if (!session) return fail("Sesi tidak ditemukan.");
-    if (!["admin", "guru", "santri"].includes(session.user.role)) {
+    if (!["admin", "guru", "santri", "wali"].includes(session.user.role)) {
       return fail("Anda tidak diizinkan mengunduh rapor.");
     }
 
@@ -287,6 +287,21 @@ export async function fetchRaporPdfData(
     if (session.user.role === "santri") {
       if (raporRow.santriUserId !== session.user.id) {
         return fail("Anda hanya dapat mengunduh rapor Anda sendiri.");
+      }
+    } else if (session.user.role === "wali") {
+      const [relasi] = await db
+        .select({ id: waliSantriAnak.id })
+        .from(waliSantriAnak)
+        .innerJoin(waliSantriProfile, eq(waliSantriProfile.id, waliSantriAnak.waliSantriId))
+        .where(
+          and(
+            eq(waliSantriProfile.userId, session.user.id),
+            eq(waliSantriAnak.santriId, raporRow.santriId),
+          ),
+        )
+        .limit(1);
+      if (!relasi) {
+        return fail("Anda hanya dapat mengunduh rapor anak Anda.");
       }
     } else if (session.user.role === "guru") {
       const guruId = await getGuruProfileId(session.user.id);

@@ -46,7 +46,13 @@ function PreviewBody({ src, nama, kind }: { src: string; nama: string; kind: Pre
     return <img src={src} alt={nama} className="preview-media" />;
   }
   if (kind === "pdf") {
-    return <iframe src={src} title={nama} className="preview-frame" />;
+    // Scrollbar viewer PDF bawaan browser tidak bisa ditata lewat CSS, jadi
+    // iframe-nya dibiarkan sedikit lebih besar lalu dipotong oleh wadah ini.
+    return (
+      <div className="preview-frame-shell">
+        <iframe src={src} title={nama} className="preview-frame" />
+      </div>
+    );
   }
   if (kind === "text") return <TextPreview src={src} />;
   if (kind === "word" || kind === "powerpoint" || kind === "spreadsheet") {
@@ -81,11 +87,13 @@ export function PreviewModal({
   nama,
   onClose,
   hideDownload = false,
+  onDownload,
 }: {
   src: string;
   nama: string;
   onClose: () => void;
   hideDownload?: boolean;
+  onDownload?: () => void;
 }) {
   const kind = detectKind(nama);
   const titleId = useId();
@@ -151,9 +159,27 @@ export function PreviewModal({
           </div>
           <div className="preview-actions">
             {!hideDownload ? (
-              <a href={src} download={nama} className="button button-secondary">
-                Unduh
-              </a>
+              onDownload ? (
+                <button
+                  type="button"
+                  className="table-action"
+                  title="Unduh"
+                  aria-label="Unduh"
+                  onClick={onDownload}
+                >
+                  <Icon name="download" />
+                </button>
+              ) : (
+                <a
+                  href={src}
+                  download={nama}
+                  className="table-action"
+                  title="Unduh"
+                  aria-label="Unduh"
+                >
+                  <Icon name="download" />
+                </a>
+              )
             ) : null}
             <button
               ref={closeButtonRef}

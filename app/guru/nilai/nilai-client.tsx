@@ -91,8 +91,8 @@ export function NilaiGridClient({
           </p>
         ) : null}
       </div>
-      <div className="form-actions">
-        <button className="button button-primary" type="submit" disabled={pending || santri.length === 0}>
+      <div className="form-actions form-actions-inset">
+        <button className="button button-outline-primary" type="submit" disabled={pending || santri.length === 0}>
           {pending ? "Menyimpan..." : "Simpan semua nilai"}
         </button>
       </div>

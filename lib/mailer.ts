@@ -1,5 +1,7 @@
 import "server-only";
 import nodemailer, { type Transporter } from "nodemailer";
+import { rupiah, tanggalLengkapIndo } from "@/lib/format";
+import type { BuktiPembayaranData } from "@/lib/bukti";
 
 export function isMailerConfigured(): boolean {
   return Boolean(
@@ -137,6 +139,81 @@ export async function kirimEmailNotifikasiUbahEmail(
       Email baru: <strong>${emailBaru}</strong></p>
       <p>Semua sesi login di perangkat lain telah otomatis dikeluarkan.</p>
       <p style="color:#b91c1c;">Jika ini bukan Anda, segera hubungi pengelola sistem dan gunakan fitur lupa kata sandi.</p>
+    `,
+  });
+}
+
+export async function kirimEmailBuktiPembayaran(
+  data: BuktiPembayaranData,
+): Promise<void> {
+  const from =
+    process.env.SMTP_FROM?.trim() || process.env.SMTP_USER?.trim() || "LMS Pesantren";
+  const tujuan = data.emailTujuan;
+  if (!tujuan) return;
+
+  const total = data.totalTagihan;
+  const dibayar = data.nominalDibayar ?? total;
+  const spp = data.sumber === "spp";
+  const tampilkanItem = data.items.length > 0 && !(spp && data.items.length <= 1);
+  const baris = [
+    ["Nomor bukti", data.nomorBukti],
+    ["Nama santri", data.santriNama],
+    ["NIS", data.nis],
+    ["Kelas", data.kelasNama ?? "—"],
+    ["Periode", data.periodeLabel],
+    ...(tampilkanItem
+      ? data.items.map((item): [string, string] => [item.nama, rupiah(item.nominal)])
+      : []),
+    ["Nominal tagihan", rupiah(data.nominal)],
+    data.nominalDiskon > 0 ? ["Diskon", `- ${rupiah(data.nominalDiskon)}`] : null,
+    data.nominalDenda > 0 ? ["Denda", `+ ${rupiah(data.nominalDenda)}`] : null,
+    ["Total dibayar", rupiah(dibayar)],
+    ["Metode", data.metodeLabel],
+    ["Waktu", data.paidAt ? tanggalLengkapIndo(new Date(data.paidAt)) : "—"],
+    data.dicatatOlehNama ? ["Dicatat oleh", data.dicatatOlehNama] : null,
+  ].filter((row): row is [string, string] => row !== null);
+
+  const rowsHtml = baris
+    .map(
+      ([label, value]) =>
+        `<tr><td style="padding:4px 12px 4px 0;color:#64748b;">${label}</td><td style="padding:4px 0;font-weight:600;">${value}</td></tr>`,
+    )
+    .join("");
+
+  const judulEmail = spp ? "Terima kasih sudah membayar SPP" : "Terima kasih sudah membayar";
+  const kalimatEmail = spp
+    ? `Terima kasih sudah membayar SPP bulan <strong>${data.periodeLabel}</strong>.`
+    : `Terima kasih sudah membayar tagihan <strong>${data.nomorTagihan}</strong>.`;
+
+  await getTransporter().sendMail({
+    from: `${data.namaPesantren} <${from}>`,
+    to: tujuan,
+    subject: spp
+      ? `Bukti pembayaran SPP ${data.periodeLabel} — ${data.santriNama}`
+      : `Bukti pembayaran ${data.nomorTagihan} — ${data.santriNama}`,
+    text: [
+      spp
+        ? `Terima kasih sudah membayar SPP bulan ${data.periodeLabel}.`
+        : `Terima kasih sudah membayar tagihan ${data.nomorTagihan}.`,
+      `Ini merupakan bukti pembayaran sebesar ${rupiah(dibayar)}.`,
+      "",
+      ...baris.map(([label, value]) => `${label}: ${value}`),
+      "",
+      `Salam, ${data.namaPesantren}`,
+    ].join("\n"),
+    html: `
+      <div style="font-family:system-ui,Arial,sans-serif;max-width:520px;">
+        <h2 style="margin:0 0 4px;color:#0f766e;">${judulEmail}</h2>
+        <p style="margin:0 0 12px;color:#334155;">
+          ${kalimatEmail}
+          Ini merupakan bukti pembayaran sebesar
+          <strong>${rupiah(dibayar)}</strong>.
+        </p>
+        <table style="border-collapse:collapse;font-size:13px;">${rowsHtml}</table>
+        <p style="margin-top:16px;color:#334155;">
+          ${data.namaPesantren}${data.alamatPesantren ? `<br />${data.alamatPesantren}` : ""}
+        </p>
+      </div>
     `,
   });
 }

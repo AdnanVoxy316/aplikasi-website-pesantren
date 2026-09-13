@@ -2,10 +2,17 @@ import type { Metadata } from "next";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Panel, EmptyState } from "@/components/ui/panel";
 import { requireRole } from "@/lib/auth/session";
-import { listAnakWali } from "@/db/queries/santri";
+import {
+  listAnakWali,
+  listPembayaranPaidAnak,
+  mapPembayaranPerTagihan,
+} from "@/db/queries/santri";
 import { db } from "@/db";
 import { pembayaranSpp, tagihanSpp, santriProfile, user } from "@/db/schema";
 import { eq, desc, inArray } from "drizzle-orm";
+import { BuktiButton } from "@/components/shared/bukti-pembayaran";
+import { BatalkanPembayaranButton } from "@/components/shared/batalkan-pembayaran-button";
+import { labelMetode } from "@/lib/bukti";
 import { rupiah, labelPeriode, tanggalWaktuIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -42,6 +49,7 @@ export default async function WaliRiwayatPage() {
   const rows = await db
     .select({
       id: pembayaranSpp.id,
+      tagihanId: tagihanSpp.id,
       santriNama: user.name,
       periodeBulan: tagihanSpp.periodeBulan,
       periodeTahun: tagihanSpp.periodeTahun,
@@ -51,6 +59,7 @@ export default async function WaliRiwayatPage() {
       nominalDibayar: pembayaranSpp.nominalDibayar,
       status: pembayaranSpp.status,
       paidAt: pembayaranSpp.paidAt,
+      checkoutUrl: pembayaranSpp.checkoutUrl,
       createdAt: pembayaranSpp.createdAt,
     })
     .from(pembayaranSpp)
@@ -66,12 +75,15 @@ export default async function WaliRiwayatPage() {
     .orderBy(desc(pembayaranSpp.createdAt))
     .limit(100);
 
+  const paidRows = await listPembayaranPaidAnak(anakRows.map((a) => a.santriId));
+  const buktiPerTagihan = mapPembayaranPerTagihan(paidRows);
+
   return (
     <>
       <PageHeading
         kicker="Keuangan"
         title="Riwayat pembayaran anak"
-        description="Pembayaran online via Mayar dan catatan manual dari admin."
+        description="Pembayaran online via Midtrans dan catatan manual dari admin."
       />
       <Panel title="Histori transaksi" subtitle={`${rows.length} transaksi`}>
         {rows.length === 0 ? (
@@ -87,6 +99,7 @@ export default async function WaliRiwayatPage() {
                   <th>Nominal</th>
                   <th>Status</th>
                   <th>Waktu</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -97,9 +110,7 @@ export default async function WaliRiwayatPage() {
                       <div style={{ fontFamily: "monospace", fontSize: 9 }}>{row.nomorTagihan}</div>
                     </td>
                     <td>{labelPeriode(row.periodeBulan, row.periodeTahun)}</td>
-                    <td>
-                      {row.provider === "manual" ? "manual" : row.paymentMethod ?? row.provider}
-                    </td>
+                    <td>{labelMetode(row.provider, row.paymentMethod)}</td>
                     <td>{rupiah(row.nominalDibayar)}</td>
                     <td>
                       <span className={`status-badge ${STATUS_VARIANT[row.status] ?? "neutral"}`}>
@@ -107,6 +118,13 @@ export default async function WaliRiwayatPage() {
                       </span>
                     </td>
                     <td>{tanggalWaktuIndo(row.paidAt ?? row.createdAt)}</td>
+                    <td>
+                      {row.status === "paid" && buktiPerTagihan.get(row.tagihanId) ? (
+                        <BuktiButton pembayaranId={buktiPerTagihan.get(row.tagihanId)!} />
+                      ) : row.status !== "paid" && row.checkoutUrl ? (
+                        <BatalkanPembayaranButton tagihanId={row.tagihanId} variant="icon" />
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>

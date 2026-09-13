@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Panel } from "@/components/ui/panel";
 import { requireRole } from "@/lib/auth/session";
@@ -22,7 +23,17 @@ export default async function GuruTugasBaruPage() {
         title="Buat tugas baru"
         description="Santri dapat mengumpulkan file (semua jenis, maks 10 MB per file, hingga 10 file) dan/atau link."
       />
-      <Panel title="Formulir tugas" subtitle="Tugas langsung terlihat oleh santri di kelas tujuan">
+      <Panel
+        title="Formulir tugas"
+        subtitle="Tugas langsung terlihat oleh santri di kelas tujuan"
+        actions={
+          <Link className="button button-secondary form-cancel-header" href="/guru/tugas">
+            Batal
+          </Link>
+        }
+        bodyClassName="panel-body"
+        className="form-shell"
+      >
         <TugasBaruClient
           pengajaranOptions={pengajaranRows.map((p) => ({
             id: p.id,

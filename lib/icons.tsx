@@ -181,6 +181,45 @@ export const iconPaths: Record<string, ReactNode> = {
       <path d="M19 13v5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5" />
     </>
   ),
+  receipt: (
+    <>
+      <path d="M6 2h12v20l-3-1.6L12 22l-3-1.6L6 22V2Z" />
+      <path d="M9 7h6M9 11h6M9 15h4" />
+    </>
+  ),
+  printer: (
+    <>
+      <path d="M7 8V3h10v5" />
+      <rect x="4" y="8" width="16" height="8" rx="2" />
+      <path d="M7 14h10v7H7zM17 12h.01" />
+    </>
+  ),
+  bank: (
+    <>
+      <path d="m3 9 9-6 9 6M4 9h16M6 9v8M10 9v8M14 9v8M18 9v8M3 20h18" />
+    </>
+  ),
+  cash: (
+    <>
+      <rect x="2.5" y="6" width="19" height="12" rx="2" />
+      <circle cx="12" cy="12" r="2.5" />
+      <path d="M6 9.5v.01M18 14.5v.01" />
+    </>
+  ),
+  qrcode: (
+    <>
+      <rect x="3" y="3" width="7" height="7" rx="1.2" />
+      <rect x="14" y="3" width="7" height="7" rx="1.2" />
+      <rect x="3" y="14" width="7" height="7" rx="1.2" />
+      <path d="M14 14h3v3h-3zM20.5 14v.01M20.5 17.5V21M14 20.5h3M11 3.5v.01M3.5 11h.01" />
+    </>
+  ),
+  whatsapp: (
+    <>
+      <path d="M20.5 11.6a8.5 8.5 0 0 1-12.4 7.5L3.5 20.5l1.4-4.5A8.5 8.5 0 1 1 20.5 11.6Z" />
+      <path d="M8.6 8.2c.5 2.6 2.6 4.7 5.2 5.2l.9-1.5 1.7.8c-.4 1.4-1.8 2-3.1 1.6a7.4 7.4 0 0 1-5-5c-.4-1.3.2-2.6 1.5-3l.8 1.6-1 1.3Z" />
+    </>
+  ),
 } satisfies Record<string, JSX.Element>;
 
 export type IconName = keyof typeof iconPaths;

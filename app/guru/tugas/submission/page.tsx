@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Panel, EmptyState } from "@/components/ui/panel";
+import { TaskSelect } from "@/components/ui/task-select";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { requireRole } from "@/lib/auth/session";
 import { getGuruProfile, listTugasGuru, listSubmissionsOfTugas, getTugasLampiran } from "@/db/queries/guru";
@@ -82,6 +83,13 @@ export default async function GuruSubmissionPage({
               {t.judul}
             </Link>
           ))}
+          <TaskSelect
+            basePath="/guru/tugas/submission"
+            paramName="tugasId"
+            selectedId={selected.id}
+            label="Pilih tugas"
+            options={tugasRows.slice(0, 8).map((t) => ({ id: t.id, label: t.judul }))}
+          />
         </div>
       </div>
 

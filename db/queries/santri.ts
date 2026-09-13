@@ -316,6 +316,7 @@ export async function listRiwayatPembayaranSantri(santriId: string) {
   return db
     .select({
       id: pembayaranSpp.id,
+      tagihanId: tagihanSpp.id,
       nomorTagihan: tagihanSpp.nomorTagihan,
       periodeBulan: tagihanSpp.periodeBulan,
       periodeTahun: tagihanSpp.periodeTahun,
@@ -334,6 +335,44 @@ export async function listRiwayatPembayaranSantri(santriId: string) {
     .limit(100);
 }
 
+/** Pembayaran lunas per tagihan (untuk tombol bukti). Urut terbaru dulu. */
+export async function listPembayaranPaidSantri(santriId: string) {
+  return db
+    .select({
+      id: pembayaranSpp.id,
+      tagihanSppId: pembayaranSpp.tagihanSppId,
+    })
+    .from(pembayaranSpp)
+    .innerJoin(tagihanSpp, eq(pembayaranSpp.tagihanSppId, tagihanSpp.id))
+    .where(and(eq(tagihanSpp.santriId, santriId), eq(pembayaranSpp.status, "paid")))
+    .orderBy(desc(pembayaranSpp.paidAt));
+}
+
+/** Pembayaran lunas milik beberapa santri (untuk halaman wali). */
+export async function listPembayaranPaidAnak(santriIds: string[]) {
+  if (santriIds.length === 0) return [];
+  return db
+    .select({
+      id: pembayaranSpp.id,
+      tagihanSppId: pembayaranSpp.tagihanSppId,
+    })
+    .from(pembayaranSpp)
+    .innerJoin(tagihanSpp, eq(pembayaranSpp.tagihanSppId, tagihanSpp.id))
+    .where(
+      and(inArray(tagihanSpp.santriId, santriIds), eq(pembayaranSpp.status, "paid")),
+    )
+    .orderBy(desc(pembayaranSpp.paidAt));
+}
+
+export function mapPembayaranPerTagihan(
+  rows: { id: string; tagihanSppId: string }[],
+): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const row of rows) {
+    if (!map.has(row.tagihanSppId)) map.set(row.tagihanSppId, row.id);
+  }
+  return map;
+}
 export async function getSantriDashboardStats(santriId: string, kelasId: string | null) {
   const tugasRows = await listTugasUntukSantri(santriId, kelasId);
   const now = Date.now();

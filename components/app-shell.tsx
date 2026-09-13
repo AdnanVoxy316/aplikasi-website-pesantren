@@ -23,6 +23,7 @@ import {
   type NavItem,
 } from "@/lib/nav";
 import { markAllNotificationsRead } from "@/actions/notifikasi";
+import { SessionGuard } from "@/components/session-guard";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 type ToastFn = (message: string, type?: ToastType) => void;
@@ -219,6 +220,7 @@ export default function AppShell({
 
   return (
     <ToastContext.Provider value={showToast}>
+      <SessionGuard />
       <div
         className={`sidebar-overlay${sidebarOpen ? " open" : ""}`}
         onClick={() => setSidebarOpen(false)}

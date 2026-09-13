@@ -24,7 +24,7 @@ export default async function AdminPembayaranPage() {
       <PageHeading
         kicker="Pembayaran SPP"
         title="Dashboard pembayaran"
-        description="Ringkasan tagihan, pembayaran online via Mayar, dan transaksi manual."
+        description="Ringkasan tagihan, pembayaran online via Midtrans, dan pembayaran tunai/transfer manual."
         actions={
           <Link className="button button-primary" href="/admin/pembayaran/tagihan">
             Kelola tagihan
@@ -59,7 +59,7 @@ export default async function AdminPembayaranPage() {
           tone="icon-coral"
           label="Menunggu pembayaran"
           value={String(stats.pending.jumlah)}
-          note="Transaksi Mayar aktif"
+          note="Transaksi Midtrans aktif"
         />
       </div>
 

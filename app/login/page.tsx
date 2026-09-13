@@ -1,16 +1,28 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Icon } from "@/lib/icons";
 import { getPesantrenSettings } from "@/db/queries/admin";
-import { demoAccounts } from "@/lib/data/accounts";
 import { LoginForm } from "@/components/login-form";
+import { getSession } from "@/lib/auth/session";
+import { roleDashboard } from "@/lib/nav";
 
 export const metadata: Metadata = {
   title: "Masuk",
   description: "Masuk ke ruang belajar LMS Pesantren.",
 };
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ alasan?: string }>;
+}) {
+  const { alasan } = await searchParams;
+  /* Validasi sesi yang sebenarnya di sini (bukan di proxy): cookie yang ada
+     belum tentu sesi valid — bisa basi/kedaluwarsa. Jika valid, pengguna yang
+     sudah masuk tidak perlu melihat form login. */
+  const session = await getSession();
+  if (session) redirect(roleDashboard[session.user.role]);
   const settings = await getPesantrenSettings();
   const brandLogo = settings?.settings.logoUrl ?? null;
   const googleConfigured = Boolean(
@@ -31,7 +43,7 @@ export default async function LoginPage() {
           </span>
           <span>
             <strong className="brand-name">LMS Pesantren</strong>
-            <span className="brand-subtitle">Ruang belajar terpadu</span>
+            <span className="brand-subtitle">Miftahul Mukhlishin Kota Bandung</span>
           </span>
         </Link>
         <div className="login-story-copy">
@@ -40,26 +52,15 @@ export default async function LoginPage() {
             Ilmu yang tertata, langkah yang lebih bermakna.
           </h1>
           <p className="login-story-text">
-            Satu ruang untuk mengelola kelas, tugas, kehadiran, nilai, rapor, dan
-            komunikasi seluruh warga pesantren.
+            Absensi, tugas, nilai, sampai rapor tercatat rapi dan bisa dilihat
+            kapan saja oleh guru, santri, dan wali.
           </p>
-          <div className="login-story-points">
-            <div className="login-story-point">
-              <Icon name="check" />
-              Kelola kegiatan akademik dengan lebih rapi
-            </div>
-            <div className="login-story-point">
-              <Icon name="shield" />
-              Data setiap peran terlindungi dan terarah
-            </div>
-            <div className="login-story-point">
-              <Icon name="wallet" />
-              Pantau pembayaran SPP secara transparan
-            </div>
-          </div>
         </div>
         <div className="login-footer">
-          Pesantren Al-Hikmah · Tahun Ajaran 2026 / 2027
+          Pesantren Miftahul Mukhlishin Kota Bandung
+          {settings?.tahunAjaranLabel
+            ? ` · Tahun Ajaran ${settings.tahunAjaranLabel}`
+            : ""}
         </div>
       </section>
 
@@ -74,20 +75,16 @@ export default async function LoginPage() {
               Gunakan akun pesantren untuk melanjutkan aktivitas Anda.
             </p>
           </div>
-          <LoginForm googleConfigured={googleConfigured} />
-          {process.env.NODE_ENV !== "production" ? (
-            <div className="notice" style={{ marginTop: 14 }}>
-              <Icon name="sparkle" />
-              <div style={{ display: "grid", gap: 2 }}>
-                <strong>Akun demo (development) — pilih sesuai peran</strong>
-                {demoAccounts.map((account) => (
-                  <span key={account.email}>
-                    {account.email} · {account.password} — {account.roleLabel}
-                  </span>
-                ))}
-              </div>
+          {alasan === "sesi-berakhir" ? (
+            <div className="notice" role="alert" style={{ marginBottom: 14 }}>
+              <Icon name="alert" />
+              <span>
+                Sesi ini telah berakhir. Login kembali untuk membuka LMS
+                Pesantren.
+              </span>
             </div>
           ) : null}
+          <LoginForm googleConfigured={googleConfigured} />
           <p className="login-note">
             <Icon name="lock" />
             Akses akun dibatasi berdasarkan peran. Jangan bagikan kata sandi

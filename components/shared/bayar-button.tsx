@@ -20,7 +20,7 @@ export function BayarButton({ tagihanId, label = "Bayar Sekarang" }: { tagihanId
           try {
             const result = await bayarSekarangForm(fd);
             if (result.ok && result.data?.checkoutUrl) {
-              showToast(result.message ?? "Mengarahkan ke Mayar...");
+              showToast(result.message ?? "Mengarahkan ke Midtrans...");
               window.location.href = result.data.checkoutUrl;
             } else {
               showToast(

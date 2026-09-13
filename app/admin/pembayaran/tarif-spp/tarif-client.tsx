@@ -1,9 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Icon } from "@/lib/icons";
 import { useToast } from "@/components/app-shell";
 import { createTarifForm, setTarifAktifForm } from "@/actions/forms";
+import { MinimumNominalNote } from "@/components/shared/minimum-nominal-note";
 import { rupiah } from "@/lib/format";
 
 export type TarifRow = {
@@ -31,6 +32,7 @@ const inputStyle = {
 export function TarifClient({ rows, kelasOptions }: { rows: TarifRow[]; kelasOptions: KelasOption[] }) {
   const showToast = useToast();
   const [pending, startTransition] = useTransition();
+  const [nominal, setNominal] = useState(0);
 
   const run = (fn: () => Promise<{ ok: boolean; error?: string; message?: string }>) => {
     startTransition(async () => {
@@ -121,6 +123,7 @@ export function TarifClient({ rows, kelasOptions }: { rows: TarifRow[]; kelasOpt
             const fd = new FormData(form);
             run(() => createTarifForm(fd));
             form.reset();
+            setNominal(0);
           }}
         >
           <div className="field">
@@ -129,7 +132,17 @@ export function TarifClient({ rows, kelasOptions }: { rows: TarifRow[]; kelasOpt
           </div>
           <div className="field">
             <label htmlFor="t-nominal">Nominal (Rp)</label>
-            <input id="t-nominal" name="nominal" type="number" min="1" required placeholder="300000" style={inputStyle} />
+            <input
+              id="t-nominal"
+              name="nominal"
+              type="number"
+              min="1"
+              required
+              placeholder="300000"
+              style={inputStyle}
+              onChange={(event) => setNominal(Number(event.target.value))}
+            />
+            <MinimumNominalNote nominal={nominal} />
           </div>
           <div className="field">
             <label htmlFor="t-kelas">

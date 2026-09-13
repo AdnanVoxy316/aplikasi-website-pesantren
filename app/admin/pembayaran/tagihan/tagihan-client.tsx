@@ -7,8 +7,12 @@ import {
   generateTagihanForm,
   cancelTagihanForm,
   markPaidManualForm,
+  updateTagihanNominalForm,
 } from "@/actions/forms";
-import { rupiah, labelPeriode, tanggalIndo } from "@/lib/format";
+import { rupiah, labelPeriode, tanggalIndo, BULAN } from "@/lib/format";
+import { MinimumNominalNote } from "@/components/shared/minimum-nominal-note";
+import { BuatTagihanModal } from "./buat-tagihan-modal";
+import { KelolaItemModal, type JenisOption, type TagihanItemLengkap } from "./kelola-item-modal";
 
 export type TagihanRow = {
   id: string;
@@ -16,12 +20,15 @@ export type TagihanRow = {
   santriNama: string;
   nis: string | null;
   kelasNama: string | null;
+  sumber: string;
   periodeBulan: number;
   periodeTahun: number;
   nominal: number;
   totalTagihan: number;
   jatuhTempo: Date | null;
   status: string;
+  jumlahItem: number;
+  itemRingkas: string | null;
 };
 
 export type KelasOption = { id: string; nama: string };
@@ -55,16 +62,25 @@ export function TagihanClient({
   santriOptions,
   taOptions,
   tahunAjaranId,
+  jenisOptions,
+  itemMap,
 }: {
   rows: TagihanRow[];
   kelasOptions: KelasOption[];
   santriOptions: SantriOption[];
   taOptions: TaOption[];
   tahunAjaranId: string;
+  jenisOptions: JenisOption[];
+  itemMap: Record<string, TagihanItemLengkap[]>;
 }) {
   const showToast = useToast();
   const [pending, startTransition] = useTransition();
   const [statusFilter, setStatusFilter] = useState("semua");
+  const [bayarRow, setBayarRow] = useState<TagihanRow | null>(null);
+  const [editRow, setEditRow] = useState<TagihanRow | null>(null);
+  const [editNominal, setEditNominal] = useState(0);
+  const [buatTerbuka, setBuatTerbuka] = useState(false);
+  const [kelolaRow, setKelolaRow] = useState<TagihanRow | null>(null);
 
   const filtered = rows.filter((r) => statusFilter === "semua" || r.status === statusFilter);
 
@@ -72,10 +88,16 @@ export function TagihanClient({
     startTransition(async () => {
       const result = await fn();
       showToast(result.ok ? result.message ?? "Berhasil." : result.error ?? "Gagal.");
+      if (result.ok) {
+        setBayarRow(null);
+        setEditRow(null);
+        setBuatTerbuka(false);
+      }
     });
   };
 
   const now = new Date();
+  const bulanDepan = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
   return (
     <div className="detail-layout" style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) 285px", gap: 15, alignItems: "start" }}>
@@ -88,19 +110,29 @@ export function TagihanClient({
               {rupiah(filtered.reduce((s, r) => s + r.totalTagihan, 0))}
             </p>
           </div>
-          <select
-            className="date-input"
-            aria-label="Filter status"
-            value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value)}
-            style={{ ...inputStyle, width: "auto", marginBottom: 0 }}
-          >
-            <option value="semua">Semua status</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button
+              type="button"
+              className="button button-primary"
+              onClick={() => setBuatTerbuka(true)}
+            >
+              <Icon name="plus" />
+              Buat tagihan
+            </button>
+            <select
+              className="date-input"
+              aria-label="Filter status"
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              style={{ ...inputStyle, width: "auto", marginBottom: 0 }}
+            >
+              <option value="semua">Semua status</option>
+              <option value="unpaid">Unpaid</option>
+              <option value="pending">Pending</option>
+              <option value="paid">Paid</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
         </div>
         <div className="table-shell">
           <table className="data-table">
@@ -108,6 +140,7 @@ export function TagihanClient({
               <tr>
                 <th>No. tagihan</th>
                 <th>Santri</th>
+                <th>Jenis</th>
                 <th>Periode</th>
                 <th>Total</th>
                 <th>Jatuh tempo</th>
@@ -123,6 +156,16 @@ export function TagihanClient({
                     <strong>{row.santriNama}</strong>
                     {row.kelasNama ? ` · ${row.kelasNama}` : ""}
                   </td>
+                  <td style={{ maxWidth: 190 }}>
+                    <span className={`status-badge ${row.sumber === "spp" ? "neutral" : "success"}`}>
+                      {row.sumber === "spp" ? "SPP" : "Manual"}
+                    </span>
+                    <div className="invoice-number-small" style={{ marginTop: 4 }}>
+                      {row.jumlahItem > 1
+                        ? `${row.jumlahItem} item · ${row.itemRingkas}`
+                        : row.itemRingkas ?? "—"}
+                    </div>
+                  </td>
                   <td>{labelPeriode(row.periodeBulan, row.periodeTahun)}</td>
                   <td>{rupiah(row.totalTagihan)}</td>
                   <td>{tanggalIndo(row.jatuhTempo)}</td>
@@ -133,25 +176,39 @@ export function TagihanClient({
                   </td>
                   <td>
                     <div className="table-actions">
+                      <button
+                        className="table-action"
+                        type="button"
+                        title="Rincian & kelola item"
+                        disabled={pending}
+                        onClick={() => setKelolaRow(row)}
+                      >
+                        <Icon name="clipboard" />
+                      </button>
                       {row.status !== "paid" && row.status !== "cancelled" ? (
                         <>
+                          {row.jumlahItem <= 1 ? (
+                            <button
+                              className="table-action"
+                              type="button"
+                              title="Ubah nominal tagihan"
+                              disabled={pending}
+                              onClick={() => {
+                                setEditRow(row);
+                                setEditNominal(row.nominal);
+                              }}
+                            >
+                              <Icon name="edit" />
+                            </button>
+                          ) : null}
                           <button
                             className="table-action"
                             type="button"
-                            title="Tandai lunas (manual)"
+                            title="Tandai lunas (cash/transfer)"
                             disabled={pending}
-                            onClick={() => {
-                              const catatan = window.prompt(
-                                `Catatan pembayaran manual untuk ${row.santriNama} (misal: transfer manual):`,
-                              );
-                              if (catatan === null) return;
-                              const fd = new FormData();
-                              fd.set("id", row.id);
-                              fd.set("catatan", catatan);
-                              run(() => markPaidManualForm(fd));
-                            }}
+                            onClick={() => setBayarRow(row)}
                           >
-                            <Icon name="wallet" />
+                            <Icon name="cash" />
                           </button>
                           <button
                             className="table-action danger"
@@ -177,7 +234,8 @@ export function TagihanClient({
           </table>
           {filtered.length === 0 ? (
             <p className="panel-subtitle" style={{ padding: 14 }}>
-              Tidak ada tagihan sesuai filter. Generate tagihan dari panel sebelah.
+              Tidak ada tagihan sesuai filter. Generate tagihan SPP dari panel sebelah, atau klik
+              Buat tagihan untuk tagihan jenis lain.
             </p>
           ) : null}
         </div>
@@ -208,17 +266,17 @@ export function TagihanClient({
           </div>
           <div className="field">
             <label htmlFor="g-bulan">Periode bulan</label>
-            <select id="g-bulan" name="periodeBulan" defaultValue={String(now.getMonth() + 1)} required style={inputStyle}>
+            <select id="g-bulan" name="periodeBulan" defaultValue={String(bulanDepan.getMonth() + 1)} required style={inputStyle}>
               {Array.from({ length: 12 }, (_, i) => (
                 <option key={i + 1} value={i + 1}>
-                  {labelPeriode(i + 1, now.getFullYear())}
+                  {BULAN[i]}
                 </option>
               ))}
             </select>
           </div>
           <div className="field">
             <label htmlFor="g-tahun">Tahun</label>
-            <input id="g-tahun" name="periodeTahun" type="number" defaultValue={now.getFullYear()} required style={inputStyle} />
+            <input id="g-tahun" name="periodeTahun" type="number" defaultValue={bulanDepan.getFullYear()} required style={inputStyle} />
           </div>
           <div className="field">
             <label htmlFor="g-scope">Cakupan</label>
@@ -267,6 +325,167 @@ export function TagihanClient({
           </div>
         </form>
       </section>
+
+      {bayarRow ? (
+        <div className="preview-overlay" role="dialog" aria-modal="true">
+          <div className="preview-modal" style={{ maxWidth: 420 }}>
+            <div className="preview-header">
+              <div className="preview-title">
+                <strong>Tandai lunas</strong>
+                <span className="panel-subtitle">
+                  {bayarRow.santriNama} · {labelPeriode(bayarRow.periodeBulan, bayarRow.periodeTahun)}
+                </span>
+              </div>
+              <div className="preview-actions">
+                <button
+                  type="button"
+                  className="table-action danger"
+                  title="Tutup"
+                  onClick={() => setBayarRow(null)}
+                >
+                  <Icon name="close" />
+                </button>
+              </div>
+            </div>
+            <form
+              className="preview-body"
+              style={{ padding: 16 }}
+              onSubmit={(event) => {
+                event.preventDefault();
+                const fd = new FormData(event.currentTarget);
+                run(() => markPaidManualForm(fd));
+              }}
+            >
+              <input type="hidden" name="id" value={bayarRow.id} />
+              <div className="field">
+                <label htmlFor="b-metode">Metode pembayaran</label>
+                <select id="b-metode" name="metode" defaultValue="cash" style={inputStyle}>
+                  <option value="cash">Tunai (cash)</option>
+                  <option value="transfer">Transfer bank</option>
+                  <option value="qris">QRIS manual</option>
+                  <option value="ewallet">E-wallet</option>
+                  <option value="lainnya">Lainnya</option>
+                </select>
+              </div>
+              <div className="field">
+                <label htmlFor="b-catatan">Catatan (opsional)</label>
+                <input
+                  id="b-catatan"
+                  name="catatan"
+                  placeholder="mis. diterima bendahara, no. kuitansi"
+                  style={inputStyle}
+                />
+              </div>
+              <p style={{ fontSize: 12, color: "var(--muted)" }}>
+                Total ditandai lunas: <strong>{rupiah(bayarRow.totalTagihan)}</strong>
+              </p>
+              <div className="form-actions">
+                <button className="button button-secondary" type="button" onClick={() => setBayarRow(null)}>
+                  Batal
+                </button>
+                <button className="button button-primary" type="submit" disabled={pending}>
+                  Tandai lunas
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {editRow ? (
+        <div className="preview-overlay" role="dialog" aria-modal="true">
+          <div className="preview-modal" style={{ maxWidth: 420 }}>
+            <div className="preview-header">
+              <div className="preview-title">
+                <strong>Ubah nominal tagihan</strong>
+                <span className="panel-subtitle">
+                  {editRow.santriNama} · {labelPeriode(editRow.periodeBulan, editRow.periodeTahun)}
+                </span>
+              </div>
+              <div className="preview-actions">
+                <button
+                  type="button"
+                  className="table-action danger"
+                  title="Tutup"
+                  onClick={() => setEditRow(null)}
+                >
+                  <Icon name="close" />
+                </button>
+              </div>
+            </div>
+            <form
+              className="preview-body"
+              style={{ padding: 16 }}
+              onSubmit={(event) => {
+                event.preventDefault();
+                const fd = new FormData(event.currentTarget);
+                run(() => updateTagihanNominalForm(fd));
+              }}
+            >
+              <input type="hidden" name="tagihanId" value={editRow.id} />
+              <div className="field">
+                <label htmlFor="e-nominal">Nominal dasar tagihan</label>
+                <input
+                  id="e-nominal"
+                  name="nominal"
+                  type="number"
+                  min={0}
+                  step={500}
+                  defaultValue={editRow.nominal}
+                  required
+                  style={inputStyle}
+                  onChange={(event) => setEditNominal(Number(event.target.value))}
+                />
+                <small>
+                  Nominal sebelumnya {rupiah(editRow.nominal)}. Cocokkan dengan kemampuan santri.
+                </small>
+                <MinimumNominalNote nominal={editNominal} />
+              </div>
+              <div className="field">
+                <label htmlFor="e-catatan">Catatan (opsional)</label>
+                <input id="e-catatan" name="catatan" placeholder="alasan penyesuaian" style={inputStyle} />
+              </div>
+              <div className="form-actions">
+                <button className="button button-secondary" type="button" onClick={() => setEditRow(null)}>
+                  Batal
+                </button>
+                <button className="button button-primary" type="submit" disabled={pending}>
+                  Simpan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {buatTerbuka ? (
+        <BuatTagihanModal
+          santriOptions={santriOptions}
+          taOptions={taOptions}
+          jenisOptions={jenisOptions}
+          defaultTahunAjaranId={tahunAjaranId}
+          onClose={() => setBuatTerbuka(false)}
+          run={run}
+        />
+      ) : null}
+
+      {kelolaRow ? (
+        <KelolaItemModal
+          tagihan={{
+            id: kelolaRow.id,
+            nomorTagihan: kelolaRow.nomorTagihan,
+            santriNama: kelolaRow.santriNama,
+            periodeBulan: kelolaRow.periodeBulan,
+            periodeTahun: kelolaRow.periodeTahun,
+            status: kelolaRow.status,
+            totalTagihan: kelolaRow.totalTagihan,
+          }}
+          items={itemMap[kelolaRow.id] ?? []}
+          jenisOptions={jenisOptions}
+          onClose={() => setKelolaRow(null)}
+          run={run}
+        />
+      ) : null}
     </div>
   );
 }

@@ -234,12 +234,24 @@ export async function listKehadiranTanggal(
   return new Map(rows.map((r) => [r.santriId, r.status]));
 }
 
+export async function listKehadiranKelasMapel(kelasId: string, mapelId: string) {
+  return db
+    .select({
+      santriId: kehadiran.santriId,
+      tanggal: kehadiran.tanggal,
+      status: kehadiran.status,
+    })
+    .from(kehadiran)
+    .where(and(eq(kehadiran.kelasId, kelasId), eq(kehadiran.mapelId, mapelId)))
+    .orderBy(asc(kehadiran.tanggal));
+}
+
 export async function listRiwayatKehadiranKelas(
   kelasId: string,
   mapelId: string,
-  limit = 30,
+  limit?: number,
 ) {
-  return db
+  const query = db
     .select({
       tanggal: kehadiran.tanggal,
       hadir: sql<number>`sum(case when ${kehadiran.status} = 'hadir' then 1 else 0 end)`,
@@ -251,8 +263,8 @@ export async function listRiwayatKehadiranKelas(
     .from(kehadiran)
     .where(and(eq(kehadiran.kelasId, kelasId), eq(kehadiran.mapelId, mapelId)))
     .groupBy(kehadiran.tanggal)
-    .orderBy(desc(kehadiran.tanggal))
-    .limit(limit);
+    .orderBy(desc(kehadiran.tanggal));
+  return limit === undefined ? query : query.limit(limit);
 }
 
 export async function listRaporKelas(kelasId: string, tahunAjaranId: string) {

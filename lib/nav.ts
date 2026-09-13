@@ -54,7 +54,9 @@ export const navigation: Record<Role, NavSection[]> = {
       label: "Pembayaran SPP",
       items: [
         { label: "Dashboard pembayaran", href: "/admin/pembayaran", icon: "wallet" },
+        { label: "Jenis pembayaran", href: "/admin/pembayaran/jenis-pembayaran", icon: "clipboard" },
         { label: "Tarif SPP", href: "/admin/pembayaran/tarif-spp", icon: "settings" },
+        { label: "Tarif khusus santri", href: "/admin/pembayaran/tarif-santri", icon: "wallet" },
         { label: "Tagihan", href: "/admin/pembayaran/tagihan", icon: "file" },
         { label: "Transaksi", href: "/admin/pembayaran/transaksi", icon: "chart" },
         { label: "Pengaturan pembayaran", href: "/admin/pembayaran/pengaturan", icon: "settings" },
@@ -114,7 +116,7 @@ export const navigation: Record<Role, NavSection[]> = {
     {
       label: "Keuangan",
       items: [
-        { label: "Pembayaran SPP", href: "/santri/pembayaran/tagihan", icon: "wallet" },
+        { label: "Tagihan", href: "/santri/pembayaran/tagihan", icon: "wallet" },
         { label: "Riwayat pembayaran", href: "/santri/pembayaran/riwayat", icon: "clock" },
       ],
     },
@@ -146,7 +148,7 @@ export const navigation: Record<Role, NavSection[]> = {
     {
       label: "Keuangan",
       items: [
-        { label: "Pembayaran SPP", href: "/wali/pembayaran/tagihan", icon: "wallet" },
+        { label: "Tagihan anak", href: "/wali/pembayaran/tagihan", icon: "wallet" },
         { label: "Riwayat pembayaran", href: "/wali/pembayaran/riwayat", icon: "clock" },
       ],
     },

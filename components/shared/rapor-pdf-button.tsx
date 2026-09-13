@@ -285,46 +285,21 @@ function buildRaporPdf(data: RaporPdfPayload, withFooter = false): jsPDF {
   return doc;
 }
 
-export function RaporPdfButton({ raporId }: { raporId: string }) {
-  const showToast = useToast();
-  const [pending, startTransition] = useTransition();
-
-  const unduh = () => {
-    startTransition(async () => {
-      const result = await fetchRaporPdfData(raporId);
-      if (!result.ok) {
-        showToast(result.error ?? "Gagal memuat data rapor.");
-        return;
-      }
-      try {
-        buildRaporPdf(result.data).save(namaFile(result.data));
-        showToast("Rapor PDF berhasil diunduh.");
-      } catch {
-        showToast("Gagal membuat file PDF.");
-      }
-    });
-  };
-  return (
-    <button
-      type="button"
-      className={`table-action${pending ? " is-loading" : ""}`}
-      title="Unduh PDF"
-      aria-label="Unduh rapor PDF"
-      disabled={pending}
-      onClick={unduh}
-    >
-      <Icon name="download" />
-    </button>
-  );
-}
-
-/* Tombol ramah pemula untuk santri: pratinjau PDF dulu di layar, baru unduh. */
-export function SantriRaporActions({ raporId }: { raporId: string }) {
+export function RaporPdfButton({
+  raporId,
+  variant = "icon",
+  label = "Unduh PDF",
+}: {
+  raporId: string;
+  variant?: "icon" | "button";
+  label?: string;
+}) {
   const showToast = useToast();
   const [pending, startTransition] = useTransition();
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfNama, setPdfNama] = useState("rapor.pdf");
   const urlRef = useRef<string | null>(null);
+  const payloadRef = useRef<RaporPdfPayload | null>(null);
 
   useEffect(() => {
     return () => {
@@ -332,7 +307,8 @@ export function SantriRaporActions({ raporId }: { raporId: string }) {
     };
   }, []);
 
-  const load = (mode: "preview" | "download") => {
+  /* Buka pratinjau dulu (dengan catatan kaki) supaya guru/santri bisa cek sebelum unduh. */
+  const bukaPreview = () => {
     startTransition(async () => {
       const result = await fetchRaporPdfData(raporId);
       if (!result.ok) {
@@ -340,16 +316,12 @@ export function SantriRaporActions({ raporId }: { raporId: string }) {
         return;
       }
       try {
-        const doc = buildRaporPdf(result.data, mode === "preview");
+        const doc = buildRaporPdf(result.data, true);
         const nama = namaFile(result.data);
-        if (mode === "download") {
-          doc.save(nama);
-          showToast("Rapor PDF berhasil diunduh.");
-          return;
-        }
         if (urlRef.current) URL.revokeObjectURL(urlRef.current);
         const url = doc.output("bloburl").toString();
         urlRef.current = url;
+        payloadRef.current = result.data;
         setPdfNama(nama);
         setPdfUrl(url);
       } catch {
@@ -358,35 +330,57 @@ export function SantriRaporActions({ raporId }: { raporId: string }) {
     });
   };
 
+  /* Unduh dari dalam pratinjau: PDF dibuat ulang tanpa catatan kaki. */
+  const unduh = () => {
+    const data = payloadRef.current;
+    if (!data) return;
+    try {
+      buildRaporPdf(data).save(namaFile(data));
+      showToast("Rapor PDF berhasil diunduh.");
+    } catch {
+      showToast("Gagal membuat file PDF.");
+    }
+  };
+
   const close = () => {
     if (urlRef.current) URL.revokeObjectURL(urlRef.current);
     urlRef.current = null;
+    payloadRef.current = null;
     setPdfUrl(null);
   };
 
   return (
-    <div className="inline-actions">
-      <button
-        type="button"
-        className="button button-secondary"
-        disabled={pending}
-        onClick={() => load("preview")}
-      >
-        <Icon name="eye" />
-        Lihat PDF
-      </button>
-      <button
-        type="button"
-        className="button button-primary"
-        disabled={pending}
-        onClick={() => load("download")}
-      >
-        <Icon name="download" />
-        Unduh PDF
-      </button>
+    <>
+      {variant === "button" ? (
+        <button
+          type="button"
+          className={`button button-primary${pending ? " is-loading" : ""}`}
+          disabled={pending}
+          onClick={bukaPreview}
+        >
+          <Icon name="download" />
+          {label}
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={`table-action${pending ? " is-loading" : ""}`}
+          title="Pratinjau & unduh rapor"
+          aria-label="Pratinjau & unduh rapor"
+          disabled={pending}
+          onClick={bukaPreview}
+        >
+          <Icon name="download" />
+        </button>
+      )}
       {pdfUrl ? (
-        <PreviewModal src={pdfUrl} nama={pdfNama} onClose={close} hideDownload />
+        <PreviewModal src={pdfUrl} nama={pdfNama} onClose={close} onDownload={unduh} />
       ) : null}
-    </div>
+    </>
   );
+}
+
+/* Tombol untuk santri: pratinjau PDF dulu di layar, baru unduh dari dalam pratinjau. */
+export function SantriRaporActions({ raporId }: { raporId: string }) {
+  return <RaporPdfButton raporId={raporId} variant="button" />;
 }

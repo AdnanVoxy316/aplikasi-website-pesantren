@@ -8,6 +8,7 @@ import { getPesantrenSettings, listTahunAjaran, listJenisNilai } from "@/db/quer
 import { requireRole } from "@/lib/auth/session";
 import { db } from "@/db";
 import { account, user } from "@/db/schema";
+import { emailDariIdToken } from "@/lib/auth/google";
 import { PengaturanClient } from "./pengaturan-client";
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export default async function AdminPengaturanPage() {
     .where(eq(user.id, session.user.id))
     .limit(1);
   const [googleRow] = await db
-    .select({ id: account.id })
+    .select({ id: account.id, idToken: account.idToken })
     .from(account)
     .where(and(eq(account.userId, session.user.id), eq(account.providerId, "google")))
     .limit(1);
@@ -82,7 +83,11 @@ export default async function AdminPengaturanPage() {
           subtitle="Masuk tanpa kata sandi — bisa dilepas kapan saja"
           bodyClassName="panel-body"
         >
-          <GoogleAccountPanel terhubung={Boolean(googleRow)} terkonfigurasi={googleConfigured} />
+          <GoogleAccountPanel
+            terhubung={Boolean(googleRow)}
+            terkonfigurasi={googleConfigured}
+            emailGoogle={emailDariIdToken(googleRow?.idToken)}
+          />
         </Panel>
       </div>
     </>

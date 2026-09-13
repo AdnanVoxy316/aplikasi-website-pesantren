@@ -12,6 +12,7 @@ export function LoginForm({ googleConfigured }: { googleConfigured: boolean }) {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [ingatSaya, setIngatSaya] = useState(false);
   const [mode, setMode] = useState<"login" | "lupa">("login");
 
   const masukGoogle = async () => {
@@ -36,6 +37,9 @@ export function LoginForm({ googleConfigured }: { googleConfigured: boolean }) {
     const { error: authError } = await authClient.signIn.email({
       email,
       password,
+      /* Tidak dicentang = cookie sesi hilang saat browser ditutup (default aman).
+         Dicentang = boleh tetap masuk di perangkat ini selama 12 jam. */
+      rememberMe: ingatSaya,
     });
 
     if (authError) {
@@ -101,7 +105,12 @@ export function LoginForm({ googleConfigured }: { googleConfigured: boolean }) {
       ) : null}
       <div className="login-row">
         <label className="login-check">
-          <input type="checkbox" name="remember" /> Ingat saya
+          <input
+            type="checkbox"
+            checked={ingatSaya}
+            onChange={(event) => setIngatSaya(event.target.checked)}
+          />{" "}
+          Ingat saya
         </label>
         <button
           className="login-link"
@@ -119,17 +128,13 @@ export function LoginForm({ googleConfigured }: { googleConfigured: boolean }) {
         type="submit"
         disabled={loading}
       >
-        {loading ? "Memproses..." : (
-          <>
-            Masuk ke dashboard <span aria-hidden="true">&rarr;</span>
-          </>
-        )}
+        {loading ? "Memproses..." : "Login ke Akun Pesantren"}
       </button>
       {googleConfigured ? (
         <>
           <div
             className="login-divider"
-            style={{ display: "flex", alignItems: "center", gap: 10, margin: "16px 0" }}
+            style={{ display: "flex", alignItems: "center", gap: 10, margin: "6px 0 0" }}
             aria-hidden="true"
           >
             <span style={{ flex: 1, height: 1, background: "var(--border, #e2e8f0)" }} />

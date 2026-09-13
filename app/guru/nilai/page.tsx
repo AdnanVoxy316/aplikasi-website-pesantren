@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeading } from "@/components/ui/page-heading";
 import { Panel, EmptyState } from "@/components/ui/panel";
+import { TaskSelect } from "@/components/ui/task-select";
 import { requireRole } from "@/lib/auth/session";
 import { getGuruProfile, listPengajaranGuru, listNilaiKelasMapel } from "@/db/queries/guru";
 import { getPesantrenSettings } from "@/db/queries/admin";
@@ -80,6 +81,14 @@ export default async function GuruNilaiPage({
               {p.kelasNama} · {p.mapelNama}
             </Link>
           ))}
+          <TaskSelect
+            basePath="/guru/nilai"
+            selectedId={selected.id}
+            options={pengajaranRows.map((p) => ({
+              id: p.id,
+              label: `${p.kelasNama} · ${p.mapelNama}`,
+            }))}
+          />
         </div>
       </div>
 

@@ -16,6 +16,7 @@ import {
 import { ChangePasswordForm } from "@/components/shared/change-password-form";
 import { ProfilePhotoForm } from "@/components/shared/profile-photo-form";
 import { GoogleAccountPanel } from "@/components/admin/google-account-panel";
+import { emailDariIdToken } from "@/lib/auth/google";
 import { tanggalIndo } from "@/lib/format";
 
 export const metadata: Metadata = {
@@ -38,11 +39,12 @@ export default async function ProfilPage() {
   );
   const [googleRow] = googleConfigured
     ? await db
-        .select({ id: account.id })
+        .select({ id: account.id, idToken: account.idToken })
         .from(account)
         .where(and(eq(account.userId, shell.userId), eq(account.providerId, "google")))
         .limit(1)
     : [];
+  const emailGoogle = emailDariIdToken(googleRow?.idToken);
 
   const [detail] = await db
     .select({
@@ -67,9 +69,19 @@ export default async function ProfilPage() {
   const rows: [string, string][] = [
     ["Nama", shell.user.name],
     ["Email", shell.user.email ?? "—"],
+  ];
+
+  if (googleConfigured) {
+    rows.push([
+      "Akun Google",
+      googleRow ? (emailGoogle ?? "Tidak tersedia") : "Belum terhubung",
+    ]);
+  }
+
+  rows.push(
     ["Peran", ROLE_LABEL[shell.role] ?? shell.role],
     ["Bergabung", tanggalIndo(detail?.createdAt ?? null)],
-  ];
+  );
 
   if (shell.role === "guru") {
     rows.push(["NIP", detail?.nip || "—"]);
@@ -146,6 +158,7 @@ export default async function ProfilPage() {
             <GoogleAccountPanel
               terhubung={Boolean(googleRow)}
               terkonfigurasi={googleConfigured}
+              emailGoogle={emailGoogle}
               kembali="/profil"
             />
           </Panel>

@@ -118,7 +118,7 @@ export function AkunClient({
   };
 
   return (
-    <div className="form-layout">
+    <div>
       <section className="panel">
         <div className="panel-header">
           <div>
@@ -340,7 +340,7 @@ export function AkunClient({
           </div>
         </div>
 
-        <div className="table-shell">
+        <div className="table-shell akun-table">
           <table className="data-table">
             <thead>
               <tr>

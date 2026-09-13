@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useToast } from "@/components/app-shell";
 import { LocalPreviewButton } from "@/components/shared/file-preview";
 import { createTugasForm, addTugasLampiranForm, addTugasLampiranLinkForm } from "@/actions/forms";
@@ -191,6 +192,9 @@ export function TugasBaruClient({ pengajaranOptions }: { pengajaranOptions: Peng
         </div>
       </div>
       <div className="form-actions">
+        <Link className="button button-secondary form-cancel-mobile" href="/guru/tugas">
+          Batal
+        </Link>
         <button className="button button-primary" type="submit" disabled={pending}>
           {pending ? uploadProgress || "Menyimpan..." : "Terbitkan tugas"}
         </button>

@@ -85,7 +85,9 @@ export default async function AdminRaporPage() {
                       {row.semester === "ganjil" ? "Ganjil" : "Genap"} · {row.tahunAjaranLabel}
                     </td>
                     <td>{tanggalWaktuIndo(row.generatedAt)}</td>
-                    <td>{row.catatan ?? "—"}</td>
+                    <td>
+                      <span className="cell-truncate">{row.catatan ?? "—"}</span>
+                    </td>
                     <td>
                       <div className="table-actions">
                         <RaporPdfButton raporId={row.id} />

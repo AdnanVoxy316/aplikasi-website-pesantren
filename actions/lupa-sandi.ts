@@ -6,6 +6,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { account, resetOtp, session as sessionTable, user as userTable } from "@/db/schema";
 import { hashPasswordWithAuth } from "@/lib/auth/server";
+import { emailDariIdToken } from "@/lib/auth/google";
 import { logActivity } from "@/lib/activity";
 import { fail, ok, toActionError, type ActionResult } from "@/lib/action-result";
 import { MAILER_SETUP_HINT, isMailerConfigured, kirimEmailOtpLupaSandi } from "@/lib/mailer";
@@ -24,20 +25,6 @@ function hashKode(kode: string): string {
 
 function kodeOtpBaru(): string {
   return String(randomInt(100000, 1000000));
-}
-
-/* Email Google ter-link dibaca dari klaim "email" di id_token yang tersimpan
-   pada tabel account (Google tidak menyimpan email di tabel account). */
-function emailDariIdToken(idToken: string | null): string | null {
-  if (!idToken) return null;
-  const bagian = idToken.split(".");
-  if (bagian.length !== 3) return null;
-  try {
-    const payload = JSON.parse(Buffer.from(bagian[1], "base64url").toString("utf8"));
-    return typeof payload.email === "string" ? payload.email.toLowerCase() : null;
-  } catch {
-    return null;
-  }
 }
 
 type AkunReset = {

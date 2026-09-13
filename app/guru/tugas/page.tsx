@@ -47,7 +47,7 @@ export default async function GuruTugasPage() {
           </EmptyState>
         ) : (
           <div className="table-shell">
-            <table className="data-table">
+            <table className="data-table tugas-table">
               <thead>
                 <tr>
                   <th>Judul</th>

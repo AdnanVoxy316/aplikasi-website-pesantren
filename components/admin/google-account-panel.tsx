@@ -23,10 +23,12 @@ const PESAN_OAUTH: Record<string, string> = {
 export function GoogleAccountPanel({
   terhubung,
   terkonfigurasi,
+  emailGoogle = null,
   kembali = "/admin/pengaturan",
 }: {
   terhubung: boolean;
   terkonfigurasi: boolean;
+  emailGoogle?: string | null;
   kembali?: string;
 }) {
   const showToast = useToast();
@@ -71,6 +73,11 @@ export function GoogleAccountPanel({
           ? "Akun Google terhubung — Anda dapat masuk dengan Google. Lepas kapan saja agar masuk hanya dengan email/kata sandi."
           : "Hubungkan akun Google untuk bisa masuk tanpa kata sandi. Selalu ada kata sandi sebagai cadangan."}
       </p>
+      {terhubung ? (
+        <p className="form-card-description">
+          Terhubung sebagai <strong>{emailGoogle ?? "Tidak tersedia"}</strong>
+        </p>
+      ) : null}
       {oauthError ? (
         <div className="notice error" role="alert">
           <Icon name="alert" />

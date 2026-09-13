@@ -37,7 +37,7 @@ export function tanggalLengkapIndo(date: Date | null | undefined): string {
   }).format(date);
 }
 
-const BULAN = [
+export const BULAN = [
   "Januari", "Februari", "Maret", "April", "Mei", "Juni",
   "Juli", "Agustus", "September", "Oktober", "November", "Desember",
 ];

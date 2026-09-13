@@ -104,7 +104,9 @@ export default async function GuruRaporPage() {
                     </td>
                     <td>{row.semester}</td>
                     <td>{tanggalWaktuIndo(row.generatedAt)}</td>
-                    <td>{row.catatan ?? "—"}</td>
+                    <td>
+                      <span className="cell-truncate">{row.catatan ?? "—"}</span>
+                    </td>
                     <td>
                       <div className="table-actions">
                         <RaporPdfButton raporId={row.id} />

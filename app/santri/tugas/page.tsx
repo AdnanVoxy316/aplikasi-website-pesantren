@@ -50,7 +50,7 @@ export default async function SantriTugasPage() {
           </EmptyState>
         ) : (
           <div className="table-shell table-shell-scroll">
-            <table className="data-table">
+            <table className="data-table tugas-table">
               <thead>
                 <tr>
                   <th>Judul</th>

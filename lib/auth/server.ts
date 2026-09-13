@@ -17,8 +17,15 @@ export const auth = betterAuth({
     maxPasswordLength: 72,
   },
   session: {
-    expiresIn: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
+    /* Model sesi ala aplikasi bank:
+       - Login TANPA "Ingat saya" → cookie sesi tanpa max-age (hilang saat
+         browser ditutup, wajib login ulang). Diterapkan better-auth lewat
+         cookie dont_remember; refresh sesi juga diskip otomatis.
+       - Login DENGAN "Ingat saya" → cookie persisten selama expiresIn (12 jam).
+       - Keluar otomatis saat idle (30 menit) ditangani watchdog klien di
+         components/session-guard.tsx. */
+    expiresIn: 60 * 60 * 12,
+    updateAge: 60 * 5,
   },
   account: {
     accountLinking: {
@@ -116,6 +123,24 @@ export const auth = betterAuth({
     : {}),
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      /* Login Google selalu tidak diingat (setara "Ingat saya" tidak dicentang):
+         tandai dont_remember sebelum redirect ke Google — callback OAuth membaca
+         cookie ini sebagai fallback, dan /get-session ikut skip refresh.
+         Hanya saat belum ada sesi (bukan alur link akun dari halaman profil). */
+      if (ctx.path === "/sign-in/social") {
+        const existingToken = await ctx.getSignedCookie(
+          ctx.context.authCookies.sessionToken.name,
+          ctx.context.secret,
+        );
+        if (!existingToken) {
+          await ctx.setSignedCookie(
+            ctx.context.authCookies.dontRememberToken.name,
+            "true",
+            ctx.context.secret,
+            ctx.context.authCookies.dontRememberToken.attributes,
+          );
+        }
+      }
       if (ctx.path === "/sign-in/email") {
         const email = (ctx.body as { email?: string } | undefined)?.email;
         if (email) {

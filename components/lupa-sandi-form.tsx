@@ -75,7 +75,10 @@ export function LupaSandiForm({ onKembali }: { onKembali: () => void }) {
   };
 
   return (
-    <div className="login-form" style={{ display: "grid", gap: 14 }}>
+    <div
+      className={`login-form lupa-wrap${langkah === "sandi" ? " lupa-sandi" : ""}`}
+      style={{ display: "grid", gap: 14 }}
+    >
       <div className="login-card-header" style={{ textAlign: "left" }}>
         <span className="login-card-kicker">Lupa kata sandi</span>
         {langkah !== "sukses" ? (
@@ -86,7 +89,7 @@ export function LupaSandiForm({ onKembali }: { onKembali: () => void }) {
       </div>
 
       {langkah === "email" ? (
-        <form onSubmit={minta}>
+        <form className="lupa-step" onSubmit={minta}>
           <div className="login-field">
             <label htmlFor="lupa-email">Email LMS Anda</label>
             <input
@@ -118,7 +121,7 @@ export function LupaSandiForm({ onKembali }: { onKembali: () => void }) {
           </div>
         </form>
       ) : langkah === "otp" ? (
-        <form onSubmit={verifikasi} key="otp">
+        <form className="lupa-step" onSubmit={verifikasi} key="otp">
           <input type="hidden" name="emailLms" value={emailLms} />
           <div className="login-field">
             <label htmlFor="lupa-otp">Kode verifikasi (cek Gmail Anda, berlaku 10 menit)</label>
@@ -158,7 +161,7 @@ export function LupaSandiForm({ onKembali }: { onKembali: () => void }) {
           </div>
         </form>
       ) : langkah === "sandi" ? (
-        <form onSubmit={simpan} key="sandi">
+        <form className="lupa-step" onSubmit={simpan} key="sandi">
           <input type="hidden" name="emailLms" value={emailLms} />
           <div className="login-field">
             <label htmlFor="lupa-sandi-baru">Kata sandi baru</label>

@@ -112,7 +112,7 @@ export default async function AdminDashboardPage() {
           {kehadiranKelas.length === 0 ? (
             <p className="panel-subtitle">Belum ada data kehadiran.</p>
           ) : (
-            <div>
+            <div className="progress-list">
               {kehadiranKelas.map((k) => (
                 <ProgressRow
                   key={k.kelas_nama}

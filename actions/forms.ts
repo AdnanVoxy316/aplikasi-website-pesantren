@@ -31,6 +31,11 @@ import {
   deleteJenisNilai,
 } from "@/actions/admin/akademik";
 import { createPengumuman, deletePengumuman } from "@/actions/admin/pengumuman";
+import {
+  createJenisPembayaran,
+  updateJenisPembayaran,
+  setJenisPembayaranAktif,
+} from "@/actions/pembayaran/jenis";
 import { hapusLogo, updateLogo, updatePengaturan } from "@/actions/admin/pengaturan";
 import { updateFotoProfil } from "@/actions/profil";
 import {
@@ -60,11 +65,24 @@ import {
 import {
   createTarif,
   setTarifAktif,
+  setTarifSantri,
+  hapusTarifSantri,
   generateTagihan,
+  updateTagihanNominal,
   cancelTagihan,
   bayarSekarang,
+  batalkanPembayaran,
   markPaidManual,
+  simulasiPembayaranLunas,
+  kirimBuktiEmail,
+  ambilQrPembayaran,
 } from "@/actions/pembayaran/spp";
+import {
+  createTagihanManual,
+  tambahItemTagihan,
+  ubahItemTagihan,
+  hapusItemTagihan,
+} from "@/actions/pembayaran/tagihan";
 
 const str = (fd: FormData, key: string): string => String(fd.get(key) ?? "").trim();
 const opt = (fd: FormData, key: string): string | undefined => {
@@ -437,14 +455,124 @@ export async function generateTagihanForm(fd: FormData) {
   });
 }
 
+export async function setTarifSantriForm(fd: FormData) {
+  return setTarifSantri({
+    santriId: str(fd, "santriId"),
+    nominal: str(fd, "nominal"),
+    catatan: opt(fd, "catatan"),
+  });
+}
+
+export async function hapusTarifSantriForm(fd: FormData) {
+  return hapusTarifSantri(str(fd, "santriId"));
+}
+
+export async function updateTagihanNominalForm(fd: FormData) {
+  return updateTagihanNominal({
+    tagihanId: str(fd, "tagihanId"),
+    nominal: str(fd, "nominal"),
+    catatan: opt(fd, "catatan"),
+  });
+}
+
 export async function cancelTagihanForm(fd: FormData) {
   return cancelTagihan(str(fd, "id"));
 }
 
 export async function markPaidManualForm(fd: FormData) {
-  return markPaidManual(str(fd, "id"), str(fd, "catatan"));
+  const metode = str(fd, "metode") || "cash";
+  return markPaidManual({
+    tagihanId: str(fd, "id"),
+    metode: metode as "cash" | "transfer" | "qris" | "ewallet" | "lainnya",
+    catatan: opt(fd, "catatan"),
+  });
+}
+
+export async function simulasiPembayaranLunasForm(fd: FormData) {
+  return simulasiPembayaranLunas(str(fd, "pembayaranId"));
+}
+
+export async function kirimBuktiEmailForm(fd: FormData) {
+  return kirimBuktiEmail(str(fd, "pembayaranId"));
 }
 
 export async function bayarSekarangForm(fd: FormData) {
   return bayarSekarang(str(fd, "id"));
+}
+
+export async function ambilQrPembayaranForm(fd: FormData) {
+  return ambilQrPembayaran(str(fd, "pembayaranId"));
+}
+
+export async function batalkanPembayaranForm(fd: FormData) {
+  return batalkanPembayaran(str(fd, "id"));
+}
+
+/* Pembayaran — jenis pembayaran (fondasi tagihan multi-item) */
+const jenisPembayaranFields = (fd: FormData) => ({
+  kode: str(fd, "kode"),
+  nama: str(fd, "nama"),
+  kategori: str(fd, "kategori") as "bulanan" | "sekali" | "insidental",
+  keterangan: opt(fd, "keterangan"),
+  tarif: str(fd, "tarif") || "0",
+  urutan: opt(fd, "urutan") ?? "10",
+});
+
+export async function createJenisPembayaranForm(fd: FormData) {
+  return createJenisPembayaran(jenisPembayaranFields(fd));
+}
+
+export async function updateJenisPembayaranForm(fd: FormData) {
+  return updateJenisPembayaran(str(fd, "id"), jenisPembayaranFields(fd));
+}
+
+export async function setJenisPembayaranAktifForm(fd: FormData) {
+  return setJenisPembayaranAktif(str(fd, "id"), str(fd, "isActive") === "true");
+}
+
+/* Pembayaran — tagihan manual multi-item + kelola item */
+type TagihanItemInput = {
+  jenisPembayaranId: string;
+  nominal: string | number;
+  keterangan?: string;
+};
+
+function parseItems(fd: FormData): TagihanItemInput[] {
+  try {
+    const parsed = JSON.parse(str(fd, "items") || "[]");
+    return Array.isArray(parsed) ? (parsed as TagihanItemInput[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function createTagihanManualForm(fd: FormData) {
+  return createTagihanManual({
+    santriId: str(fd, "santriId"),
+    tahunAjaranId: str(fd, "tahunAjaranId"),
+    jatuhTempo: opt(fd, "jatuhTempo"),
+    catatan: opt(fd, "catatan"),
+    items: parseItems(fd),
+  });
+}
+
+export async function tambahItemTagihanForm(fd: FormData) {
+  return tambahItemTagihan({
+    tagihanId: str(fd, "tagihanId"),
+    jenisPembayaranId: str(fd, "jenisPembayaranId"),
+    nominal: str(fd, "nominal"),
+    keterangan: opt(fd, "keterangan"),
+  });
+}
+
+export async function ubahItemTagihanForm(fd: FormData) {
+  return ubahItemTagihan({
+    itemId: str(fd, "itemId"),
+    nominal: str(fd, "nominal"),
+    keterangan: opt(fd, "keterangan"),
+  });
+}
+
+export async function hapusItemTagihanForm(fd: FormData) {
+  return hapusItemTagihan(str(fd, "itemId"));
 }

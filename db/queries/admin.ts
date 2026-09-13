@@ -389,6 +389,7 @@ export async function listTagihanDetail(status?: string) {
       santriNama: user.name,
       nis: santriProfile.nis,
       kelasNama: kelas.nama,
+      sumber: tagihanSpp.sumber,
       periodeBulan: tagihanSpp.periodeBulan,
       periodeTahun: tagihanSpp.periodeTahun,
       nominal: tagihanSpp.nominal,
@@ -396,6 +397,10 @@ export async function listTagihanDetail(status?: string) {
       jatuhTempo: tagihanSpp.jatuhTempo,
       status: tagihanSpp.status,
       createdAt: tagihanSpp.createdAt,
+      jumlahItem: sql<number>`(select count(*) from tagihan_item where tagihan_item.tagihan_spp_id = ${tagihanSpp.id})`,
+      itemRingkas: sql<
+        string | null
+      >`(select group_concat(nama, ', ') from tagihan_item where tagihan_item.tagihan_spp_id = ${tagihanSpp.id})`,
     })
     .from(tagihanSpp)
     .innerJoin(santriProfile, eq(tagihanSpp.santriId, santriProfile.id))
@@ -407,26 +412,135 @@ export async function listTagihanDetail(status?: string) {
 }
 
 export async function listPembayaranTransaksi() {
+  const pencatat = alias(user, "pencatat");
   return db
     .select({
       id: pembayaranSpp.id,
+      tagihanId: tagihanSpp.id,
       tagihanNomor: tagihanSpp.nomorTagihan,
       santriNama: user.name,
+      periodeBulan: tagihanSpp.periodeBulan,
+      periodeTahun: tagihanSpp.periodeTahun,
+      totalTagihan: tagihanSpp.totalTagihan,
       provider: pembayaranSpp.provider,
+      providerOrderId: pembayaranSpp.providerOrderId,
       providerInvoiceId: pembayaranSpp.providerInvoiceId,
       checkoutUrl: pembayaranSpp.checkoutUrl,
       paymentMethod: pembayaranSpp.paymentMethod,
+      catatan: pembayaranSpp.catatan,
+      dicatatOlehNama: pencatat.name,
       nominalDibayar: pembayaranSpp.nominalDibayar,
       status: pembayaranSpp.status,
       paidAt: pembayaranSpp.paidAt,
+      buktiTerkirimAt: pembayaranSpp.buktiTerkirimAt,
       createdAt: pembayaranSpp.createdAt,
     })
     .from(pembayaranSpp)
     .innerJoin(tagihanSpp, eq(pembayaranSpp.tagihanSppId, tagihanSpp.id))
     .innerJoin(santriProfile, eq(tagihanSpp.santriId, santriProfile.id))
     .innerJoin(user, eq(santriProfile.userId, user.id))
+    .leftJoin(pencatat, eq(pembayaranSpp.dicatatOleh, pencatat.id))
     .orderBy(desc(pembayaranSpp.createdAt))
     .limit(200);
+}
+
+export type LaporanPembayaranRow = {
+  tagihanId: string;
+  santriId: string;
+  santriNama: string;
+  nis: string;
+  kelasNama: string | null;
+  jenis: string | null;
+  periodeBulan: number;
+  periodeTahun: number;
+  nominal: number;
+  nominalDiskon: number;
+  nominalDenda: number;
+  totalTagihan: number;
+  jatuhTempo: Date | null;
+  statusTagihan: string;
+  pembayaranId: string | null;
+  provider: string | null;
+  paymentMethod: string | null;
+  catatan: string | null;
+  nominalDibayar: number | null;
+  statusPembayaran: string | null;
+  paidAt: Date | null;
+  dicatatOlehNama: string | null;
+};
+
+/** Data laporan pembayaran (semua tagihan, lunas maupun belum) untuk export Excel. */
+export async function listLaporanPembayaran(filter: {
+  bulan?: number;
+  tahun?: number;
+  dari?: { bulan: number; tahun: number };
+  sampai?: { bulan: number; tahun: number };
+}): Promise<LaporanPembayaranRow[]> {
+  const pencatat = alias(user, "pencatat");
+  const conditions: SQL[] = [];
+
+  if (filter.bulan && filter.tahun) {
+    conditions.push(
+      and(
+        eq(tagihanSpp.periodeBulan, filter.bulan),
+        eq(tagihanSpp.periodeTahun, filter.tahun),
+      )!,
+    );
+  } else if (filter.dari && filter.sampai) {
+    const mulai = filter.dari.tahun * 100 + filter.dari.bulan;
+    const selesai = filter.sampai.tahun * 100 + filter.sampai.bulan;
+    conditions.push(
+      sql`(${tagihanSpp.periodeTahun} * 100 + ${tagihanSpp.periodeBulan}) between ${mulai} and ${selesai}`,
+    );
+  }
+
+  const rows = await db
+    .select({
+      tagihanId: tagihanSpp.id,
+      santriId: tagihanSpp.santriId,
+      santriNama: user.name,
+      nis: santriProfile.nis,
+      kelasNama: kelas.nama,
+      jenis: sql<
+        string | null
+      >`(select group_concat(nama, ', ') from tagihan_item where tagihan_item.tagihan_spp_id = ${tagihanSpp.id})`,
+      periodeBulan: tagihanSpp.periodeBulan,
+      periodeTahun: tagihanSpp.periodeTahun,
+      nominal: tagihanSpp.nominal,
+      nominalDiskon: tagihanSpp.nominalDiskon,
+      nominalDenda: tagihanSpp.nominalDenda,
+      totalTagihan: tagihanSpp.totalTagihan,
+      jatuhTempo: tagihanSpp.jatuhTempo,
+      statusTagihan: tagihanSpp.status,
+      pembayaranId: pembayaranSpp.id,
+      provider: pembayaranSpp.provider,
+      paymentMethod: pembayaranSpp.paymentMethod,
+      catatan: pembayaranSpp.catatan,
+      nominalDibayar: pembayaranSpp.nominalDibayar,
+      statusPembayaran: pembayaranSpp.status,
+      paidAt: pembayaranSpp.paidAt,
+      dicatatOlehNama: pencatat.name,
+    })
+    .from(tagihanSpp)
+    .innerJoin(santriProfile, eq(tagihanSpp.santriId, santriProfile.id))
+    .innerJoin(user, eq(santriProfile.userId, user.id))
+    .leftJoin(kelas, eq(santriProfile.kelasId, kelas.id))
+    .leftJoin(
+      pembayaranSpp,
+      and(
+        eq(pembayaranSpp.tagihanSppId, tagihanSpp.id),
+        inArray(pembayaranSpp.status, ["paid", "pending", "processing"]),
+      ),
+    )
+    .leftJoin(pencatat, eq(pembayaranSpp.dicatatOleh, pencatat.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .orderBy(
+      desc(tagihanSpp.periodeTahun),
+      desc(tagihanSpp.periodeBulan),
+      user.name,
+    );
+
+  return rows as LaporanPembayaranRow[];
 }
 
 export async function getRekapKehadiranPerKelas() {
